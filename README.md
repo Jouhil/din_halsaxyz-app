@@ -1,0 +1,1 @@
+# din_halsaxyz-app
