@@ -1,0 +1,829 @@
+{
+  "gratitude": [
+    {"id":"g001","text":"Jag är tacksam för en person som fick mig att le idag.","needs":["humör"],"mode":"pepp","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"g002","text":"Jag är tacksam för något gott jag åt eller drack idag.","needs":["humör"],"mode":"lugn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"g003","text":"Jag är tacksam för att min kropp bar mig igenom dagen.","needs":["humör","energi"],"mode":"lugn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"g004","text":"Jag är tacksam för ett ögonblick av tystnad jag fick uppleva.","needs":["stress","sömn"],"mode":"lugn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"g005","text":"Jag är tacksam för en liten sak som fungerade bra idag.","needs":["humör"],"mode":"pepp","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"g006","text":"Jag är tacksam för taket över mitt huvud och värmen det ger.","needs":["humör","stress"],"mode":"lugn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"g007","text":"Jag är tacksam för ett vackert ljus eller en färg jag lade märke till.","needs":["humör"],"mode":"pepp","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"g008","text":"Jag är tacksam för att jag hade möjlighet att vila en stund.","needs":["sömn","stress"],"mode":"lugn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"g009","text":"Jag är tacksam för ett samtal som kändes meningsfullt.","needs":["humör"],"mode":"pepp","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"g010","text":"Jag är tacksam för något jag lärde mig idag, litet som stort.","needs":["humör","energi"],"mode":"fokus","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"g011","text":"Jag är tacksam för musiken, ett ljud eller en röst som lugnade mig.","needs":["stress","sömn"],"mode":"lugn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"g012","text":"Jag är tacksam för att jag tog ett steg, hur litet det än var.","needs":["humör","energi"],"mode":"pepp","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"g013","text":"Jag är tacksam för naturen – ett träd, himlen eller vinden.","needs":["stress","humör"],"mode":"lugn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"g014","text":"Jag är tacksam för att min andning pågår utan att jag behöver tänka på den.","needs":["stress"],"mode":"lugn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"g015","text":"Jag är tacksam för ett skratt jag fick dela med någon.","needs":["humör"],"mode":"pepp","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"g016","text":"Jag är tacksam för vatten att dricka och tvätta mig med.","needs":["humör"],"mode":"lugn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"g017","text":"Jag är tacksam för en bok, podcast eller film som inspirerade mig.","needs":["humör","energi"],"mode":"pepp","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"g018","text":"Jag är tacksam för sömnen jag fick förra natten.","needs":["sömn","energi"],"mode":"lugn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"g019","text":"Jag är tacksam för att jag klarade något som kändes svårt.","needs":["humör","tankar"],"mode":"pepp","intensity":2,"durationSec":10,"audience":"neutral"},
+    {"id":"g020","text":"Jag är tacksam för ett djur som fick mig att känna värme.","needs":["humör","stress"],"mode":"lugn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"g021","text":"Jag är tacksam för teknik som kopplade mig till någon jag saknar.","needs":["humör"],"mode":"pepp","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"g022","text":"Jag är tacksam för ett ögonblick när jag kände mig lugn.","needs":["stress","sömn"],"mode":"lugn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"g023","text":"Jag är tacksam för en varm dryck som värmde mig inifrån.","needs":["stress","humör"],"mode":"lugn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"g024","text":"Jag är tacksam för att jag valde att ta hand om mig själv idag.","needs":["humör","energi"],"mode":"pepp","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"g025","text":"Jag är tacksam för ett minne som värmer när jag tänker på det.","needs":["humör","stress"],"mode":"lugn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"g026","text":"Jag är tacksam för solljuset eller dagsljuset jag fick se.","needs":["humör","energi"],"mode":"pepp","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"g027","text":"Jag är tacksam för min förmåga att känna – glädje, lugn, nyfikenhet.","needs":["humör","tankar"],"mode":"lugn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"g028","text":"Jag är tacksam för att jag fick hjälp eller stöd när jag behövde det.","needs":["humör","stress"],"mode":"lugn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"g029","text":"Jag är tacksam för ett moment av rörelse som väckte min kropp.","needs":["energi","humör"],"mode":"pepp","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"g030","text":"Jag är tacksam för en doft som gav mig ett fint minne.","needs":["humör","stress"],"mode":"lugn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"g031","text":"Jag är tacksam för ett beslut jag fattade med omsorg om mig själv.","needs":["tankar","humör"],"mode":"fokus","intensity":2,"durationSec":10,"audience":"neutral"},
+    {"id":"g032","text":"Jag är tacksam för att morgondagen är en ny möjlighet.","needs":["humör","energi"],"mode":"pepp","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"g033","text":"Jag är tacksam för en plats som känns trygg och bekväm.","needs":["stress","sömn"],"mode":"lugn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"g034","text":"Jag är tacksam för min nyfikenhet och vilja att förstå.","needs":["tankar","energi"],"mode":"fokus","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"g035","text":"Jag är tacksam för att jag fick uttrycka mig på något sätt idag.","needs":["humör","tankar"],"mode":"pepp","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"g036","text":"Jag är tacksam för en stunds stillhet innan jag somnade.","needs":["sömn","stress"],"mode":"sömn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"g037","text":"Jag är tacksam för att kunna andas frisk luft.","needs":["stress","humör"],"mode":"lugn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"g038","text":"Jag är tacksam för en rutinuppgift jag slutförde utan drama.","needs":["humör","energi"],"mode":"fokus","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"g039","text":"Jag är tacksam för att jag fick ge något till någon annan idag.","needs":["humör"],"mode":"pepp","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"g040","text":"Jag är tacksam för en gest av vänlighet jag tog emot.","needs":["humör","stress"],"mode":"lugn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"g041","text":"Jag är tacksam för att jag fick prova något nytt, även om det var litet.","needs":["humör","energi"],"mode":"pepp","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"g042","text":"Jag är tacksam för min tålmodighet när saker var svåra.","needs":["tankar","stress"],"mode":"lugn","intensity":2,"durationSec":10,"audience":"neutral"},
+    {"id":"g043","text":"Jag är tacksam för att ha ett mål eller en dröm att sträva mot.","needs":["energi","humör"],"mode":"pepp","intensity":2,"durationSec":10,"audience":"neutral"},
+    {"id":"g044","text":"Jag är tacksam för sömnens läkande förmåga natten som kommer.","needs":["sömn"],"mode":"sömn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"g045","text":"Jag är tacksam för att jag valde att öppna den här appen och ta hand om mig.","needs":["humör","stress"],"mode":"pepp","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"g046","text":"Jag är tacksam för ett ord eller en mening som inspirerade mig.","needs":["tankar","humör"],"mode":"fokus","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"g047","text":"Jag är tacksam för min förmåga att hitta lösningar, steg för steg.","needs":["tankar","energi"],"mode":"fokus","intensity":2,"durationSec":10,"audience":"neutral"},
+    {"id":"g048","text":"Jag är tacksam för en stund av lek eller lätthet i vardagen.","needs":["humör"],"mode":"pepp","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"g049","text":"Jag är tacksam för att regnet, kylan eller värmen påminner mig om att vara levande.","needs":["humör","stress"],"mode":"lugn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"g050","text":"Jag är tacksam för att jag fick vila när jag var trött.","needs":["sömn","energi"],"mode":"lugn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"g051","text":"Jag är tacksam för en känsla av hopp som dök upp idag.","needs":["humör","tankar"],"mode":"pepp","intensity":2,"durationSec":10,"audience":"neutral"},
+    {"id":"g052","text":"Jag är tacksam för att jag hanterade en utmaning med ärlighet.","needs":["tankar","humör"],"mode":"fokus","intensity":2,"durationSec":10,"audience":"neutral"},
+    {"id":"g053","text":"Jag är tacksam för mjukheten i en kudde, en filt eller en kram.","needs":["stress","sömn"],"mode":"sömn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"g054","text":"Jag är tacksam för att ha fler chanser att göra saker annorlunda.","needs":["tankar","humör"],"mode":"lugn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"g055","text":"Jag är tacksam för att jag lyssnade på min kropp idag.","needs":["energi","stress"],"mode":"lugn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"g056","text":"Jag är tacksam för att det finns humor och lätthet i livet.","needs":["humör"],"mode":"pepp","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"g057","text":"Jag är tacksam för ett ögonblick av uppmärksamhet jag gav mig själv.","needs":["tankar","stress"],"mode":"lugn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"g058","text":"Jag är tacksam för att jag inte behövde vara perfekt för att det skulle räcka.","needs":["tankar","humör"],"mode":"lugn","intensity":2,"durationSec":10,"audience":"neutral"},
+    {"id":"g059","text":"Jag är tacksam för all den kärlek, liten och stor, som finns i mitt liv.","needs":["humör","stress"],"mode":"pepp","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"g060","text":"Jag är tacksam för det lugna andetaget jag tar just nu.","needs":["stress","sömn"],"mode":"sömn","intensity":1,"durationSec":10,"audience":"neutral"}
+  ],
+  "affirmations": [
+    {"id":"a001","text":"Jag är tillräcklig, precis som jag är, just nu.","needs":["tankar","stress"],"mode":"lugn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"a002","text":"Jag tillåter mig att ta en paus och ladda om.","needs":["energi","stress"],"mode":"lugn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"a003","text":"Mina känslor är giltiga och förtjänar utrymme.","needs":["tankar","humör"],"mode":"lugn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"a004","text":"Jag har klarat svåra stunder förut – den förmågan finns kvar i mig.","needs":["stress","tankar"],"mode":"lugn","intensity":2,"durationSec":10,"audience":"neutral"},
+    {"id":"a005","text":"Varje steg framåt räknas, oavsett hur litet det är.","needs":["energi","humör"],"mode":"pepp","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"a006","text":"Jag väljer att vara snäll mot mig själv idag.","needs":["tankar","stress"],"mode":"lugn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"a007","text":"Jag kan hantera det som händer, ett ögonblick i taget.","needs":["stress","tankar"],"mode":"fokus","intensity":2,"durationSec":10,"audience":"neutral"},
+    {"id":"a008","text":"Min energi är värdefull – jag väljer hur jag använder den.","needs":["energi","tankar"],"mode":"fokus","intensity":2,"durationSec":10,"audience":"neutral"},
+    {"id":"a009","text":"Att be om hjälp är ett tecken på styrka, inte svaghet.","needs":["tankar","stress"],"mode":"lugn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"a010","text":"Jag förtjänar ro och välmående.","needs":["sömn","stress"],"mode":"sömn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"a011","text":"Jag är kapabel att lära mig och växa i min egen takt.","needs":["tankar","energi"],"mode":"fokus","intensity":2,"durationSec":10,"audience":"neutral"},
+    {"id":"a012","text":"Jag tillåter mig att känna glädje utan att motivera den.","needs":["humör"],"mode":"pepp","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"a013","text":"Mitt välmående är viktigt och det är okej att prioritera det.","needs":["stress","tankar"],"mode":"lugn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"a014","text":"Jag sätter gränser med omtanke om mig själv och andra.","needs":["tankar","stress"],"mode":"fokus","intensity":2,"durationSec":10,"audience":"neutral"},
+    {"id":"a015","text":"Jag är mer än mina tankar – jag kan observera dem med nyfikenhet.","needs":["tankar"],"mode":"lugn","intensity":2,"durationSec":10,"audience":"neutral"},
+    {"id":"a016","text":"Jag välkomnar sömn och låter kroppen återhämta sig.","needs":["sömn"],"mode":"sömn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"a017","text":"Jag bär på resurser jag inte alltid ser men som alltid finns där.","needs":["tankar","energi"],"mode":"lugn","intensity":2,"durationSec":10,"audience":"neutral"},
+    {"id":"a018","text":"Det är okej att ta det lugnt – fart är inte alltid framsteg.","needs":["stress","energi"],"mode":"lugn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"a019","text":"Jag väljer att fokusera på det som är inom min kontroll just nu.","needs":["tankar","stress"],"mode":"fokus","intensity":2,"durationSec":10,"audience":"neutral"},
+    {"id":"a020","text":"Jag är värd omtanke – från mig själv och från andra.","needs":["humör","tankar"],"mode":"lugn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"a021","text":"Jag tillåter mig att sätta ner tempot och andas djupare.","needs":["stress","sömn"],"mode":"sömn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"a022","text":"Jag kan vara nyfiken på mina känslor istället för att kämpa mot dem.","needs":["tankar","stress"],"mode":"lugn","intensity":2,"durationSec":10,"audience":"neutral"},
+    {"id":"a023","text":"Mitt bästa är alltid tillräckligt – och det varierar dag för dag.","needs":["tankar","humör"],"mode":"lugn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"a024","text":"Jag tar ett andetag och påminner mig om att jag klarar det här.","needs":["stress","tankar"],"mode":"lugn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"a025","text":"Jag är öppen för att hitta lätthet i det jag gör idag.","needs":["humör","energi"],"mode":"pepp","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"a026","text":"Mina misstag lär mig – de definierar mig inte.","needs":["tankar","humör"],"mode":"lugn","intensity":2,"durationSec":10,"audience":"neutral"},
+    {"id":"a027","text":"Jag är precis där jag behöver vara i livet just nu.","needs":["tankar","stress"],"mode":"lugn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"a028","text":"Jag väljer att ge mig själv tålamod och förståelse.","needs":["tankar","stress"],"mode":"lugn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"a029","text":"Jag har kraft och flexibilitet att anpassa mig till förändringar.","needs":["tankar","energi"],"mode":"fokus","intensity":2,"durationSec":10,"audience":"neutral"},
+    {"id":"a030","text":"Varje dag erbjuder en chans att börja om, lite och lugnt.","needs":["humör","tankar"],"mode":"pepp","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"a031","text":"Jag litar på min förmåga att ta hand om mig själv.","needs":["tankar","stress"],"mode":"fokus","intensity":2,"durationSec":10,"audience":"neutral"},
+    {"id":"a032","text":"Det är okej att inte ha alla svar – osäkerhet är en del av livet.","needs":["tankar","stress"],"mode":"lugn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"a033","text":"Jag väljer tankar som ger mig energi framför tankar som tömmer mig.","needs":["tankar","energi"],"mode":"fokus","intensity":2,"durationSec":10,"audience":"neutral"},
+    {"id":"a034","text":"Jag är starkare och mjukare än jag ibland tror.","needs":["humör","tankar"],"mode":"pepp","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"a035","text":"Jag tillåter mig att vara i nuet, utan att jaga nästa sak.","needs":["stress","tankar"],"mode":"lugn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"a036","text":"Sömn är en gåva jag ger min kropp och hjärna varje natt.","needs":["sömn"],"mode":"sömn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"a037","text":"Jag väljer vänlighet – mot mig själv – som ett aktivt val varje dag.","needs":["tankar","humör"],"mode":"lugn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"a038","text":"Jag är kapabel att hålla balansen, även när det gungar.","needs":["stress","tankar"],"mode":"fokus","intensity":2,"durationSec":10,"audience":"neutral"},
+    {"id":"a039","text":"Jag förtjänar att njuta av enkla, goda stunder.","needs":["humör","stress"],"mode":"pepp","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"a040","text":"Jag kan ta paus utan att det räknas som misslyckande.","needs":["stress","energi"],"mode":"lugn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"a041","text":"Jag möter utmaningar med nyfikenhet istället för rädsla.","needs":["tankar","energi"],"mode":"fokus","intensity":2,"durationSec":10,"audience":"neutral"},
+    {"id":"a042","text":"Jag väljer att fira framsteg, hur små de än verkar.","needs":["humör","tankar"],"mode":"pepp","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"a043","text":"Min kropp förtjänar omsorg, rörelse och vila i balans.","needs":["energi","sömn"],"mode":"lugn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"a044","text":"Jag kan göra ett litet val i rätt riktning – just nu.","needs":["energi","tankar"],"mode":"fokus","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"a045","text":"Jag är öppen för lugn och väljer att bjuda in det.","needs":["sömn","stress"],"mode":"sömn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"a046","text":"Jag lyssnar på mig själv med samma omtanke som jag lyssnar på en vän.","needs":["tankar","stress"],"mode":"lugn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"a047","text":"Jag tillåter mig att vara mänsklig – med styrkor och begränsningar.","needs":["tankar","humör"],"mode":"lugn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"a048","text":"Jag väljer att starta – ett steg är nog för att komma igång.","needs":["energi","tankar"],"mode":"pepp","intensity":2,"durationSec":10,"audience":"neutral"},
+    {"id":"a049","text":"Jag förtjänar tid och utrymme att reflektera och ladda om.","needs":["stress","tankar"],"mode":"lugn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"a050","text":"Jag är kapabel att skapa goda vanor i min egen takt.","needs":["energi","tankar"],"mode":"fokus","intensity":2,"durationSec":10,"audience":"neutral"},
+    {"id":"a051","text":"Jag möter mig själv med tålamod, oavsett hur jag mår.","needs":["tankar","stress"],"mode":"lugn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"a052","text":"Jag är värdefull oavsett vad jag åstadkommer idag.","needs":["tankar","humör"],"mode":"lugn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"a053","text":"Jag väljer att andas – och påminner kroppen om att den är trygg.","needs":["stress","sömn"],"mode":"sömn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"a054","text":"Jag har tillgång till lugn, det bor i mig och jag kan bjuda in det.","needs":["stress","tankar"],"mode":"lugn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"a055","text":"Jag tar dagens utmaningar en i taget, utan att hoppa fram.","needs":["stress","tankar"],"mode":"fokus","intensity":2,"durationSec":10,"audience":"neutral"},
+    {"id":"a056","text":"Jag väljer att se det som gick bra idag, minst en sak.","needs":["humör","tankar"],"mode":"pepp","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"a057","text":"Jag tillåter nattens vila att komma till mig nu.","needs":["sömn"],"mode":"sömn","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"a058","text":"Jag är öppen för glädje och väljer att märka den när den dyker upp.","needs":["humör"],"mode":"pepp","intensity":1,"durationSec":10,"audience":"neutral"},
+    {"id":"a059","text":"Jag klarar osäkerhet – jag har gjort det förut.","needs":["tankar","stress"],"mode":"lugn","intensity":2,"durationSec":10,"audience":"neutral"},
+    {"id":"a060","text":"Jag väljer omtanke om mig själv som den röda tråden i min dag.","needs":["humör","tankar"],"mode":"lugn","intensity":1,"durationSec":10,"audience":"neutral"}
+  ],
+  "breathing_sessions": [
+    {
+      "id":"b001",
+      "title":"4-6 Lugnt andetag",
+      "steps":[
+        "Sätt dig bekvämt och slut ögonen lätt. Lägg händerna i knät.",
+        "Andas in genom näsan i 4 sekunder – känn magen utvidgas.",
+        "Andas ut långsamt genom munnen i 6 sekunder – låt axlarna sjunka.",
+        "Upprepa utan ansträngning. Låt varje utandning bli lite längre."
+      ],
+      "pattern":"4-6",
+      "needs":["stress"],
+      "mode":"lugn",
+      "intensity":1,
+      "durationSec":120,
+      "audience":"neutral"
+    },
+    {
+      "id":"b002",
+      "title":"Box Breathing – Fyrkantsandning",
+      "steps":[
+        "Sitt upp med rak rygg. Blunda gärna.",
+        "Andas in i 4 sekunder – håll i 4 sekunder.",
+        "Andas ut i 4 sekunder – håll i 4 sekunder.",
+        "Upprepa cykeln 5–6 gånger i lugnt tempo."
+      ],
+      "pattern":"4-4-4-4",
+      "needs":["stress","tankar"],
+      "mode":"fokus",
+      "intensity":2,
+      "durationSec":120,
+      "audience":"neutral"
+    },
+    {
+      "id":"b003",
+      "title":"Sömnandetag 4-7-8",
+      "steps":[
+        "Ligg ned eller luta dig bakåt. Placera tungan bakom framtänderna.",
+        "Andas in tyst i 4 sekunder – håll andan i 7 sekunder.",
+        "Andas ut med ett svagt ljud i 8 sekunder.",
+        "Upprepa 4 gånger – låt kroppen bli tyngre för varje cykel."
+      ],
+      "pattern":"4-7-8",
+      "needs":["sömn","stress"],
+      "mode":"sömn",
+      "intensity":1,
+      "durationSec":120,
+      "audience":"neutral"
+    },
+    {
+      "id":"b004",
+      "title":"Energiandning",
+      "steps":[
+        "Sitt rakt upp, häng inte ihop. Placera fötterna plant i golvet.",
+        "Andas in djupt i 4 sekunder – känn hur bröstkorgen öppnas.",
+        "Andas ut kraftfullt i 2 sekunder – som ett mjukt blås.",
+        "Upprepa 8 gånger. Märk hur vakenhet sprider sig."
+      ],
+      "pattern":"4-2",
+      "needs":["energi"],
+      "mode":"pepp",
+      "intensity":2,
+      "durationSec":90,
+      "audience":"neutral"
+    },
+    {
+      "id":"b005",
+      "title":"Koherent andning",
+      "steps":[
+        "Slut ögonen och låt axlarna sjunka. Inga prestationskrav.",
+        "Andas in i 5 sekunder – mjukt och jämnt.",
+        "Andas ut i 5 sekunder – lika jämnt, utan paus.",
+        "Fortsätt i ett flöde. Tänk på en lugn sjö utan vågor."
+      ],
+      "pattern":"5-5",
+      "needs":["stress","sömn"],
+      "mode":"lugn",
+      "intensity":1,
+      "durationSec":120,
+      "audience":"neutral"
+    },
+    {
+      "id":"b006",
+      "title":"Djupandning med suck",
+      "steps":[
+        "Ta en djup inandning i 4 sekunder genom näsan.",
+        "Ta en extra liten inandning ovanpå – fyll lungorna maximalt.",
+        "Andas ut långt och helt i 8 sekunder. Upprepa 5 gånger.",
+        "Märk hur spänning lossnar i axlar och käke."
+      ],
+      "pattern":"4-0-8",
+      "needs":["stress","tankar"],
+      "mode":"lugn",
+      "intensity":1,
+      "durationSec":120,
+      "audience":"neutral"
+    },
+    {
+      "id":"b007",
+      "title":"Fysiologisk suck",
+      "steps":[
+        "Sätt dig bekvämt. Det här är snabbt och effektivt.",
+        "Andas in djupt, ta sedan en snabb extra inandning för att toppa upp lungorna.",
+        "Andas ut allt, långt och helt, i 6–8 sekunder.",
+        "Upprepa 3–5 gånger. Bra vid akut stress."
+      ],
+      "pattern":"dubbel-in-6",
+      "needs":["stress"],
+      "mode":"lugn",
+      "intensity":2,
+      "durationSec":90,
+      "audience":"neutral"
+    },
+    {
+      "id":"b008",
+      "title":"Magandning för fokus",
+      "steps":[
+        "Lägg en hand på magen, en på bröstet. Märk skillnaden.",
+        "Andas in i 4 sekunder – bara magen ska röra sig uppåt.",
+        "Andas ut i 6 sekunder – magen sjunker tillbaka.",
+        "Fortsätt 8–10 cykler. Bra inför ett möte eller uppgift."
+      ],
+      "pattern":"4-6",
+      "needs":["tankar","energi"],
+      "mode":"fokus",
+      "intensity":2,
+      "durationSec":120,
+      "audience":"neutral"
+    },
+    {
+      "id":"b009",
+      "title":"Kvällsandning – Varva ner",
+      "steps":[
+        "Ligg ned på rygg. Låt kroppen vara tung mot underlaget.",
+        "Andas in i 4 sekunder och tänk: 'dagen är slut'.",
+        "Andas ut i 8 sekunder och tänk: 'jag kan vila nu'.",
+        "Upprepa 6 gånger. Du behöver inte göra något mer."
+      ],
+      "pattern":"4-8",
+      "needs":["sömn","stress"],
+      "mode":"sömn",
+      "intensity":1,
+      "durationSec":120,
+      "audience":"neutral"
+    },
+    {
+      "id":"b010",
+      "title":"Alternerande näsandning – Balans",
+      "steps":[
+        "Sätt dig bekvämt. Täck höger näsborre med tummen.",
+        "Andas in vänster näsborre i 4 sekunder.",
+        "Täck vänster med ringfingret – andas ut höger i 4 sekunder.",
+        "Byt sida och upprepa 5 gånger per sida. Lugnar nervsystemet."
+      ],
+      "pattern":"4-4 alternerande",
+      "needs":["stress","tankar"],
+      "mode":"lugn",
+      "intensity":2,
+      "durationSec":120,
+      "audience":"neutral"
+    },
+    {
+      "id":"b011",
+      "title":"3-3-3 Miniandning",
+      "steps":[
+        "Perfekt för en kort paus. Inga förberedelser behövs.",
+        "Andas in i 3 sekunder – håll i 3 sekunder.",
+        "Andas ut i 3 sekunder. Upprepa 3 varv.",
+        "Totalt 27 sekunder. Återgå till din dag med lugnare puls."
+      ],
+      "pattern":"3-3-3",
+      "needs":["stress"],
+      "mode":"lugn",
+      "intensity":1,
+      "durationSec":90,
+      "audience":"neutral"
+    },
+    {
+      "id":"b012",
+      "title":"Aktiverande Eldfläktandning",
+      "steps":[
+        "Sitt rakt och tag ett djupt inledande andetag.",
+        "Andas in i 3 sekunder, ut i 3 sekunder – men aktivt och lite kraftigare.",
+        "Öka takten lätt de sista 30 sekunderna, sedan ett långt utandningssuck.",
+        "Känn hur fokus och energi stiger. Bra inför en arbetsuppgift."
+      ],
+      "pattern":"3-3 aktiv",
+      "needs":["energi","tankar"],
+      "mode":"pepp",
+      "intensity":3,
+      "durationSec":90,
+      "audience":"neutral"
+    }
+  ],
+  "micro_tools": [
+    {
+      "id":"m001",
+      "title":"5-4-3-2-1 Grounding",
+      "steps":[
+        "Nämn 5 saker du kan SE runt dig just nu.",
+        "Nämn 4 saker du kan KÄNNA mot huden.",
+        "Nämn 3 saker du kan HÖRA.",
+        "Nämn 2 saker du kan LUKTA eller gillar att lukta på.",
+        "Nämn 1 sak du kan SMAKA eller som du tycker om att smaka."
+      ],
+      "needs":["stress","tankar"],
+      "mode":"lugn",
+      "intensity":1,
+      "durationSec":90,
+      "audience":"neutral"
+    },
+    {
+      "id":"m002",
+      "title":"Skakövning – Släpp spänning",
+      "steps":[
+        "Stå upp eller sätt dig. Skaka händerna i 15 sekunder som om de är blöta.",
+        "Skaka armarna lätt uppåt och neråt i 15 sekunder.",
+        "Skaka benen en i taget i 15 sekunder vardera.",
+        "Ta ett djupt andetag och stanna stilla. Känn hur kroppen vilar."
+      ],
+      "needs":["stress","energi"],
+      "mode":"pepp",
+      "intensity":2,
+      "durationSec":90,
+      "audience":"neutral"
+    },
+    {
+      "id":"m003",
+      "title":"Kroppsscan – 60 sekunder",
+      "steps":[
+        "Blunda och börja uppifrån: känn i hårbotten och pannan, mjukna.",
+        "Flytta uppmärksamheten till axlar och nacke – låt dem sjunka.",
+        "Känn magen och ländryggen, andas in och ut en gång.",
+        "Avsluta med fötterna mot golvet. Du är förankrad och här."
+      ],
+      "needs":["stress","sömn"],
+      "mode":"lugn",
+      "intensity":1,
+      "durationSec":60,
+      "audience":"neutral"
+    },
+    {
+      "id":"m004",
+      "title":"En minut tacksamhetsstopp",
+      "steps":[
+        "Sätt ett minuttimerljud och stäng ögonen.",
+        "Tänk på en person, plats eller upplevelse som gav dig värme.",
+        "Håll bilden i sinnet – känn den i bröstet.",
+        "När timern ringer, ta ett andetag och öppna ögonen."
+      ],
+      "needs":["humör","stress"],
+      "mode":"lugn",
+      "intensity":1,
+      "durationSec":60,
+      "audience":"neutral"
+    },
+    {
+      "id":"m005",
+      "title":"Kraftpose – Inre styrka",
+      "steps":[
+        "Stå upp. Sätt händerna på höfterna och håll ryggen rak.",
+        "Lyft blicken något och ta tre djupa andetag.",
+        "Tänk på en situation du hanterade bra – känn den känslan.",
+        "Håll posen 60 sekunder. Bra inför ett utmanande moment."
+      ],
+      "needs":["energi","tankar"],
+      "mode":"pepp",
+      "intensity":2,
+      "durationSec":90,
+      "audience":"neutral"
+    },
+    {
+      "id":"m006",
+      "title":"Hjärtfokus – Mjukna inåt",
+      "steps":[
+        "Lägg en hand på bröstet och slut ögonen.",
+        "Andas in mot handen – föreställ att andetaget når hjärtat.",
+        "Tänk på någon du bryr dig om – känn värmen sprida sig.",
+        "Håll den känslan i 30–60 sekunder. Ingen prestation behövs."
+      ],
+      "needs":["stress","humör"],
+      "mode":"lugn",
+      "intensity":1,
+      "durationSec":90,
+      "audience":"neutral"
+    },
+    {
+      "id":"m007",
+      "title":"Rörelsebryt – Energikick",
+      "steps":[
+        "Res dig upp. Rulla axlarna bakåt 5 gånger.",
+        "Gör 10 armcirklar, sedan 10 knälyft på stället.",
+        "Skaka lätt på händer och fötter i 15 sekunder.",
+        "Avsluta med tre djupa andetag. Bra mitt i en tröttsam dag."
+      ],
+      "needs":["energi"],
+      "mode":"pepp",
+      "intensity":2,
+      "durationSec":90,
+      "audience":"neutral"
+    },
+    {
+      "id":"m008",
+      "title":"Tre positiva detaljer",
+      "steps":[
+        "Ta upp ett papper eller öppna en notis. Skriv: 'Tre goda saker nu:'",
+        "Skriv den första saken – något litet räcker.",
+        "Skriv den andra saken – tänk bredare om det hjälper.",
+        "Skriv den tredje. Läs igenom dem en gång med en mild blick."
+      ],
+      "needs":["humör","tankar"],
+      "mode":"pepp",
+      "intensity":1,
+      "durationSec":60,
+      "audience":"neutral"
+    },
+    {
+      "id":"m009",
+      "title":"Självmedkänsla – Snabbversion",
+      "steps":[
+        "Tänk på det svåra du bär på just nu – nämn det tyst för dig själv.",
+        "Påminn dig: 'Det är mänskligt att ha det svårt ibland. Jag är inte ensam.'",
+        "Lägg händerna mot hjärtat. Säg inåt: 'Jag är snäll mot mig nu.'",
+        "Ta ett andetag och bär känslan in i resten av dagen."
+      ],
+      "needs":["tankar","stress"],
+      "mode":"lugn",
+      "intensity":2,
+      "durationSec":90,
+      "audience":"neutral"
+    },
+    {
+      "id":"m010",
+      "title":"Närvaro med en kopp",
+      "steps":[
+        "Häll upp en het eller kall dryck. Håll koppen i båda händerna.",
+        "Känn värmen eller kylan. Titta på ångan eller ytan.",
+        "Ta en klunk – smaka medvetet. Vilket är det dominerande smakintrycket?",
+        "Sitt kvar en minut utan telefon. Du är här nu."
+      ],
+      "needs":["stress","humör"],
+      "mode":"lugn",
+      "intensity":1,
+      "durationSec":60,
+      "audience":"neutral"
+    },
+    {
+      "id":"m011",
+      "title":"Tankeparkering",
+      "steps":[
+        "Ta ett papper. Skriv alla oroande tankar du har just nu – töm dem.",
+        "Vik ihop pappret och lägg det åt sidan. Det finns kvar om du behöver det.",
+        "Ta tre andetag och säg tyst: 'Det får vänta en stund.'",
+        "Fokusera nu på en konkret uppgift framför dig."
+      ],
+      "needs":["tankar","stress"],
+      "mode":"fokus",
+      "intensity":2,
+      "durationSec":90,
+      "audience":"neutral"
+    },
+    {
+      "id":"m012",
+      "title":"Snabbpromenad – Hjärnspark",
+      "steps":[
+        "Ta på dig skorna och gå ut – eller promenera inomhus i 60–90 sek.",
+        "Fokusera på varje steg mot underlaget. Känn kontakten.",
+        "Titta på tre saker du normalt inte lägger märke till.",
+        "Återvänd med ett djupt andetag. Bra mot energidipp."
+      ],
+      "needs":["energi","humör"],
+      "mode":"pepp",
+      "intensity":2,
+      "durationSec":90,
+      "audience":"neutral"
+    },
+    {
+      "id":"m013",
+      "title":"Sov ner kroppen – Progressiv avslappning",
+      "steps":[
+        "Ligg ned. Spänn tårna maximalt i 5 sekunder – släpp sedan helt.",
+        "Spänn vaderna i 5 sekunder – släpp. Känn skillnaden.",
+        "Fortsätt uppåt: lår, mage, händer, axlar – spänn och släpp.",
+        "Avsluta med ansiktet. Tungan mot gommen i 5 sek – sedan full avslappning."
+      ],
+      "needs":["sömn","stress"],
+      "mode":"sömn",
+      "intensity":1,
+      "durationSec":120,
+      "audience":"neutral"
+    },
+    {
+      "id":"m014",
+      "title":"Uppskatta nu – Mindfulness blink",
+      "steps":[
+        "Stanna upp oavsett vad du gör. Luta dig tillbaka en sekund.",
+        "Vad händer i kroppen just nu? Notera utan att värdera.",
+        "Vad finns runt dig som du kan uppskatta – en detalj?",
+        "Ta ett andetag och fortsätt. Du var precis helt närvarande."
+      ],
+      "needs":["tankar","humör"],
+      "mode":"lugn",
+      "intensity":1,
+      "durationSec":60,
+      "audience":"neutral"
+    },
+    {
+      "id":"m015",
+      "title":"Spegeldialog – Vänlig röst",
+      "steps":[
+        "Gå till en spegel. Titta dig i ögonen en stund.",
+        "Säg en snäll mening till dig själv högt eller tyst – vad skulle du sagt en vän?",
+        "Håll blicken 15 sekunder. Det är okej om det känns ovant.",
+        "Ta ett andetag och gå vidare. Det räcker att du försökte."
+      ],
+      "needs":["humör","tankar"],
+      "mode":"pepp",
+      "intensity":2,
+      "durationSec":60,
+      "audience":"neutral"
+    },
+    {
+      "id":"m016",
+      "title":"Prioritet ett – Klarhetsstopp",
+      "steps":[
+        "Ta ett djupt andetag. Fråga dig: 'Vad är det viktigaste just nu?'",
+        "Skriv ner max tre saker. Stryk allt annat mentalt.",
+        "Välj den ena uppgiften som ger mest effekt idag.",
+        "Sätt igång med den inom de nästa fem minuterna."
+      ],
+      "needs":["tankar","energi"],
+      "mode":"fokus",
+      "intensity":2,
+      "durationSec":90,
+      "audience":"neutral"
+    },
+    {
+      "id":"m017",
+      "title":"Känslocheck – Namnge och acceptera",
+      "steps":[
+        "Fråga dig: 'Vad känner jag just nu?' Ge känslan ett namn.",
+        "Placera känslan i kroppen – var sitter den? Magen? Bröstet?",
+        "Säg: 'Jag märker att jag känner [känsla]. Det är okej att känna så.'",
+        "Ta ett andetag och lägg märke till om känslan förändras något."
+      ],
+      "needs":["tankar","stress"],
+      "mode":"lugn",
+      "intensity":2,
+      "durationSec":90,
+      "audience":"neutral"
+    },
+    {
+      "id":"m018",
+      "title":"Morgonintention – Starta rätt",
+      "steps":[
+        "Innan du tittar i telefonen: ta tre andetag sittandes i sängen.",
+        "Fråga dig: 'Vad vill jag bära med mig in i den här dagen?'",
+        "Skriv ned eller tänk på ett ord eller en mening som guidar dagen.",
+        "Håll det i minnet de första fem minuterna. Det räcker."
+      ],
+      "needs":["energi","humör"],
+      "mode":"pepp",
+      "intensity":1,
+      "durationSec":60,
+      "audience":"neutral"
+    },
+    {
+      "id":"m019",
+      "title":"Digital paus – Återkoppla till kroppen",
+      "steps":[
+        "Lägg ned skärmen. Titta upp och se på ett punkt i rummet i 15 sekunder.",
+        "Blinka naturligt 5 gånger. Rulla ögonen sakta ett varv.",
+        "Sträck på halsen – titta vänster, höger, upp, ned.",
+        "Ta ett andetag. Du är tillbaka i kroppen – inte på skärmen."
+      ],
+      "needs":["energi","stress"],
+      "mode":"fokus",
+      "intensity":1,
+      "durationSec":60,
+      "audience":"neutral"
+    },
+    {
+      "id":"m020",
+      "title":"Kväll – Dagavslutningstanke",
+      "steps":[
+        "Sätt dig eller lägg dig ned. Tänk tillbaka på dagen utan att döma.",
+        "Välj en sak som gick bra eller som du är nöjd med.",
+        "Välj en sak du vill bära med dig imorgon.",
+        "Avsluta med: 'Jag har gjort mitt bästa idag. Nu vilar jag.'"
+      ],
+      "needs":["sömn","humör"],
+      "mode":"sömn",
+      "intensity":1,
+      "durationSec":90,
+      "audience":"neutral"
+    },
+    {
+      "id":"m021",
+      "title":"Leendeövning – Inre värme",
+      "steps":[
+        "Ta ett djupt andetag. Låt munginorna röra sig lite uppåt – ett litet leende.",
+        "Håll leendet i 30 sekunder. Det behöver inte vara äkta från start.",
+        "Tänk på något som faktiskt gör dig glad. Känn om leendet förändras.",
+        "Ta ett andetag. Bra mot lågenergiläge och grå dagar."
+      ],
+      "needs":["humör","energi"],
+      "mode":"pepp",
+      "intensity":1,
+      "durationSec":60,
+      "audience":"neutral"
+    },
+    {
+      "id":"m022",
+      "title":"Kylnings­andning – Temperera humöret",
+      "steps":[
+        "Forma munnen som ett O och andas in kylig luft i 4 sekunder.",
+        "Håll andan i 2 sekunder. Känn kylan i munnen.",
+        "Andas ut sakta genom näsan i 6 sekunder.",
+        "Upprepa 5 gånger. Effektivt vid irritation och hetta."
+      ],
+      "needs":["stress","humör"],
+      "mode":"lugn",
+      "intensity":2,
+      "durationSec":90,
+      "audience":"neutral"
+    },
+    {
+      "id":"m023",
+      "title":"Sträck dig – Längsamma rörelser",
+      "steps":[
+        "Stå eller sitt. Lyft armarna rakt upp och sträck dig mot taket.",
+        "Luta långsamt åt vänster i 15 sekunder – andas in.",
+        "Luta åt höger i 15 sekunder – andas ut.",
+        "Rulla ned hakan mot bröstet och tillbaka. Känn hur ryggraden vaknar."
+      ],
+      "needs":["energi","stress"],
+      "mode":"pepp",
+      "intensity":1,
+      "durationSec":90,
+      "audience":"neutral"
+    },
+    {
+      "id":"m024",
+      "title":"Mjuk visualization – Fridfull plats",
+      "steps":[
+        "Blunda. Föreställ dig en plats du mår bra på – ute eller inne.",
+        "Lägg till ett sinnesintryck: en doft, ett ljud, en känsla mot huden.",
+        "Stanna på platsen i 30–45 sekunder. Du kan alltid återvända hit.",
+        "Andas ut och öppna ögonen sakta. Du tog en paus utan att gå någonstans."
+      ],
+      "needs":["stress","sömn"],
+      "mode":"sömn",
+      "intensity":1,
+      "durationSec":90,
+      "audience":"neutral"
+    }
+  ],
+  "cbt_mini": [
+    {
+      "id":"c001",
+      "title":"Utmana katastroftanken",
+      "prompt_fråga_1":"Vilken tanke eller oro känns störst just nu? Beskriv den i en mening.",
+      "prompt_fråga_2":"Vad är det mest realistiska utfallet – inte det värsta, utan det troligaste?",
+      "alternativ_tanke_prompt":"Formulera en balanserad tanke: 'Det är möjligt att... och jag kan hantera det genom...'",
+      "needs":["tankar","stress"],
+      "mode":"lugn",
+      "intensity":2,
+      "durationSec":120,
+      "audience":"neutral"
+    },
+    {
+      "id":"c002",
+      "title":"Svart-vitt-tänkande",
+      "prompt_fråga_1":"Märker du att du tänker i allt-eller-inget-termer just nu? Beskriv situationen.",
+      "prompt_fråga_2":"Vad finns i mitten? Kan du hitta tre nyanser eller grader av utfallet?",
+      "alternativ_tanke_prompt":"Skriv en tanke som rymmer komplexiteten: 'Ibland... och ibland... och det är okej att det är blandat.'",
+      "needs":["tankar"],
+      "mode":"fokus",
+      "intensity":2,
+      "durationSec":120,
+      "audience":"neutral"
+    },
+    {
+      "id":"c003",
+      "title":"Tankefällan: Tankeläsning",
+      "prompt_fråga_1":"Antar du att du vet vad någon annan tänker om dig? Vad antar du?",
+      "prompt_fråga_2":"Vilka bevis har du för det? Kan det finnas en annan förklaring till deras beteende?",
+      "alternativ_tanke_prompt":"Prova: 'Jag vet inte säkert vad de tänker. Det finns flera möjliga förklaringar.'",
+      "needs":["tankar","stress"],
+      "mode":"lugn",
+      "intensity":2,
+      "durationSec":120,
+      "audience":"neutral"
+    },
+    {
+      "id":"c004",
+      "title":"Beteendeaktivering – Liten handling",
+      "prompt_fråga_1":"Vad har du skjutit upp som du vet ger dig energi eller glädje?",
+      "prompt_fråga_2":"Vad är det allra minsta steget du kan ta mot det aktiviteten inom de närmaste 24 timmarna?",
+      "alternativ_tanke_prompt":"Skriv ned: 'Jag väljer att göra [konkret liten handling] kl. [tid] imorgon.'",
+      "needs":["energi","humör"],
+      "mode":"pepp",
+      "intensity":2,
+      "durationSec":120,
+      "audience":"neutral"
+    },
+    {
+      "id":"c005",
+      "title":"Overgeneralisering – Bredda perspektivet",
+      "prompt_fråga_1":"Säger du 'alltid', 'aldrig', 'ingen' om dig själv eller livet? Vilket påstående?",
+      "prompt_fråga_2":"Kan du komma på ett konkret undantag – ett tillfälle då det inte stämde?",
+      "alternativ_tanke_prompt":"Ersätt med: 'Ibland händer det att... men det är inte hela sanningen om mig eller situationen.'",
+      "needs":["tankar"],
+      "mode":"lugn",
+      "intensity":2,
+      "durationSec":120,
+      "audience":"neutral"
+    },
+    {
+      "id":"c006",
+      "title":"Bör-tänkande – Bli snällare mot dig",
+      "prompt_fråga_1":"Vad säger rösten i dig att du 'borde' eller 'måste' göra? Skriv ner det.",
+      "prompt_fråga_2":"Vem sa detta till dig? Är det ditt eget värde eller ett krav du fått av andra?",
+      "alternativ_tanke_prompt":"Omformulera: 'Det kan vara bra att... och jag väljer det av omsorg om mig, inte av tvång.'",
+      "needs":["tankar","stress"],
+      "mode":"lugn",
+      "intensity":2,
+      "durationSec":120,
+      "audience":"neutral"
+    },
+    {
+      "id":"c007",
+      "title":"Selektivt urval – Se hela bilden",
+      "prompt_fråga_1":"Fokuserar du just nu mest på det som gick fel? Vad är det du fastnar vid?",
+      "prompt_fråga_2":"Vad gick faktiskt bra, eller vad fungerade, i samma situation?",
+      "alternativ_tanke_prompt":"Skriv en mer heltäckande bild: 'En del gick inte som jag önskat, men jag märker också att...'",
+      "needs":["tankar","humör"],
+      "mode":"lugn",
+      "intensity":2,
+      "durationSec":120,
+      "audience":"neutral"
+    },
+    {
+      "id":"c008",
+      "title":"Personalisering – Minska självklandret",
+      "prompt_fråga_1":"Tar du på dig ansvar för något som troligtvis beror på flera faktorer? Vad?",
+      "prompt_fråga_2":"Vilka andra faktorer – utanför dig – kan ha bidragit till utfallet?",
+      "alternativ_tanke_prompt":"Formulera: 'Det hände på grund av flera saker. Min andel var [X] – inte allt.'",
+      "needs":["tankar","stress"],
+      "mode":"lugn",
+      "intensity":3,
+      "durationSec":120,
+      "audience":"neutral"
+    },
+    {
+      "id":"c009",
+      "title":"Framtidsoron – Håll dig i nuet",
+      "prompt_fråga_1":"Vilken framtida situation oroar dig mest just nu? Skriv ned den.",
+      "prompt_fråga_2":"Vad kan du faktiskt göra just idag – ett konkret steg – för att hantera det?",
+      "alternativ_tanke_prompt":"Skriv: 'Det som kan hända är möjligt att hantera. Idag väljer jag att fokusera på [konkret åtgärd].'",
+      "needs":["tankar","stress"],
+      "mode":"fokus",
+      "intensity":2,
+      "durationSec":120,
+      "audience":"neutral"
+    },
+    {
+      "id":"c010",
+      "title":"Emotionellt resonemang – Känsla ≠ Fakta",
+      "prompt_fråga_1":"Tror du att en känsla är ett bevis för något? T.ex. 'Jag känner mig misslyckad, alltså ÄR jag det.' Vad är din känsla?",
+      "prompt_fråga_2":"Vilka konkreta fakta – inte känslor – stödjer eller motsäger den övertygelsen?",
+      "alternativ_tanke_prompt":"Prova: 'Jag känner [känsla] just nu. Känslan är verklig men behöver inte reflektera verkligheten.'",
+      "needs":["tankar","humör"],
+      "mode":"lugn",
+      "intensity":3,
+      "durationSec":120,
+      "audience":"neutral"
+    },
+    {
+      "id":"c011",
+      "title":"Sömnsabotage – Bryt orostankarna",
+      "prompt_fråga_1":"Vilka tankar håller dig vaken när du försöker sova? Skriv ned dem nu, utanför huvudet.",
+      "prompt_fråga_2":"Kan någon av dessa tankar hanteras imorgon? Vilken kan du 'parkera' till dess?",
+      "alternativ_tanke_prompt":"Skriv en lugn signal till dig själv: 'De här tankarna finns kvar imorgon. Nu är det dags att vila.'",
+      "needs":["sömn","tankar"],
+      "mode":"sömn",
+      "intensity":2,
+      "durationSec":120,
+      "audience":"neutral"
+    },
+    {
+      "id":"c012",
+      "title":"Värdegrundat val – Vad är viktigt för mig?",
+      "prompt_fråga_1":"I den situation du befinner dig i – vad är du egentligen mest rädd att förlora eller skada?",
+      "prompt_fråga_2":"Vilket handlingsalternativ stämmer bäst överens med vad du värdesätter mest?",
+      "alternativ_tanke_prompt":"Formulera: 'Jag väljer att [handling] för att det stämmer med vem jag vill vara, inte för att det är enklast.'",
+      "needs":["tankar","energi"],
+      "mode":"fokus",
+      "intensity":3,
+      "durationSec":120,
+      "audience":"neutral"
+    }
+  ]
+}
