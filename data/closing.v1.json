@@ -1,0 +1,524 @@
+{
+  "closing_double": [
+    {
+      "id": "cd001",
+      "type": "compassion_step",
+      "lines": [
+        "Det är okej att ha en tuff dag – det är mänskligt och du är inte ensam om det.",
+        "Ta ett enda litet steg nu: ett glas vatten, ett andetag, eller bara sitta kvar."
+      ],
+      "needs": ["humör"],
+      "mode": "lugn",
+      "intensity": 1,
+      "durationSec": 15,
+      "audience": "neutral"
+    },
+    {
+      "id": "cd002",
+      "type": "compassion_step",
+      "lines": [
+        "Att kämpa med svåra känslor kräver faktiskt mod – och det visar du just nu.",
+        "Det minsta steget du kan ta är att ge dig själv en stunds ro utan krav."
+      ],
+      "needs": ["stress", "humör"],
+      "mode": "lugn",
+      "intensity": 1,
+      "durationSec": 15,
+      "audience": "neutral"
+    },
+    {
+      "id": "cd003",
+      "type": "compassion_step",
+      "lines": [
+        "Du behöver inte lösa allt idag – det räcker att du är här och tar hand om dig.",
+        "Välj en liten sak att göra med omsorg om dig själv under de närmaste minuterna."
+      ],
+      "needs": ["stress", "tankar"],
+      "mode": "lugn",
+      "intensity": 1,
+      "durationSec": 15,
+      "audience": "neutral"
+    },
+    {
+      "id": "cd004",
+      "type": "compassion_step",
+      "lines": [
+        "Det är normalt att känna sig trött och tung ibland – du förtjänar fortfarande omsorg.",
+        "Gör något mjukt för kroppen nu: sträck på dig, drick vatten, eller lägg dig ned en stund."
+      ],
+      "needs": ["energi", "humör"],
+      "mode": "lugn",
+      "intensity": 1,
+      "durationSec": 20,
+      "audience": "neutral"
+    },
+    {
+      "id": "cd005",
+      "type": "compassion_step",
+      "lines": [
+        "Svåra stunder passerar – och du har klarat sådana förut, även när det känts omöjligt.",
+        "Ta ett djupt andetag just nu och låt det räcka som ditt steg framåt."
+      ],
+      "needs": ["stress", "tankar"],
+      "mode": "lugn",
+      "intensity": 2,
+      "durationSec": 15,
+      "audience": "neutral"
+    },
+    {
+      "id": "cd006",
+      "type": "compassion_step",
+      "lines": [
+        "Du gör ditt bästa med de resurser du har just nu – det är tillräckligt.",
+        "Välj ett litet, konkret nästa steg: en sak, en minut, ett beslut."
+      ],
+      "needs": ["tankar", "energi"],
+      "mode": "fokus",
+      "intensity": 2,
+      "durationSec": 15,
+      "audience": "neutral"
+    },
+    {
+      "id": "cd007",
+      "type": "compassion_step",
+      "lines": [
+        "Att ha det jobbigt är inte ett misslyckande – det är en del av att vara människa.",
+        "Sätt en hand mot hjärtat och säg tyst: 'Jag är snäll mot mig själv nu.'"
+      ],
+      "needs": ["humör", "tankar"],
+      "mode": "lugn",
+      "intensity": 1,
+      "durationSec": 15,
+      "audience": "neutral"
+    },
+    {
+      "id": "cd008",
+      "type": "compassion_step",
+      "lines": [
+        "Det du känner är verkligt och giltigt – du behöver inte minimera det.",
+        "Det minsta steget nu är att ge dig tillåtelse att vila utan prestation."
+      ],
+      "needs": ["stress", "humör"],
+      "mode": "lugn",
+      "intensity": 1,
+      "durationSec": 15,
+      "audience": "neutral"
+    },
+    {
+      "id": "cd009",
+      "type": "compassion_step",
+      "lines": [
+        "Du bär på mer än du visar utåt – var rädd om den personen som bär allt det.",
+        "Ta en liten paus från kraven och ge dig själv fem minuters stillhet."
+      ],
+      "needs": ["stress", "energi"],
+      "mode": "lugn",
+      "intensity": 2,
+      "durationSec": 20,
+      "audience": "neutral"
+    },
+    {
+      "id": "cd010",
+      "type": "compassion_step",
+      "lines": [
+        "Alla har dagar när ingenting känns lätt – du är i gott sällskap.",
+        "Välj en sak att göra med värme mot dig själv de närmaste tio minuterna."
+      ],
+      "needs": ["humör"],
+      "mode": "pepp",
+      "intensity": 1,
+      "durationSec": 15,
+      "audience": "neutral"
+    },
+    {
+      "id": "cd011",
+      "type": "compassion_step",
+      "lines": [
+        "Det är okej om du inte orkar mer idag – att stanna upp är också ett val.",
+        "Ge dig själv lov att göra något litet och mjukt nu, utan att motivera det."
+      ],
+      "needs": ["energi", "stress"],
+      "mode": "lugn",
+      "intensity": 1,
+      "durationSec": 15,
+      "audience": "neutral"
+    },
+    {
+      "id": "cd012",
+      "type": "compassion_step",
+      "lines": [
+        "Att söka stöd – även här, i en app – visar att du bryr dig om dig själv.",
+        "Nästa steg: drick något varmt, lägg ned skärmen en minut, känn att du andas."
+      ],
+      "needs": ["humör", "stress"],
+      "mode": "lugn",
+      "intensity": 1,
+      "durationSec": 20,
+      "audience": "neutral"
+    },
+    {
+      "id": "cd013",
+      "type": "compassion_step",
+      "lines": [
+        "Kämpa inte mot känslan – du kan låta den finnas utan att den styr allt.",
+        "Ta ett andetag och bestäm en enda konkret sak att fokusera på härnäst."
+      ],
+      "needs": ["tankar", "stress"],
+      "mode": "fokus",
+      "intensity": 2,
+      "durationSec": 15,
+      "audience": "neutral"
+    },
+    {
+      "id": "cd014",
+      "type": "compassion_step",
+      "lines": [
+        "Du förtjänar samma snällhet som du ger till andra – börja med det nu.",
+        "Det minsta steget kan vara att tänka en varm tanke om dig själv och hålla den."
+      ],
+      "needs": ["humör", "tankar"],
+      "mode": "pepp",
+      "intensity": 1,
+      "durationSec": 15,
+      "audience": "neutral"
+    },
+    {
+      "id": "cd015",
+      "type": "compassion_step",
+      "lines": [
+        "Det är mänskligt att ha energidippar – din kropp signalerar att den vill ha omsorg.",
+        "Välj nu att röra på dig lite: sträck, gå till fönstret, känn dagsljuset."
+      ],
+      "needs": ["energi"],
+      "mode": "pepp",
+      "intensity": 2,
+      "durationSec": 15,
+      "audience": "neutral"
+    },
+    {
+      "id": "cd016",
+      "type": "compassion_step",
+      "lines": [
+        "Tuffa perioder lär oss något om oss själva – men de definierar oss inte.",
+        "Ta ett litet steg i omsorg: ät något litet, lägg dig ned, eller ring någon du litar på."
+      ],
+      "needs": ["tankar", "humör"],
+      "mode": "lugn",
+      "intensity": 2,
+      "durationSec": 20,
+      "audience": "neutral"
+    },
+    {
+      "id": "cd017",
+      "type": "compassion_step",
+      "lines": [
+        "Du behöver inte vara stark hela tiden – det är okej att bara vara som du är nu.",
+        "Gör en sak mjukt och utan prestation: ett andetag, en sträckning, en paus."
+      ],
+      "needs": ["stress", "humör"],
+      "mode": "lugn",
+      "intensity": 1,
+      "durationSec": 15,
+      "audience": "neutral"
+    },
+    {
+      "id": "cd018",
+      "type": "compassion_step",
+      "lines": [
+        "Oro och stress är signaler – de visar att du bryr dig om något viktigt.",
+        "Nästa steg: skriv ned oron på papper och ge dig tillåtelse att lägga den åt sidan nu."
+      ],
+      "needs": ["stress", "tankar"],
+      "mode": "fokus",
+      "intensity": 2,
+      "durationSec": 20,
+      "audience": "neutral"
+    },
+    {
+      "id": "cd019",
+      "type": "compassion_step",
+      "lines": [
+        "Det tar tid att må bättre – och det är okej att gå i din egen takt.",
+        "Välj en liten vänlig handling mot dig själv och gör den utan att värdera den."
+      ],
+      "needs": ["humör", "energi"],
+      "mode": "lugn",
+      "intensity": 1,
+      "durationSec": 15,
+      "audience": "neutral"
+    },
+    {
+      "id": "cd020",
+      "type": "compassion_step",
+      "lines": [
+        "Ibland räcker det att bara sitta med det svåra utan att försöka fixa det.",
+        "Ta ett mjukt steg: lägg händerna i knät, slut ögonen och andas tre gånger."
+      ],
+      "needs": ["tankar", "stress"],
+      "mode": "lugn",
+      "intensity": 1,
+      "durationSec": 15,
+      "audience": "neutral"
+    },
+    {
+      "id": "cd021",
+      "type": "compassion_step",
+      "lines": [
+        "Du har tagit dig igenom svåra dagar förut – den förmågan finns kvar hos dig.",
+        "Välj det allra enklaste nästa steget och gör bara det, inget mer."
+      ],
+      "needs": ["humör", "tankar"],
+      "mode": "pepp",
+      "intensity": 2,
+      "durationSec": 15,
+      "audience": "neutral"
+    },
+    {
+      "id": "cd022",
+      "type": "compassion_step",
+      "lines": [
+        "Att sakta ned är inte att ge upp – det kan vara det klokaste valet just nu.",
+        "Ge dig tillåtelse att göra mindre och var med i det du faktiskt gör."
+      ],
+      "needs": ["stress", "energi"],
+      "mode": "lugn",
+      "intensity": 1,
+      "durationSec": 15,
+      "audience": "neutral"
+    },
+    {
+      "id": "cd023",
+      "type": "compassion_step",
+      "lines": [
+        "Dina känslor förtjänar utrymme – du behöver inte pressa undan dem.",
+        "Ta ett steg inåt: känn efter var känslan sitter i kroppen och andas mot den platsen."
+      ],
+      "needs": ["tankar", "humör"],
+      "mode": "lugn",
+      "intensity": 2,
+      "durationSec": 20,
+      "audience": "neutral"
+    },
+    {
+      "id": "cd024",
+      "type": "compassion_step",
+      "lines": [
+        "Det är okej att be om hjälp, ta paus och prioritera dig själv – det är omtanke.",
+        "Ditt nästa steg: välj en person att skriva till eller något mjukt att göra för dig."
+      ],
+      "needs": ["humör", "stress"],
+      "mode": "pepp",
+      "intensity": 2,
+      "durationSec": 20,
+      "audience": "neutral"
+    },
+    {
+      "id": "cd025",
+      "type": "calm_gratitude",
+      "lines": [
+        "Ta ett djupt andetag och låt axlarna sjunka – du behöver inte hålla upp allt nu.",
+        "En sak du kan vara tacksam för just nu: att du tog dig tid att stanna upp."
+      ],
+      "needs": ["stress"],
+      "mode": "lugn",
+      "intensity": 1,
+      "durationSec": 15,
+      "audience": "neutral"
+    },
+    {
+      "id": "cd026",
+      "type": "calm_gratitude",
+      "lines": [
+        "Andas ut allt du bär på och märk stillheten som finns kvar efteråt.",
+        "Mitt i det svåra finns ändå något litet att uppskatta – du är här, du andas."
+      ],
+      "needs": ["stress", "humör"],
+      "mode": "lugn",
+      "intensity": 1,
+      "durationSec": 15,
+      "audience": "neutral"
+    },
+    {
+      "id": "cd027",
+      "type": "calm_gratitude",
+      "lines": [
+        "Låt kroppen vara tung mot stolen eller golvet – du behöver inte hålla emot.",
+        "Det finns något gott i den här dagen, hur litet det än är – låt det räknas."
+      ],
+      "needs": ["stress", "sömn"],
+      "mode": "sömn",
+      "intensity": 1,
+      "durationSec": 15,
+      "audience": "neutral"
+    },
+    {
+      "id": "cd028",
+      "type": "calm_gratitude",
+      "lines": [
+        "Ta tre langsamma andetag och känn hur rummet håller dig – du behöver inte göra mer.",
+        "Tänk på en person, en plats eller en stund som gav dig värme och låt den vila i dig."
+      ],
+      "needs": ["stress", "tankar"],
+      "mode": "lugn",
+      "intensity": 1,
+      "durationSec": 20,
+      "audience": "neutral"
+    },
+    {
+      "id": "cd029",
+      "type": "calm_gratitude",
+      "lines": [
+        "Lägg ned skuldrorna, lossa käken, andas ut – det räcker att du är här nu.",
+        "Trots allt du bär på finns det något litet att tacka för idag – låt det vara nog."
+      ],
+      "needs": ["stress"],
+      "mode": "lugn",
+      "intensity": 1,
+      "durationSec": 15,
+      "audience": "neutral"
+    },
+    {
+      "id": "cd030",
+      "type": "calm_gratitude",
+      "lines": [
+        "Du behöver inte lösa något just nu – tillåt dig att bara vara i den här stunden.",
+        "Hitta en liten sak som faktiskt fungerade idag och ge det ett ögonblick av uppmärksamhet."
+      ],
+      "needs": ["tankar", "humör"],
+      "mode": "lugn",
+      "intensity": 1,
+      "durationSec": 20,
+      "audience": "neutral"
+    },
+    {
+      "id": "cd031",
+      "type": "calm_gratitude",
+      "lines": [
+        "Blunda en sekund och känn marken under fötterna – du är förankrad och trygg.",
+        "Välj en sak du är tacksam för just nu, hur vardaglig den än verkar."
+      ],
+      "needs": ["stress", "humör"],
+      "mode": "lugn",
+      "intensity": 1,
+      "durationSec": 15,
+      "audience": "neutral"
+    },
+    {
+      "id": "cd032",
+      "type": "calm_gratitude",
+      "lines": [
+        "Andas in lugn och andas ut spänning – gör det tre gånger i ditt eget tempo.",
+        "Tänk på något eller någon som finns kvar för dig, oavsett hur dagen gick."
+      ],
+      "needs": ["stress", "sömn"],
+      "mode": "sömn",
+      "intensity": 1,
+      "durationSec": 15,
+      "audience": "neutral"
+    },
+    {
+      "id": "cd033",
+      "type": "calm_gratitude",
+      "lines": [
+        "Låt tankarna sakta ned – du behöver inte ha svar på allt ikväll.",
+        "Det finns en liten stund av gott i varje dag – du hittar den när du stannar upp."
+      ],
+      "needs": ["tankar", "sömn"],
+      "mode": "sömn",
+      "intensity": 1,
+      "durationSec": 15,
+      "audience": "neutral"
+    },
+    {
+      "id": "cd034",
+      "type": "calm_gratitude",
+      "lines": [
+        "Ta ett mjukt andetag och påminn dig: du har klarat av den här dagen.",
+        "Välj att se en sak som var okej eller bra – den detaljen förtjänar att märkas."
+      ],
+      "needs": ["humör", "energi"],
+      "mode": "pepp",
+      "intensity": 1,
+      "durationSec": 15,
+      "audience": "neutral"
+    },
+    {
+      "id": "cd035",
+      "type": "calm_gratitude",
+      "lines": [
+        "Tillåt kroppen att mjukna – du bär inte lika mycket när du andas ut helt.",
+        "Tänk på en person som bryr sig om dig och låt den varma känslan stanna ett ögonblick."
+      ],
+      "needs": ["stress", "humör"],
+      "mode": "lugn",
+      "intensity": 1,
+      "durationSec": 20,
+      "audience": "neutral"
+    },
+    {
+      "id": "cd036",
+      "type": "calm_gratitude",
+      "lines": [
+        "Ingen dag är helt förlorad – det finns alltid något litet att ta med sig framåt.",
+        "Ge det lilla goda i dagen ett namn och bär det med dig in i kvällen."
+      ],
+      "needs": ["humör", "tankar"],
+      "mode": "pepp",
+      "intensity": 2,
+      "durationSec": 15,
+      "audience": "neutral"
+    },
+    {
+      "id": "cd037",
+      "type": "calm_gratitude",
+      "lines": [
+        "Stanna kvar i det mjuka andetaget en extra sekund – känn att du inte är i fara.",
+        "Din kropp arbetar för dig varje dag utan att du behöver be den – det är något att uppskatta."
+      ],
+      "needs": ["stress", "tankar"],
+      "mode": "lugn",
+      "intensity": 1,
+      "durationSec": 15,
+      "audience": "neutral"
+    },
+    {
+      "id": "cd038",
+      "type": "calm_gratitude",
+      "lines": [
+        "Lägg ned allt mentalt du bär och andas ut – du kan plocka upp det igen imorgon.",
+        "Tänk på ett ögonblick idag då du kände dig lite mer som dig själv – det är värt att hålla i."
+      ],
+      "needs": ["sömn", "stress"],
+      "mode": "sömn",
+      "intensity": 1,
+      "durationSec": 20,
+      "audience": "neutral"
+    },
+    {
+      "id": "cd039",
+      "type": "calm_gratitude",
+      "lines": [
+        "Känn det mjuka i stolen, soffan eller sängen – du har en plats att vila på.",
+        "Välj att tacka för en enkel sak just nu: värmen, ljuset, tystnaden eller andetaget."
+      ],
+      "needs": ["sömn", "humör"],
+      "mode": "sömn",
+      "intensity": 1,
+      "durationSec": 15,
+      "audience": "neutral"
+    },
+    {
+      "id": "cd040",
+      "type": "calm_gratitude",
+      "lines": [
+        "Andas in och känn lugnet som finns tillgängligt för dig, alltid, i varje andetag.",
+        "Det mest svåra vi möter ryms bredvid det mest vardagliga goda – båda är sanna."
+      ],
+      "needs": ["stress", "tankar"],
+      "mode": "lugn",
+      "intensity": 1,
+      "durationSec": 15,
+      "audience": "neutral"
+    }
+  ]
+}
