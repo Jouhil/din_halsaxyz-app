@@ -302,7 +302,7 @@ body.dark .closing-line{border-color:rgba(140,230,80,.1);}
     <button class="side-btn" onclick="showTab('calm',this)" id="sb-calm"><span class="ico">🧘</span> Lugn & Ro</button>
     <button class="side-btn" onclick="showTab('inspire',this)" id="sb-inspire"><span class="ico">✨</span> Pepp</button>
     <button class="side-btn" onclick="showTab('help',this)" id="sb-help"><span class="ico">🧠</span> Hjälp</button>
-    <button class="side-btn" onclick="showTab('flow',this)" id="sb-flow"><span class="ico">⏱</span> 3 min</button>
+    <button class="side-btn" onclick="showTab('flow',this)" id="sb-flow"><span class="ico">⏱</span> Dagens check</button>
     <button class="side-btn" onclick="showTab('stats',this)" id="sb-stats"><span class="ico">📊</span> Statistik</button>
     <button class="side-btn" onclick="showTab('settings',this)" id="sb-settings"><span class="ico">⚙️</span> Inställningar</button>
     <div class="side-version">v3.0 · jouhil.github.io</div>
@@ -384,7 +384,7 @@ body.dark .closing-line{border-color:rgba(140,230,80,.1);}
 
     <!-- DAGENS 3 MIN -->
     <div id="tab-flow" class="tab">
-      <div class="page-title">⏱ Dagens 3 min</div>
+      <div class="page-title">⏱ Dagens check</div>
       <div id="flow-root"></div>
     </div>
 
@@ -409,9 +409,9 @@ body.dark .closing-line{border-color:rgba(140,230,80,.1);}
           <li class="stat-item"><span>🧘 Andningsminuter totalt</span><span class="stat-val" id="st-breath">0 min</span></li>
           <li class="stat-item"><span>♥ Tacksamheter visade</span><span class="stat-val" id="st-grat">0</span></li>
           <li class="stat-item"><span>⚡ Pepp-citat lästa</span><span class="stat-val" id="st-pepp">0</span></li>
-          <li class="stat-item"><span>⏱ 3 min genomförda</span><span class="stat-val" id="st-flow">0</span></li>
+          <li class="stat-item"><span>⏱ Genomförda checkar</span><span class="stat-val" id="st-flow">0</span></li>
           <li class="stat-item"><span>📅 Dagars streak</span><span class="stat-val" id="st-streak">0</span></li>
-          <li class="stat-item"><span>📉→📈 Snitt humörlyft (3 min)</span><span class="stat-val" id="st-lift">–</span></li>
+          <li class="stat-item"><span>📉→📈 Stress/Humör senaste 7</span><span class="stat-val" id="st-lift">–</span></li>
         </ul>
         <div style="text-align:center;margin-top:10px;">
           <span class="streak-badge" id="streak-badge">🔥 0 dagars streak</span>
@@ -494,7 +494,7 @@ body.dark .closing-line{border-color:rgba(140,230,80,.1);}
     <button class="bnav-btn" onclick="showTab('calm',this)"><span class="ico">🧘</span>Lugn</button>
     <button class="bnav-btn" onclick="showTab('inspire',this)"><span class="ico">✨</span>Pepp</button>
     <button class="bnav-btn" onclick="showTab('help',this)"><span class="ico">🧠</span>Hjälp</button>
-    <button class="bnav-btn" onclick="showTab('flow',this)"><span class="ico">⏱</span>3 min</button>
+    <button class="bnav-btn" onclick="showTab('flow',this)"><span class="ico">⏱</span>Check</button>
     <button class="bnav-btn" onclick="showTab('stats',this)"><span class="ico">📊</span>Stats</button>
     <button class="bnav-btn" onclick="showTab('settings',this)"><span class="ico">⚙️</span>Inställn.</button>
   </nav>
@@ -770,15 +770,18 @@ function loadStats(){
   const streak=s.streak||0;
   document.getElementById('st-streak').innerText=streak;
   document.getElementById('streak-badge').innerText='🔥 '+streak+' dagars streak';
-  // Flow stats
-  const logs=loadFlowLogs().filter(l=>l.counted);
+  const logs=loadFlowLogs().filter(l=>l.counted===true);
   document.getElementById('st-flow').innerText=logs.length;
-  // Snitt humörlyft
-  const withPost=logs.filter(l=>l.pre&&l.post&&l.post.rating);
-  if(withPost.length>0){
-    const avg=withPost.reduce((a,l)=>a+(l.post.rating - (l.pre.humör||5)),0)/withPost.length;
-    document.getElementById('st-lift').innerText=(avg>=0?'+':'')+avg.toFixed(1)+' ★';
+  const latest7=logs.slice(-7);
+  if(latest7.length){
+    const avgStressPre=latest7.reduce((a,l)=>a+((l.pre&&l.pre.stress)||0),0)/latest7.length;
+    const avgStressPost=latest7.reduce((a,l)=>a+((l.post&&l.post.stress)||0),0)/latest7.length;
+    const avgMoodPre=latest7.reduce((a,l)=>a+((l.pre&&l.pre.humör)||0),0)/latest7.length;
+    const avgMoodPost=latest7.reduce((a,l)=>a+((l.post&&l.post.humör)||0),0)/latest7.length;
+    document.getElementById('st-lift').innerText=`S ${avgStressPre.toFixed(1)}→${avgStressPost.toFixed(1)} · H ${avgMoodPre.toFixed(1)}→${avgMoodPost.toFixed(1)}`;
   } else document.getElementById('st-lift').innerText='–';
+  const dist={3:0,6:0,10:0}; logs.forEach(l=>{if(dist[l.sessionLengthMin]!==undefined)dist[l.sessionLengthMin]++;});
+  document.getElementById('streak-badge').innerText=`🔥 ${streak} dagars streak · 3m:${dist[3]} 6m:${dist[6]} 10m:${dist[10]}`;
 }
 function incStat(key){const s=JSON.parse(localStorage.getItem('stats')||'{}');s[key]=(s[key]||0)+1;localStorage.setItem('stats',JSON.stringify(s));loadStats();}
 function resetStats(){if(confirm('Nollställa all statistik?')){localStorage.removeItem('stats');loadStats();}}
@@ -788,437 +791,215 @@ function updateStreak(){const s=JSON.parse(localStorage.getItem('stats')||'{}');
 //  FLOW LOGS
 // ══════════════════════════════════════════
 function loadFlowLogs(){try{return JSON.parse(localStorage.getItem('dailyFlowLogs')||'[]');}catch(e){return[];}}
-function saveFlowLogs(logs){localStorage.setItem('dailyFlowLogs',JSON.stringify(logs));}
-
-function getTodayLog(){
-  const today=new Date().toDateString();
-  return loadFlowLogs().find(l=>l.date===today&&l.counted)||null;
-}
-
-function getUsedIds(){
-  // ids used in last 7 days
-  const cutoff=Date.now()-7*24*3600*1000;
-  const logs=loadFlowLogs().filter(l=>new Date(l.dateISO||0).getTime()>cutoff);
-  return new Set(logs.map(l=>l.exerciseId).filter(Boolean));
-}
+function saveFlowLogs(logs){try{localStorage.setItem('dailyFlowLogs',JSON.stringify(logs));}catch(e){}}
+function ymd(date=new Date()){return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;}
+function getTodayCountedLog(){const today=ymd();return loadFlowLogs().find(l=>l.date===today&&l.counted===true)||null;}
+function getRecentIds(key){const cutoff=Date.now()-7*24*3600*1000;const ids=[];loadFlowLogs().forEach(l=>{if(new Date(l.completedAt||0).getTime()>=cutoff&&l.blocks){l.blocks.forEach(b=>{if(b&&b.kind===key&&b.id)ids.push(b.id);});}});return new Set(ids);}
 
 // ══════════════════════════════════════════
-//  REGELMOTOR
+//  REGELMOTOR + THEME
 // ══════════════════════════════════════════
 function determineMode(pre){
-  const {stress=5,humör=5,energi=5,sömn=7}=pre;
-  if(stress>=8)         return 'lugn';
-  if(sömn<=3)           return 'sömn';
-  if(humör<=3)          return 'pepp';
-  if(energi<=3)         return 'fokus';
-  if(stress>=4)         return 'lugn';
-  return Math.random()>.5?'fokus':'pepp';
+  const hour=new Date().getHours();
+  const {stress=5,humör=5,energi=5,sömn=7}=pre||{};
+  if(stress>=8)return 'lugn';
+  if(sömn<=3 && (hour>=19||hour<=7))return 'sömn';
+  if(humör<=3)return 'pepp';
+  if(energi<=3)return 'fokus';
+  if(stress>=4&&stress<=7)return 'lugn';
+  return (humör>=4&&humör<=6)?'pepp':'fokus';
+}
+function guessTheme(hour, dayOfWeek){
+  if(dayOfWeek===0||dayOfWeek===6) return hour<12?'recovery':'gratitude';
+  if(hour<6) return 'sleep';
+  if(hour<12) return 'focus';
+  if(hour<18) return 'energy';
+  if(hour<22) return 'calm';
+  return 'sleep';
 }
 
-function pickExercise(mode){
-  if(!dailyLib)return null;
-  const usedIds=getUsedIds();
-  // Bygg kandidatpool
-  let pool=[];
-  const {breathing_sessions=[],micro_tools=[],cbt_mini=[]}=dailyLib;
+function validLibrary(data){return data&&Array.isArray(data.gratitude)&&Array.isArray(data.affirmations)&&Array.isArray(data.breathing_sessions)&&Array.isArray(data.micro_tools);}
+function validClosing(data){return data&&Array.isArray(data.closing_double);}
 
-  if(mode==='lugn'||mode==='sömn'){
-    pool.push(...breathing_sessions.filter(b=>b.mode===mode||b.mode==='lugn'));
-    pool.push(...micro_tools.filter(m=>m.mode==='lugn'||m.mode==='sömn'));
-  } else if(mode==='pepp'){
-    pool.push(...micro_tools.filter(m=>m.mode==='pepp'));
-  } else { // fokus
-    pool.push(...micro_tools.filter(m=>m.mode==='fokus'));
-    pool.push(...cbt_mini.filter(c=>c.mode==='fokus'||c.mode==='lugn'));
-  }
-  // Filtrera bort nyligen använda
-  let fresh=pool.filter(e=>!usedIds.has(e.id));
-  if(fresh.length===0)fresh=pool; // fallback om allt är använt
-  if(fresh.length===0)return null;
-  return fresh[Math.floor(Math.random()*fresh.length)];
+async function fetchAndCache(url, cacheKey, fallback, validator){
+  try{
+    const response=await fetch(url);
+    if(response.ok){
+      const data=await response.json();
+      if(validator(data)){try{localStorage.setItem(cacheKey,JSON.stringify(data));}catch(e){};return data;}
+    }
+  }catch(e){}
+  try{const cached=JSON.parse(localStorage.getItem(cacheKey)||'null');if(cached&&validator(cached))return cached;}catch(e){}
+  return fallback;
 }
 
-function pickClosing(pre){
-  if(!dailyClosing||!dailyClosing.closing_double) {
-    // Use library affirmations as fallback
-    if(dailyLib&&dailyLib.affirmations&&dailyLib.affirmations.length)
-      return {type:'single',text:dailyLib.affirmations[Math.floor(Math.random()*dailyLib.affirmations.length)].text};
-    return {type:'single',text:'Bra jobbat – du tog hand om dig själv idag. 🌿'};
-  }
-  const {stress=5,humör=5}=pre;
-  const all=dailyClosing.closing_double;
-  let type;
-  if(humör<=3)           type='compassion_step';
-  else if(stress>=8)     type='calm_gratitude';
-  else                   type=null;
-
-  if(type){
-    const match=all.filter(c=>c.type===type);
-    if(match.length){const c=match[Math.floor(Math.random()*match.length)];return{type:'double',lines:c.lines};}
-  }
-  // 1 mening från affirmation eller gratitude
-  const pool=[...(dailyLib?.affirmations||[]),...(dailyLib?.gratitude||[])];
-  if(pool.length){return{type:'single',text:pool[Math.floor(Math.random()*pool.length)].text};}
-  return{type:'single',text:'Bra jobbat – du tog hand om dig själv. 🌿'};
+async function loadLibraries(){
+  [dailyLib,dailyClosing]=await Promise.all([
+    fetchAndCache(LIB_URL,'cachedLibrary',FALLBACK_LIB,validLibrary),
+    fetchAndCache(CLOSING_URL,'cachedClosing',FALLBACK_CLOSING,validClosing)
+  ]);
 }
 
-// ══════════════════════════════════════════
-//  FLÖDES-STATE
-// ══════════════════════════════════════════
-let flowState={
-  step:1,       // 1=check-in 2=övning 3=avslut
-  pre:null,
-  exercise:null,
-  closing:null,
-  mode:null,
-  counted:false,
-  postRating:null,
-  sessionLengthMin:3,
-  cbt:{}
-};
+let flowState={step:1,sessionLengthMin:3,counted:true,pre:null,preLocked:null,mode:null,themeGuess:null,blocks:[],closing:null,post:{},cbt:{},completed:false};
 
-// ══════════════════════════════════════════
-//  RENDER FLOW
-// ══════════════════════════════════════════
+function pickByModeWithHistory(list,mode,kind,theme){
+  const src=Array.isArray(list)?list:[];
+  let pool=src.filter(x=>x&&x.mode===mode);
+  const recent=getRecentIds(kind);
+  let filtered=pool.filter(x=>!recent.has(x.id));
+  if(filtered.length===0) filtered=pool.slice();
+  if(theme){
+    const tm=filtered.filter(x=>Array.isArray(x.needs)&&x.needs.some(n=>String(n).toLowerCase().includes(theme)));
+    if(tm.length>0) filtered=tm;
+  }
+  if(filtered.length===0) filtered=src.filter(x=>x&&x.mode===mode);
+  return filtered[Math.floor(Math.random()*filtered.length)]||null;
+}
+function pickClosing(pre,mode,theme){
+  const doubles=(dailyClosing&&dailyClosing.closing_double)||[];
+  if(pre.humör<=3){const arr=doubles.filter(c=>c.type==='compassion_step');if(arr.length)return {type:'double',source:arr[0]};}
+  if(pre.stress>=8&&pre.humör>3){const arr=doubles.filter(c=>c.type==='calm_gratitude');if(arr.length)return {type:'double',source:arr[0]};}
+  const affirm=pickByModeWithHistory((dailyLib&&dailyLib.affirmations)||[],mode,'affirmation',theme);
+  const grat=pickByModeWithHistory((dailyLib&&dailyLib.gratitude)||[],mode,'gratitude',theme);
+  const one=Math.random()<0.5?affirm:grat;
+  return one?{type:'single',source:one}:{type:'single',source:{id:'fb-close',text:'Du gjorde något viktigt för dig själv idag.'}};
+}
+function flowLengthConfig(min){
+  if(min===10)return {checkin:60,main:180,closing:20};
+  if(min===6)return {checkin:45,main:240,closing:20};
+  return {checkin:30,main:110,closing:20};
+}
+
 function renderFlow(){
-  const root=document.getElementById('flow-root');
-  if(!root)return;
-
-  if(!dailyLib){
-    root.innerHTML='<div class="flow-loading"><span class="spinner">⏳</span>Laddar bibliotek...</div>';
-    setTimeout(()=>{if(dailyLib)renderFlow();},1000);
-    return;
-  }
-
-  const today=new Date().toDateString();
-  const todayLog=getTodayLog();
-
-  if(todayLog&&flowState.step===1){
-    // Redan gjort idag
-    renderFlowDone(root, todayLog);
-    return;
-  }
-
+  const root=document.getElementById('flow-root'); if(!root) return;
+  if(!dailyLib||!dailyClosing){root.innerHTML='<div class="flow-loading"><span class="spinner">⏳</span>Laddar dagens innehåll…</div>';return;}
   renderFlowStep(root);
 }
-
-function renderFlowDone(root, log){
-  root.innerHTML=`
-    <div class="flow-done-banner">
-      <span class="flow-done-icon">✅</span>
-      <div class="flow-done-title">Redan gjort idag!</div>
-      <div class="flow-done-sub">
-        Du genomförde din dagliga 3-minuters session.<br>
-        ${log.post?.rating ? '⭐'.repeat(log.post.rating) + ' efter övningen.' : ''}
-      </div>
-      <button class="flow-btn" onclick="startFlowAgain(false)">🔄 Kör igen (räknas inte)</button>
-      <button class="flow-btn-ghost" onclick="viewFlowHistory()">📋 Se historik</button>
-      <button class="flow-btn-danger" onclick="clearFlowTextToday()">Rensa dagens text</button>
-      <button class="flow-btn-danger" onclick="clearFlowTextLast7()">Rensa text senaste 7 dagar</button>
-      <div id="flow-status" class="flow-status" style="display:none;"></div>
-    </div>
-  `;
+function startFlow(len,counted){
+  flowState={step:2,sessionLengthMin:len,counted:!!counted,pre:null,preLocked:null,mode:null,themeGuess:null,blocks:[],closing:null,post:{},cbt:{},completed:false};
+  renderFlow();
 }
-
-function startFlowAgain(counted){
-  flowState={step:1,pre:null,exercise:null,closing:null,mode:null,counted:counted,postRating:null,sessionLengthMin:flowState.sessionLengthMin||3,cbt:{}};
-  renderFlowStep(document.getElementById('flow-root'));
-}
+function startFlowAgain(){startFlow(flowState.sessionLengthMin,false);}
 
 function renderFlowStep(root){
-  let html='';
-  // Steg-indikator
-  const s=flowState.step;
-  html+=`<div class="flow-steps">
-    <div class="fstep ${s>=1?'active':''}">1</div>
-    <div class="fstep-line ${s>=2?'done':''}"></div>
-    <div class="fstep ${s===2?'active':s>2?'done':''}">2</div>
-    <div class="fstep-line ${s>=3?'done':''}"></div>
-    <div class="fstep ${s===3?'active':''}">3</div>
-  </div>`;
-
-  if(s===1) html+=renderStepCheckin();
-  else if(s===2) html+=renderStepExercise();
-  else html+=renderStepClosing();
-
-  root.innerHTML=html;
-
-  // Attach slider listeners
-  if(s===1){
-    ['stress','humör','energi','sömn'].forEach(k=>{
-      const sl=document.getElementById('ci-'+k);
-      const vl=document.getElementById('cv-'+k);
-      if(sl&&vl)sl.addEventListener('input',()=>{vl.innerText=sl.value;});
-    });
+  const todayDone=getTodayCountedLog();
+  const cfg=flowLengthConfig(flowState.sessionLengthMin||3);
+  if(flowState.step===1||!flowState.step){
+    root.innerHTML=`<div class="card"><div style="margin-bottom:10px;font-weight:700;">Dagens check</div>
+      ${todayDone?`<div class="flow-done-banner"><span class="flow-done-icon">✅</span><div class="flow-done-title">Redan gjort idag</div><div class="flow-done-sub">Du har redan en räknad check idag.</div><button class="flow-btn" onclick="startFlow(3,false)">Kör igen (räknas inte)</button></div>`:''}
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;">
+        <button class="flow-chip" onclick="startFlow(3,${todayDone?'false':'true'})">3 min</button>
+        <button class="flow-chip" onclick="startFlow(6,${todayDone?'false':'true'})">6 min (balans)</button>
+        <button class="flow-chip" onclick="startFlow(10,${todayDone?'false':'true'})">10 min (djup)</button>
+      </div>
+      <div class="flow-note">Check-in ~${cfg.checkin}s, väljer innehåll automatiskt och sparas lokalt.</div></div>`;
+    return;
   }
+  if(flowState.step===2){root.innerHTML=renderCheckin();return;}
+  if(flowState.step===3){root.innerHTML=renderMainStep();return;}
+  if(flowState.step===4){root.innerHTML=renderClosing();return;}
 }
 
-function renderStepCheckin(){
-  const sliders=[
-    {key:'stress',label:'Stress',emoji:'😰',low:'Avslappnad',high:'Mycket stressad',def:5},
-    {key:'humör',label:'Humör',emoji:'🙂',low:'Nere',high:'Pigg & glad',def:6},
-    {key:'energi',label:'Energi',emoji:'⚡',low:'Helt slut',high:'Full energi',def:5},
-    {key:'sömn',label:'Sömn',emoji:'💤',low:'Sovit dåligt',high:'Vilad',def:6}
-  ];
-  const len=flowState.sessionLengthMin||3;
-  let html=`<div class="card">
-    <div style="margin-bottom:12px;"><strong style="font-size:1.05rem;">Dagens check</strong><br><span style="font-size:.83rem;color:var(--text2);">Välj längd och dra reglagen – startar snabbt.</span></div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;">
-      ${[3,6,10].map(v=>`<button class="flow-chip ${len===v?'sel':''}" onclick="setSessionLength(${v})" type="button">${v} min${v===6?' (balans)':v===10?' (djup)':''}</button>`).join('')}
-    </div>`;
-  sliders.forEach(({key,label,emoji,low,high,def})=>{
-    html+=`<div style="margin-bottom:16px;">
-      <div class="ci-label">${emoji} ${label}</div>
-      <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--text2);margin-bottom:4px;"><span>${low}</span><span>${high}</span></div>
-      <div class="ci-row">
-        <input type="range" class="ci-slider" id="ci-${key}" min="0" max="10" value="${def}">
-        <span class="ci-val" id="cv-${key}">${def}</span>
-      </div>
-    </div>`;
+function renderCheckin(){
+  const pre=flowState.pre||{stress:5,humör:5,energi:5,sömn:5};
+  const row=(k,l,e)=>`<div><div class="ci-label">${l}</div><div class="ci-row"><input ${flowState.preLocked?'disabled':''} type="range" min="0" max="10" value="${pre[k]}" class="ci-slider" oninput="updatePre('${k}',this.value)"><span class="ci-emoji">${e}</span><span class="ci-val">${pre[k]}</span></div></div>`;
+  return `<div class="card"><strong>Steg 1/4: Check-in</strong><div class="flow-note">Samma check-in för 3/6/10 min.</div><div style="margin-top:12px;">${row('stress','Stress','😵')}${row('humör','Humör','🙂')}${row('energi','Energi','⚡')}${row('sömn','Sömnkvalitet','🌙')}</div>
+  <button class="flow-btn" onclick="lockAndStartFlow()">Starta (${flowState.sessionLengthMin} min)</button><button class="flow-btn-ghost" onclick="flowState.step=1;renderFlow()">← Tillbaka</button></div>`;
+}
+function updatePre(k,v){flowState.pre=flowState.pre||{stress:5,humör:5,energi:5,sömn:5};flowState.pre[k]=parseInt(v,10)||0;renderFlow();}
+function lockAndStartFlow(){
+  const pre=flowState.pre||{stress:5,humör:5,energi:5,sömn:5};
+  const now=new Date();
+  flowState.preLocked={...pre};
+  flowState.mode=determineMode(pre);
+  flowState.themeGuess=guessTheme(now.getHours(),now.getDay());
+  flowState.closing=pickClosing(pre,flowState.mode,flowState.themeGuess);
+  buildBlocks();
+  flowState.step=3;
+  renderFlow();
+}
+function buildBlocks(){
+  const mode=flowState.mode, len=flowState.sessionLengthMin;
+  const blocks=[];
+  const breath=pickByModeWithHistory((dailyLib&&dailyLib.breathing_sessions)||[],mode,'breathing',flowState.themeGuess);
+  const micro=pickByModeWithHistory((dailyLib&&dailyLib.micro_tools)||[],mode,'micro',flowState.themeGuess);
+  if(len===3){blocks.push((mode==='lugn'||mode==='sömn')?{kind:'breathing',item:breath}:{kind:'micro',item:micro});}
+  if(len===6){blocks.push({kind:'breathing',item:breath||{id:'built-46',title:'Inbyggd andning 4-6',steps:['Andas in 4 sek','Andas ut 6 sek','Upprepa i 2 minuter']}});blocks.push({kind:'cbt-mini'});}
+  if(len===10){
+    if(mode==='lugn'||mode==='sömn') blocks.push({kind:'breathing',item:breath});
+    else blocks.push({kind:'micro',item:micro});
+    blocks.push({kind:'thought-record'});
+  }
+  flowState.blocks=blocks;
+}
+
+function renderMainStep(){
+  const len=flowState.sessionLengthMin;
+  const blocks=flowState.blocks||[];
+  let html='<div class="card"><strong>Steg 2/4: Huvudövning</strong>';
+  blocks.forEach((b,i)=>{
+    if(b.kind==='breathing'||b.kind==='micro'){
+      const item=b.item||{title:'Kort övning',steps:['Ta tre lugna andetag.']};
+      html+=`<div class="ex-card" style="margin-top:12px;"><div class="ex-badge">${b.kind==='breathing'?'Andning':'Mikroverktyg'}</div><div class="ex-title">${item.title||'Övning'}</div><ul class="ex-steps">${(item.steps||[]).map((s,j)=>`<li class="ex-step"><span class="ex-step-num">${j+1}</span><span class="ex-step-txt">${s}</span></li>`).join('')}</ul></div>`;
+    }
+    if(b.kind==='cbt-mini') html+=renderCbtMini();
+    if(b.kind==='thought-record') html+=renderThoughtRecord();
   });
-  html+=`<button class="flow-btn" onclick="submitCheckin()" style="margin-top:4px;">Nästa →</button>
-    <button class="flow-btn-danger" onclick="clearFlowTextToday()">Rensa dagens text</button>
-    <button class="flow-btn-danger" onclick="clearFlowTextLast7()">Rensa text senaste 7 dagar</button>
-    <div id="flow-status" class="flow-status" style="display:none;"></div>
-  </div>`;
+  html+=`<button class="flow-btn" onclick="flowState.step=4;renderFlow()" style="margin-top:12px;">Klar → Avslut</button></div>`;
   return html;
 }
-
-function setSessionLength(min){
-  flowState.sessionLengthMin=min;
-  renderFlowStep(document.getElementById('flow-root'));
+function renderCbtMini(){
+  const c=flowState.cbt;
+  return `<div class="card" style="margin-top:12px;"><strong>CBT-mini (2:00)</strong>
+  <input class="txt-in" placeholder="Situation (1 mening)" value="${c.situation||''}" oninput="updateCbt('situation',this.value)">
+  <input class="txt-in" placeholder="Jobbigaste tanke" value="${c.tanke||''}" oninput="updateCbt('tanke',this.value)" style="margin-top:8px;">
+  <input class="txt-in" placeholder="Mer hjälpsam tanke" value="${c.hjalp||''}" oninput="updateCbt('hjalp',this.value)" style="margin-top:8px;"></div>`;
 }
-
-function submitCheckin(){
-  const pre={
-    stress:parseInt(document.getElementById('ci-stress')?.value||5),
-    humör: parseInt(document.getElementById('ci-humör')?.value||6),
-    energi:parseInt(document.getElementById('ci-energi')?.value||5),
-    sömn:  parseInt(document.getElementById('ci-sömn')?.value||6)
-  };
-  flowState.pre=pre;
-  flowState.mode=determineMode(pre);
-  flowState.exercise=flowState.sessionLengthMin===3?pickExercise(flowState.mode):null;
-  flowState.closing=pickClosing(pre);
-  flowState.step=2;
-  renderFlowStep(document.getElementById('flow-root'));
+function renderThoughtRecord(){
+  const c=flowState.cbt;
+  const f=[['tr1','1. Situation – vad hände?'],['tr2','2. Känslor – hur kändes det först?'],['tr3','3. Ohjälpsamma tankar'],['tr4','4. Bevis som stödjer tanken'],['tr5','5. Bevis emot tanken'],['tr6','6. Alternativ mer realistisk/neutral tanke'],['tr7','7. Hur känns det nu?']];
+  return `<div class="card" style="margin-top:12px;"><strong>Thought record (7 steg)</strong>${f.map(([k,l])=>`<div style="margin-top:8px;"><div class="ci-label" style="text-transform:none;">${l}</div><textarea class="txt-in" style="min-height:64px;" oninput="updateCbt('${k}',this.value)">${c[k]||''}</textarea></div>`).join('')}</div>`;
 }
+function updateCbt(k,v){flowState.cbt=flowState.cbt||{};flowState.cbt[k]=v;}
 
-function renderChipGroup(name, chips, multi=false, maxSel=99){
-  const selected=flowState.cbt[name]||[];
-  return `<div class="flow-chip-wrap">${chips.map(c=>`<button class="flow-chip ${selected.includes(c)?'sel':''}" type="button" onclick="toggleCbtChip('${name}', '${c.replace(/'/g,"\'")}', ${multi}, ${maxSel})">${c}</button>`).join('')}</div>`;
+function renderClosing(){
+  const pre=flowState.preLocked||{};
+  const cl=flowState.closing||{type:'single',source:{text:'Bra att du tog en paus.'}};
+  const text=cl.type==='double'?(cl.source.lines||[]).map(l=>`<div class="closing-line">${l}</div>`).join(''):`<div class="closing-line">${cl.source.text||''}</div>`;
+  return `<div class="closing-card">${text}</div>
+    <div class="card"><strong>Steg 4/4: Post-rating</strong>
+      <div style="margin-top:10px;">${['stress','humör'].map(k=>`<div class="ci-row"><div>${k}</div><input type="range" class="ci-slider" min="0" max="10" value="${flowState.post[k]??pre[k]??5}" oninput="updatePost('${k}',this.value)"><span class="ci-val">${flowState.post[k]??pre[k]??5}</span></div>`).join('')}</div>
+      <button class="flow-btn" onclick="submitFlow()" style="margin-top:10px;">✅ Spara check</button>
+      <button class="flow-btn-ghost" onclick="flowState.step=1;renderFlow()">Till startsidan</button>
+    </div>`;
 }
-function toggleCbtChip(name, value, multi, maxSel){
-  let selected=flowState.cbt[name]||[];
-  if(!multi){selected=selected[0]===value?[]:[value];}
-  else if(selected.includes(value)){selected=selected.filter(v=>v!==value);} else {if(selected.length<maxSel)selected=[...selected,value];}
-  flowState.cbt[name]=selected;
-  renderFlowStep(document.getElementById('flow-root'));
-}
-function updateCbtField(name, value){flowState.cbt[name]=value;}
-
-function renderStepExercise(){
-  const len=flowState.sessionLengthMin||3;
-  if(len===6){
-    return `<div class="card"><strong>6 min (balans) · CBT-mini</strong><div class="flow-note" style="margin-top:6px;">Detta sparas bara på din enhet.</div>
-      <div style="margin-top:10px;font-weight:600;">Situation (1 val)</div>
-      ${renderChipGroup('situ', ['Jobb/Skola','Familj','Relationer','Hälsa','Ekonomi','Sömn','Socialt','Självkänsla'])}
-      <input class="txt-in" maxlength="120" placeholder="Annat… (valfritt, max 120 tecken)" value="${flowState.cbt.situOther||''}" oninput="updateCbtField('situOther',this.value)">
-      <div style="margin-top:10px;font-weight:600;">Känslor (max 3)</div>
-      ${renderChipGroup('feel', ['Stressad','Orolig','Ledsen','Irriterad','Arg','Skamsen','Trött','Ensam','Överväldigad','Tom','Pressad'], true, 3)}
-      <div class="ci-row" style="margin-top:8px;"><input type="range" class="ci-slider" min="0" max="10" value="${flowState.cbt.feelIntensity||5}" oninput="updateCbtField('feelIntensity',this.value)"><span class="ci-val">${flowState.cbt.feelIntensity||5}</span></div>
-      <div style="margin-top:10px;font-weight:600;">Alternativ tanke (1 val)</div>
-      ${renderChipGroup('alt', ['Det här är en jobbig tanke, inte ett faktum.','Jag kan ta en liten del nu.','Jag behöver inte lösa allt på en gång.','Jag kan be om hjälp eller stöd.','Jag har klarat liknande saker förr.','Det är okej att det känns svårt.'])}
-      <input class="txt-in" maxlength="140" placeholder="Skriv egen… (valfritt)" value="${flowState.cbt.altOther||''}" oninput="updateCbtField('altOther',this.value)">
-    </div>
-    <button class="flow-btn" onclick="submitExercise()" style="margin-top:14px;">Klar → Avslutning</button>
-    <button class="flow-btn-ghost" onclick="skipCbtWriting()">Hoppa över skrivdelen</button>`;
-  }
-  if(len===10){
-    return `<div class="card"><strong>10 min (djup) · Thought record</strong><div class="flow-note" style="margin-top:6px;">Detta sparas bara på din enhet.</div>
-      <div style="margin-top:10px;font-weight:600;">1) Situation</div>${renderChipGroup('trSitu', ['Jobb/Skola','Familj','Relationer','Hälsa','Ekonomi','Sömn','Socialt','Självkänsla'])}<input class="txt-in" maxlength="120" placeholder="Annat…" value="${flowState.cbt.trSituOther||''}" oninput="updateCbtField('trSituOther',this.value)">
-      <div style="margin-top:10px;font-weight:600;">2) Känslor + intensitet</div>${renderChipGroup('trFeel', ['Stressad','Orolig','Ledsen','Irriterad','Arg','Skamsen','Trött','Ensam','Överväldigad','Tom','Pressad'], true, 3)}<div class="ci-row" style="margin-top:8px;"><input type="range" class="ci-slider" min="0" max="10" value="${flowState.cbt.trFeelIntensity||5}" oninput="updateCbtField('trFeelIntensity',this.value)"><span class="ci-val">${flowState.cbt.trFeelIntensity||5}</span></div>
-      <div style="margin-top:10px;font-weight:600;">3) Ohjälpsamma tankar (max 2)</div>${renderChipGroup('trUnhelp', ['Jag duger inte','Jag kommer misslyckas','Det är kört','Jag är efter','Jag måste vara perfekt','Ingen bryr sig','Jag klarar inte det här','Jag gjorde fel','Jag har ingen energi'], true, 2)}<input class="txt-in" maxlength="120" placeholder="Annat…" value="${flowState.cbt.trUnhelpOther||''}" oninput="updateCbtField('trUnhelpOther',this.value)">
-      <div style="margin-top:10px;font-weight:600;">4) Evidens som stödjer</div>${renderChipGroup('trFor', ['Det hände nyss','Jag missade något','Jag fick kritik','Jag har haft liknande problem','Jag är trött','Jag sköt upp något'], true)}<input class="txt-in" maxlength="120" placeholder="Annat…" value="${flowState.cbt.trForOther||''}" oninput="updateCbtField('trForOther',this.value)">
-      <div style="margin-top:10px;font-weight:600;">5) Evidens emot</div>${renderChipGroup('trAgainst', ['Jag har klarat liknande','Jag gjorde också saker rätt','Jag har fått positiv feedback','Det finns andra förklaringar','Jag är extra trött idag','Jag kan ta hjälp','Jag kan göra ett mindre steg'], true)}<input class="txt-in" maxlength="120" placeholder="Annat…" value="${flowState.cbt.trAgainstOther||''}" oninput="updateCbtField('trAgainstOther',this.value)">
-      <div style="margin-top:10px;font-weight:600;">6) Alternativ tanke</div>${renderChipGroup('trAlt', ['Det här är en jobbig tanke, inte ett faktum.','Jag kan ta en liten del nu.','Jag behöver inte lösa allt på en gång.','Jag kan be om hjälp eller stöd.','Jag har klarat liknande saker förr.','Det är okej att det känns svårt.'])}<input class="txt-in" maxlength="140" placeholder="Annat…" value="${flowState.cbt.trAltOther||''}" oninput="updateCbtField('trAltOther',this.value)">
-      <div style="margin-top:10px;font-weight:600;">7) Hur känns det nu?</div>${renderChipGroup('trNow', ['Lite lugnare','Mer hopp','Fortfarande jobbigt men hanterbart','Trött men okej'])}<div class="ci-row" style="margin-top:8px;"><input type="range" class="ci-slider" min="0" max="10" value="${flowState.cbt.trNowIntensity||5}" oninput="updateCbtField('trNowIntensity',this.value)"><span class="ci-val">${flowState.cbt.trNowIntensity||5}</span></div>
-    </div>
-    <button class="flow-btn" onclick="submitExercise()" style="margin-top:14px;">Klar → Avslutning</button>
-    <button class="flow-btn-ghost" onclick="skipCbtWriting()">Hoppa över skrivdelen</button>`;
-  }
-
-  const ex=flowState.exercise;
-  if(!ex){
-    return `<div class="card"><p style="color:var(--text2);">Ingen övning hittades. Försök igen senare.</p><button class="flow-btn-ghost" onclick="flowState.step=1;renderFlowStep(document.getElementById('flow-root'));">← Tillbaka</button></div>`;
-  }
-  const modeLabels={lugn:'🌊 Lugn & Ro',pepp:'⚡ Energi',fokus:'🎯 Fokus',sömn:'🌙 Sömn'};
-  const stepsHtml=(ex.steps||[]).map((st,i)=>`<li class="ex-step"><span class="ex-step-num">${i+1}</span><span class="ex-step-txt">${st}</span></li>`).join('');
-  let extraHtml='';
-  if(ex.prompt_fråga_1){
-    extraHtml=`<div style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(140,230,80,.1);"><div style="font-size:.82rem;font-weight:700;color:#a8e87c;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;">Reflektera</div><div style="background:rgba(0,0,0,.2);border-radius:12px;padding:12px;margin-bottom:8px;font-size:.9rem;color:#d0f0cc;line-height:1.6;">💭 ${ex.prompt_fråga_1}</div><div style="background:rgba(0,0,0,.2);border-radius:12px;padding:12px;margin-bottom:8px;font-size:.9rem;color:#d0f0cc;line-height:1.6;">💭 ${ex.prompt_fråga_2}</div><div style="background:rgba(140,230,80,.08);border-radius:12px;padding:12px;font-size:.9rem;color:#c8f0a0;line-height:1.6;">✏️ ${ex.alternativ_tanke_prompt}</div></div>`;
-  }
-
-  return `<div class="ex-card"><span class="ex-badge">${modeLabels[flowState.mode]||flowState.mode}</span><div class="ex-title">${ex.title}</div><ul class="ex-steps">${stepsHtml}</ul>${extraHtml}</div>
-  <button class="flow-btn" onclick="submitExercise()" style="margin-top:14px;">Klar → Avslutning</button>
-  <button class="flow-btn-ghost" onclick="flowState.step=1;renderFlowStep(document.getElementById('flow-root'));">← Börja om</button>`;
-}
-
-function skipCbtWriting(){
-  Object.keys(flowState.cbt||{}).forEach(k=>{if(/other|text|note|free|custom/i.test(k)&&typeof flowState.cbt[k]==='string')flowState.cbt[k]='';});
-  submitExercise();
-}
-
-function submitExercise(){
-  flowState.step=3;
-  renderFlowStep(document.getElementById('flow-root'));
-}
-
-function renderStepClosing(){
-  const cl=flowState.closing;
-  let closingHtml='';
-  if(cl.type==='double'){
-    closingHtml=cl.lines.map(l=>`<div class="closing-line">${l}</div>`).join('');
-  } else {
-    closingHtml=`<div class="closing-line">${cl.text}</div>`;
-  }
-
-  const pre=flowState.pre||{};
-  const preHtml=`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
-    ${Object.entries(pre).map(([k,v])=>`<span style="background:var(--input-bg);border-radius:8px;padding:3px 10px;font-size:.78rem;font-weight:600;color:var(--text2);">${k} ${v}/10</span>`).join('')}
-  </div>`;
-
-  return `<div class="closing-card" style="margin-bottom:14px;">
-    <div style="font-size:1.5rem;text-align:center;margin-bottom:10px;">🌿</div>
-    ${closingHtml}
-  </div>
-  <div class="card">
-    <div class="post-rating-label">Hur känns det nu?</div>
-    ${preHtml}
-    <div class="rating-stars" id="rating-stars">
-      ${[1,2,3,4,5].map(n=>`<span class="rstar" onclick="setRating(${n})" title="${n} stjärnor">⭐</span>`).join('')}
-    </div>
-    <button class="flow-btn" onclick="submitFlow()" style="margin-top:16px;">✅ Klart för idag!</button>
-    <button class="flow-btn-ghost" onclick="submitFlowNoRating()">Avsluta utan betyg</button>
-  </div>`;
-}
-
-function setRating(n){
-  flowState.postRating=n;
-  document.querySelectorAll('.rstar').forEach((s,i)=>{
-    s.classList.toggle('sel',i<n);
-  });
-}
-
+function updatePost(k,v){flowState.post=flowState.post||{};flowState.post[k]=parseInt(v,10)||0;renderFlow();}
 function submitFlow(){
-  saveFlowLog(true);
-  showFlowComplete(true);
-}
-function submitFlowNoRating(){
-  saveFlowLog(true);
-  showFlowComplete(false);
-}
-
-function saveFlowLog(counted){
-  const today=new Date().toDateString();
-  const logs=loadFlowLogs();
-  // Markera eventuell gammal counted-logg för idag som uncounted om vi kör om
-  if(!flowState.counted) {
-    // Räknas inte – spara ändå för historik
-    counted=false;
-  }
-  logs.push({
-    date:today,
-    dateISO:new Date().toISOString(),
-    pre:flowState.pre,
-    post:{rating:flowState.postRating},
-    exerciseId:flowState.exercise?.id||null,
-    exerciseTitle:flowState.exercise?.title||null,
+  const counted=!!flowState.counted && !getTodayCountedLog();
+  const blocks=(flowState.blocks||[]).map(b=>({kind:b.kind,id:b.item?.id||null,title:b.item?.title||null}));
+  const entry={
+    date:ymd(),
+    sessionLengthMin:flowState.sessionLengthMin,
+    pre:flowState.preLocked||flowState.pre||{},
+    post:flowState.post||{},
     mode:flowState.mode,
-    sessionLengthMin:flowState.sessionLengthMin||3,
-    themeGuess:document.body.classList.contains('dark')?'dark':'light',
-    cbt:localStorage.getItem('saveFreeTextLogs')==='1'?(flowState.cbt||{}):scrubFreeText(flowState.cbt||{}),
-    counted:counted
-  });
-  saveFlowLogs(logs);
-  if(counted)incStat('flow');
+    themeGuess:flowState.themeGuess,
+    blocks,
+    closing:{type:flowState.closing?.type||'single',id:flowState.closing?.source?.id||null},
+    cbt:(flowState.sessionLengthMin>=6?(localStorage.getItem('saveFreeTextLogs')==='1'?flowState.cbt:scrubFreeText(flowState.cbt)):undefined),
+    completedAt:new Date().toISOString(),
+    counted
+  };
+  const logs=loadFlowLogs(); logs.push(entry); saveFlowLogs(logs); if(counted)incStat('flow');
+  showFlowComplete(counted);
 }
+function showFlowComplete(counted){const root=document.getElementById('flow-root');root.innerHTML=`<div class="flow-done-banner"><span class="flow-done-icon">🌟</span><div class="flow-done-title">Bra jobbat!</div><div class="flow-done-sub">${counted?'Dagens check räknades.':'Körd igen (räknades inte).'}</div><button class="flow-btn" onclick="startFlow(3,false)">Kör igen (räknas inte)</button></div>`;flowState.step=1;loadStats();}
+function viewFlowHistory(){const logs=loadFlowLogs().slice(-7).reverse();const root=document.getElementById('flow-root');root.innerHTML=`<div class="card"><strong>📋 Senaste 7 checkar</strong><ul class="stat-list" style="margin-top:12px;">${logs.map(l=>`<li class="stat-item"><span>${l.date} · ${l.sessionLengthMin} min · ${l.mode||'-'}</span><span class="stat-val">${l.counted?'✓':'–'}</span></li>`).join('')||'<li class="stat-item"><span>Ingen historik ännu</span></li>'}</ul><button class="flow-btn-ghost" onclick="renderFlow()" style="margin-top:10px;">← Tillbaka</button></div>`;}
 
-function showFlowComplete(withRating){
-  const root=document.getElementById('flow-root');
-  const rating=flowState.postRating;
-  root.innerHTML=`<div class="flow-done-banner" style="border-color:rgba(45,90,39,.3);background:linear-gradient(135deg,rgba(45,90,39,.15),rgba(45,90,39,.07));">
-    <span class="flow-done-icon">🌟</span>
-    <div class="flow-done-title">Bra jobbat!</div>
-    <div class="flow-done-sub">
-      Du tog 3 minuter för dig själv idag.<br>
-      ${withRating&&rating?'⭐'.repeat(rating)+' – tack för ditt betyg.':''}
-    </div>
-    <button class="flow-btn" onclick="startFlowAgain(false)" style="margin-top:8px;">🔄 Kör igen (räknas inte)</button>
-  </div>`;
-  // Reset flowState.step for next time
-  flowState.step=1;
-}
-
-function viewFlowHistory(){
-  const logs=loadFlowLogs().slice(-7).reverse();
-  const root=document.getElementById('flow-root');
-  let rows=logs.map(l=>`<li class="stat-item">
-    <span>${l.date}${l.exerciseTitle?' – '+l.exerciseTitle:''}</span>
-    <span class="stat-val">${l.post?.rating?'⭐'.repeat(l.post.rating):l.counted?'✓':'–'}</span>
-  </li>`).join('');
-  root.innerHTML=`<div class="card">
-    <strong>📋 Senaste 7 sessions</strong>
-    <ul class="stat-list" style="margin-top:12px;">${rows||'<li class="stat-item"><span>Ingen historik ännu</span></li>'}</ul>
-    <button class="flow-btn-ghost" onclick="renderFlow()" style="margin-top:10px;">← Tillbaka</button>
-  </div>`;
-}
-
-function scrubFreeText(value){
-  const re=/(text|note|free|custom|other|notes)/i;
-  if(Array.isArray(value)) return value.map(v=>scrubFreeText(v));
-  if(value&&typeof value==='object'){
-    const out={};
-    Object.keys(value).forEach(k=>{
-      const v=value[k];
-      if(re.test(k)&&typeof v==='string') out[k]='';
-      else out[k]=scrubFreeText(v);
-    });
-    return out;
-  }
-  return value;
-}
-function setFlowStatus(msg){
-  const el=document.getElementById('flow-status');
-  if(!el)return;
-  el.style.display='block';
-  el.textContent=msg;
-  setTimeout(()=>{el.style.display='none';},2600);
-}
-function clearFlowTextToday(){
-  if(!confirm('Rensa all fri text för dagens check?'))return;
-  const logs=loadFlowLogs();
-  const today=new Date();
-  const y=today.getFullYear(),m=today.getMonth(),d=today.getDate();
-  const next=new Date(y,m,d+1).getTime(),start=new Date(y,m,d).getTime();
-  logs.forEach(l=>{const t=new Date(l.dateISO||0).getTime();if(t>=start&&t<next){if(l.cbt)l.cbt=scrubFreeText(l.cbt);}});
-  saveFlowLogs(logs);
-  flowState.cbt=scrubFreeText(flowState.cbt||{});
-  renderFlow();
-  setFlowStatus('Dagens fria text rensades.');
-}
-function clearFlowTextLast7(){
-  if(!confirm('Rensa fri text för senaste 7 dagar (inklusive idag)?'))return;
-  const logs=loadFlowLogs();
-  const now=new Date();
-  const start=new Date(now.getFullYear(),now.getMonth(),now.getDate()-6).getTime();
-  logs.forEach(l=>{const t=new Date(l.dateISO||0).getTime();if(t>=start){if(l.cbt)l.cbt=scrubFreeText(l.cbt);}});
-  saveFlowLogs(logs);
-  flowState.cbt=scrubFreeText(flowState.cbt||{});
-  renderFlow();
-  setFlowStatus('Fri text för senaste 7 dagar rensades.');
-}
-
+function scrubFreeText(value){const re=/(text|note|free|custom|other|notes|tr\d|situation|tanke|hjalp)/i;if(Array.isArray(value))return value.map(v=>scrubFreeText(v));if(value&&typeof value==='object'){const out={};Object.keys(value).forEach(k=>{out[k]=(re.test(k)&&typeof value[k]==='string')?'':scrubFreeText(value[k]);});return out;}return value;}
+function setFlowStatus(msg){const el=document.getElementById('flow-status');if(!el)return;el.style.display='block';el.textContent=msg;setTimeout(()=>{el.style.display='none';},2600);} 
+function clearFlowTextToday(){const logs=loadFlowLogs();const td=ymd();logs.forEach(l=>{if(l.date===td&&l.cbt)l.cbt=scrubFreeText(l.cbt);});saveFlowLogs(logs);setFlowStatus('Dagens fria text rensades.');}
+function clearFlowTextLast7(){const logs=loadFlowLogs();const cutoff=Date.now()-6*24*3600*1000;logs.forEach(l=>{if(new Date(l.completedAt||0).getTime()>=cutoff&&l.cbt)l.cbt=scrubFreeText(l.cbt);});saveFlowLogs(logs);setFlowStatus('Fri text för senaste 7 dagar rensades.');}
 // ══════════════════════════════════════════
 //  EXPORT / IMPORT
 // ══════════════════════════════════════════
@@ -1231,7 +1012,8 @@ function exportAll(){
     stats:JSON.parse(localStorage.getItem('stats')||'{}'),
     dailyFocus:JSON.parse(localStorage.getItem('dailyFocus')||'{}'),
     dailyFlowLogs:loadFlowLogs(),
-    settings:{theme:localStorage.getItem('theme')||'auto',bioOn:localStorage.getItem('bioOn')||'0',saveFreeTextLogs:localStorage.getItem('saveFreeTextLogs')||'0'}
+    settings:{theme:localStorage.getItem('theme')||'auto',bioOn:localStorage.getItem('bioOn')||'0',saveFreeTextLogs:localStorage.getItem('saveFreeTextLogs')||'0'},
+    localStorageDump:{...localStorage}
   };
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob);
@@ -1248,6 +1030,7 @@ function importFile(input){
       const choice=confirm('Välj:\nOK = Slå ihop (behåll befintlig data)\nAvbryt = Ersätt allt');
       if(choice){
         // Slå ihop
+        if(data.localStorageDump){Object.entries(data.localStorageDump).forEach(([k,v])=>{if(localStorage.getItem(k)==null)localStorage.setItem(k,v);});}
         if(data.gratList)myGrat=[...new Set([...myGrat,...data.gratList])];
         if(data.quoteList)myQuotes=[...new Set([...myQuotes,...data.quoteList])];
         if(data.dailyFlowLogs){
@@ -1258,6 +1041,7 @@ function importFile(input){
         }
       } else {
         // Ersätt
+        if(data.localStorageDump){localStorage.clear();Object.entries(data.localStorageDump).forEach(([k,v])=>localStorage.setItem(k,v));}
         if(data.gratList)myGrat=data.gratList;
         if(data.quoteList)myQuotes=data.quoteList;
         if(data.stats)localStorage.setItem('stats',JSON.stringify(data.stats));
