@@ -647,8 +647,8 @@ resizeApp();window.addEventListener('resize',resizeApp);window.addEventListener(
 // ══════════════════════════════════════════
 //  DATA
 // ══════════════════════════════════════════
-const defGrat=["Tacksam för kaffet.","Tacksam för vilan.","Tacksam för vänner.","Tacksam för musiken.","Tacksam för hälsan.","Jag har hälsa.","Jag har vänner.","Jag bor bra.","Att få äta gott.","Tid utan måsten.","En god kopp te.","Tacksam för det jag har.","Stunder av lugn.","Naturen runt mig."];
-const defQuotes=["Du klarar detta!","Varje dag är ett nytt börjande.","Du är starkare än du tror.","Ta ett andetag – du gör ditt bästa.","Jag gör så gott jag kan – och det räcker för idag.","Jag är värd respekt från andra och från mig själv.","Jag lär mig och utvecklas varje dag.","Varje dag tar jag steg mot mitt bästa jag.","Mina känslor är ok, även de trötta och irriterade."];
+const defGrat=["Tacksam för att jag har bra vänner","Jag har hälsa och kraft i kroppen","Tacksam för att solen går upp varje morgon","Jag har mat på bordet varje dag","Tacksam för att jag har ett tak över huvudet","Jag har människor som bryr sig om mig","Tacksam för att jag fick uppleva en ny dag","Jag har förmågan att lära mig nya saker","Tacksam för naturen och frisk luft runt mig","Jag har ett hjärta som slår och lungor som andas","Tacksam för skrattet som lyser upp dagen","Jag har minnen som värmer mitt hjärta","Tacksam för att jag kan röra mig fritt","Jag har drömmar och mål att sträva mot","Tacksam för musikens förmåga att lyfta mitt humör","Jag har styrka att hantera utmaningar","Tacksam för en varm kopp kaffe på morgonen","Jag har möjlighet att välja hur jag tänker","Tacksam för att varje dag ger nya möjligheter","Jag har förmågan att känna kärlek och glädje","Tacksam för att jag bor i ett tryggt land","Jag har tillgång till rent vatten varje dag","Tacksam för att jag kan ge och ta emot en kram","Jag har kreativitet och fantasi","Tacksam för ögonblick av stillhet och ro","Jag har lärt mig av mina misstag och blivit starkare","Tacksam för att jag har en fungerande kropp","Jag har tillgång till utbildning och kunskap","Tacksam för solnedgångarnas skönhet","Jag har möjlighet att hjälpa andra","Tacksam för att jag kan kommunicera och uttrycka mig","Jag har hopp om en bättre morgondag","Tacksam för böcker och berättelser som inspirerar","Jag har förmågan att förlåta och gå vidare","Tacksam för att jag har ett arbete att gå till","Jag har passion för saker som engagerar mig","Tacksam för varje litet steg framåt","Jag har förmåga att känna tacksamhet i sig självt","Tacksam för regnet som ger liv åt naturen","Jag har erfarenheter som format mig positivt","Tacksam för att jag kan se stjärnorna på natten","Jag har mod att möta det okända","Tacksam för djurens sällskap och glädje","Jag har en hjärna som kan lösa problem","Tacksam för att familjen finns i mitt liv","Jag har möjlighet att träna och hålla mig frisk","Tacksam för tekniken som förenklar min vardag","Jag har frihet att göra egna val","Tacksam för att jag kan se skönhet i vardagen","Jag har tid att vila och återhämta mig","Tacksam för alla goda samtal jag har haft","Jag har förmågan att anpassa mig och växa","Tacksam för varje gång någon sagt något snällt till mig","Jag har resurser och verktyg för att nå mina mål","Tacksam för havet, skogen och bergen","Jag har en röst och mod att använda den","Tacksam för att jag kan känna empati för andra","Jag har en historia att vara stolt över","Tacksam för de utmaningar som gjort mig starkare","Jag har möjlighet att skapa något meningsfullt","Tacksam för att jag kan njuta av god mat","Jag har vänner som lyssnar när jag behöver det","Tacksam för de skratt jag delar med nära och kära","Jag har förmågan att börja om varje dag","Tacksam för att livet ger mig nya chanser","Jag har nyfikenhet som driver mig framåt","Tacksam för de tysta stunderna som laddar batterierna","Jag har ett leende att ge bort gratis","Tacksam för att jag kan drömma om framtiden","Jag har tacksamheten som gör livet rikare","Tacksam för varje andetag jag tar","Jag har förmågan att se ljuset även i mörkret","Tacksam för alla möjligheter som ännu inte kommit","Jag har kärlek att ge och ta emot","Tacksam för att jag klarade igår och klarar idag","Jag har tro på att allt ordnar sig","Tacksam för att jag är unik och värdefull precis som jag är","Jag har livet framför mig fullt av möjligheter"];
+const defQuotes=["Du är starkare än du tror","Varje dag tar jag steg mot mitt bästa jag","Jag är kapabel att klara vad som än kommer","Mina känslor är ok, även de trötta och irriterande","Jag väljer att tro på mig själv idag","Varje utmaning gör mig starkare","Jag förtjänar att må bra","Jag har klarat svåra saker förut och klarar det igen","Min energi återvänder när jag tar hand om mig","Jag är nog precis som jag är just nu","Det är ok att ha en dålig dag, imorgon är ny","Jag växer varje gång jag väljer att fortsätta","Jag har allt inom mig som jag behöver","Mina drömmar är värda att kämpa för","Jag tillåter mig själv att vila utan skuldkänslor","Varje litet framsteg räknas och betyder något","Jag är värd kärlek och respekt","Jag väljer att fokusera på det jag kan påverka","Min kropp gör sitt bästa för mig varje dag","Jag är modig nog att ta nästa steg","Det bästa i mig visar sig när det är som svårast","Jag är stolt över hur långt jag kommit","Jag väljer att se möjligheter istället för hinder","Jag är en person som gör skillnad","Min potential är obegränsad","Jag tillåter mig att vara mänsklig och ofullständig","Jag har mod även när jag är rädd","Varje morgon är en ny chans att börja om","Jag litar på min förmåga att fatta bra beslut","Jag är värd det bästa som livet har att erbjuda","Mitt sinne är lugnt och mitt hjärta är starkt","Jag väljer glädje, även när det kostar lite ansträngning","Jag är kapabel att lära mig och växa","Jag ger mig själv tillåtelse att misslyckas och försöka igen","Jag är en magnet för positiva möjligheter","Det finns kraft i mig som jag ännu inte fullt använt","Jag är viktig och min röst har värde","Jag kan hantera osäkerhet med lugn och tålamod","Varje dag bygger jag ett liv jag är stolt över","Jag väljer att inte ge upp, inte idag","Jag har förmågan att skapa förändring i mitt liv","Mina tankar formar min verklighet och jag väljer positiva tankar","Jag är mer än mina misstag","Jag tillåter mig att ta plats och synas","Jag har resurser och kreativitet att lösa problem","Det är ok att be om hjälp, det är ett styrketecken","Jag väljer att behandla mig själv med vänlighet","Jag tror på den process jag är mitt i","Varje andetag påminner mig om att jag lever och har kraft","Jag är på rätt väg, även om den känns lång","Jag förtjänar framgång och lycka","Min inre styrka är starkare än alla yttre omständigheter","Jag är nyfiken och öppen för nya möjligheter","Jag väljer att lita på livet och dess riktning","Mina svaga stunder är en del av min styrka","Jag är tillräckligt bra precis som jag är idag","Jag har klarat 100% av mina svåraste dagar hittills","Jag väljer att leva i nuet och inte oroa mig i onödan","Jag är kapabel att skapa den förändring jag önskar","Varje utmaning är en möjlighet att lära sig något nytt","Jag väljer att fira mina framsteg, stora som små","Jag är omgiven av möjligheter om jag väljer att se dem","Min vilja och mitt mod är starkare än min rädsla","Jag ger inte upp för att det är svårt, jag ger mig för att det är värt det","Jag förtjänar lugn, glädje och inre frid","Jag är i ständig utveckling och det är något att vara stolt över","Varje dag gör jag mitt bästa och det är tillräckligt","Jag väljer att tro att allt är möjligt","Mina erfarenheter har format mig till den starka person jag är","Jag är fri att skapa det liv jag vill leva","Jag lyssnar på min kropp och ger den vad den behöver","Jag är kapabel att förändra det som inte tjänar mig längre","Mitt mod växer varje gång jag möter mina rädslor","Jag väljer att omge mig med energi som lyfter mig","Jag är värd att investera tid och kärlek på mig själv","Jag tror på min förmåga att nå mina mål","Jag är ett verk i framsteg och det är fantastiskt","Idag väljer jag att vara snäll mot mig själv"];
 
 function loadL(k, fb){const s=localStorage.getItem(k);if(s){try{return JSON.parse(s);}catch(e){}}return [...fb];}
 function saveL(k,a){localStorage.setItem(k,JSON.stringify(a));}
@@ -794,7 +794,7 @@ function loadFlowLogs(){try{return JSON.parse(localStorage.getItem('dailyFlowLog
 function saveFlowLogs(logs){try{localStorage.setItem('dailyFlowLogs',JSON.stringify(logs));}catch(e){}}
 function ymd(date=new Date()){return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;}
 function getTodayCountedLog(){const today=ymd();return loadFlowLogs().find(l=>l.date===today&&l.counted===true)||null;}
-function getRecentIds(key){const cutoff=Date.now()-7*24*3600*1000;const ids=[];loadFlowLogs().forEach(l=>{if(new Date(l.completedAt||0).getTime()>=cutoff&&l.blocks){l.blocks.forEach(b=>{if(b&&b.kind===key&&b.id)ids.push(b.id);});}});return new Set(ids);}
+function getRecentIds(key){const cutoff=Date.now()-7*24*3600*1000;const ids=[];loadFlowLogs().forEach(l=>{if(new Date(l.completedAt||0).getTime()>=cutoff){if(l.blocks){l.blocks.forEach(b=>{if(b&&b.kind===key&&b.id)ids.push(b.id);});}if((key==='affirmation'||key==='gratitude')&&l.closing?.id&&l.closing?.type==='single')ids.push(l.closing.id);if(key==='closing_double'&&l.closing?.id&&l.closing?.type==='double')ids.push(l.closing.id);}});return new Set(ids);}
 
 // ══════════════════════════════════════════
 //  REGELMOTOR + THEME
@@ -842,23 +842,43 @@ async function loadLibraries(){
 
 let flowState={step:1,sessionLengthMin:3,counted:true,pre:null,preLocked:null,mode:null,themeGuess:null,blocks:[],closing:null,post:{},cbt:{},completed:false};
 
+function hasThemeMatch(item,theme){
+  if(!theme||!item) return false;
+  const t=String(theme).toLowerCase();
+  const fields=[item.theme,item.time,item.period,item.title,item.text]
+    .filter(Boolean)
+    .map(v=>String(v).toLowerCase());
+  const listFields=[...(Array.isArray(item.tags)?item.tags:[]),...(Array.isArray(item.needs)?item.needs:[])].map(v=>String(v).toLowerCase());
+  return [...fields,...listFields].some(v=>v.includes(t));
+}
 function pickByModeWithHistory(list,mode,kind,theme){
   const src=Array.isArray(list)?list:[];
-  let pool=src.filter(x=>x&&x.mode===mode);
+  const modePool=src.filter(x=>x&&x.mode===mode);
   const recent=getRecentIds(kind);
-  let filtered=pool.filter(x=>!recent.has(x.id));
-  if(filtered.length===0) filtered=pool.slice();
+  let pool=modePool.filter(x=>!recent.has(x.id));
   if(theme){
-    const tm=filtered.filter(x=>Array.isArray(x.needs)&&x.needs.some(n=>String(n).toLowerCase().includes(theme)));
-    if(tm.length>0) filtered=tm;
+    const tm=pool.filter(x=>hasThemeMatch(x,theme));
+    if(tm.length>0) return tm[Math.floor(Math.random()*tm.length)]||null;
   }
-  if(filtered.length===0) filtered=src.filter(x=>x&&x.mode===mode);
-  return filtered[Math.floor(Math.random()*filtered.length)]||null;
+  if(pool.length>0) return pool[Math.floor(Math.random()*pool.length)]||null;
+  pool=modePool.slice();
+  if(theme){
+    const tm=pool.filter(x=>hasThemeMatch(x,theme));
+    if(tm.length>0) return tm[Math.floor(Math.random()*tm.length)]||null;
+  }
+  return pool[Math.floor(Math.random()*pool.length)]||null;
 }
 function pickClosing(pre,mode,theme){
   const doubles=(dailyClosing&&dailyClosing.closing_double)||[];
-  if(pre.humör<=3){const arr=doubles.filter(c=>c.type==='compassion_step');if(arr.length)return {type:'double',source:arr[0]};}
-  if(pre.stress>=8&&pre.humör>3){const arr=doubles.filter(c=>c.type==='calm_gratitude');if(arr.length)return {type:'double',source:arr[0]};}
+  const doubleRecent=getRecentIds('closing_double');
+  const pickDouble=(type)=>{
+    const byType=doubles.filter(c=>c.type===type);
+    let pool=byType.filter(c=>!doubleRecent.has(c.id));
+    if(pool.length===0) pool=byType;
+    return pool[0]||null;
+  };
+  if(pre.humör<=3){const picked=pickDouble('compassion_step');if(picked)return {type:'double',source:picked};}
+  if(pre.stress>=8&&pre.humör>3){const picked=pickDouble('calm_gratitude');if(picked)return {type:'double',source:picked};}
   const affirm=pickByModeWithHistory((dailyLib&&dailyLib.affirmations)||[],mode,'affirmation',theme);
   const grat=pickByModeWithHistory((dailyLib&&dailyLib.gratitude)||[],mode,'gratitude',theme);
   const one=Math.random()<0.5?affirm:grat;
@@ -887,10 +907,10 @@ function renderFlowStep(root){
   if(flowState.step===1||!flowState.step){
     root.innerHTML=`<div class="card"><div style="margin-bottom:10px;font-weight:700;">Dagens check</div>
       ${todayDone?`<div class="flow-done-banner"><span class="flow-done-icon">✅</span><div class="flow-done-title">Redan gjort idag</div><div class="flow-done-sub">Du har redan en räknad check idag.</div><button class="flow-btn" onclick="startFlow(3,false)">Kör igen (räknas inte)</button></div>`:''}
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;">
-        <button class="flow-chip" onclick="startFlow(3,${todayDone?'false':'true'})">3 min</button>
-        <button class="flow-chip" onclick="startFlow(6,${todayDone?'false':'true'})">6 min (balans)</button>
-        <button class="flow-chip" onclick="startFlow(10,${todayDone?'false':'true'})">10 min (djup)</button>
+      <div style="display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:12px;">
+        <button class="flow-btn" onclick="startFlow(3,${todayDone?'false':'true'})">1) 3 min (snabbt)</button>
+        <button class="flow-btn" onclick="startFlow(6,${todayDone?'false':'true'})">2) 6 min (balans)</button>
+        <button class="flow-btn" onclick="startFlow(10,${todayDone?'false':'true'})">3) 10 min (djup)</button>
       </div>
       <div class="flow-note">Check-in ~${cfg.checkin}s, väljer innehåll automatiskt och sparas lokalt.</div></div>`;
     return;
@@ -903,7 +923,7 @@ function renderFlowStep(root){
 function renderCheckin(){
   const pre=flowState.pre||{stress:5,humör:5,energi:5,sömn:5};
   const row=(k,l,e)=>`<div><div class="ci-label">${l}</div><div class="ci-row"><input ${flowState.preLocked?'disabled':''} type="range" min="0" max="10" value="${pre[k]}" class="ci-slider" oninput="updatePre('${k}',this.value)"><span class="ci-emoji">${e}</span><span class="ci-val">${pre[k]}</span></div></div>`;
-  return `<div class="card"><strong>Steg 1/4: Check-in</strong><div class="flow-note">Samma check-in för 3/6/10 min.</div><div style="margin-top:12px;">${row('stress','Stress','😵')}${row('humör','Humör','🙂')}${row('energi','Energi','⚡')}${row('sömn','Sömnkvalitet','🌙')}</div>
+  return `<div class="card"><strong>Steg 1/${flowState.sessionLengthMin===3?3:4}: Check-in</strong><div class="flow-note">Samma check-in för 3/6/10 min.</div><div style="margin-top:12px;">${row('stress','Stress','😵')}${row('humör','Humör','🙂')}${row('energi','Energi','⚡')}${row('sömn','Sömnkvalitet','🌙')}</div>
   <button class="flow-btn" onclick="lockAndStartFlow()">Starta (${flowState.sessionLengthMin} min)</button><button class="flow-btn-ghost" onclick="flowState.step=1;renderFlow()">← Tillbaka</button></div>`;
 }
 function updatePre(k,v){flowState.pre=flowState.pre||{stress:5,humör:5,energi:5,sömn:5};flowState.pre[k]=parseInt(v,10)||0;renderFlow();}
@@ -921,13 +941,20 @@ function lockAndStartFlow(){
 function buildBlocks(){
   const mode=flowState.mode, len=flowState.sessionLengthMin;
   const blocks=[];
-  const breath=pickByModeWithHistory((dailyLib&&dailyLib.breathing_sessions)||[],mode,'breathing',flowState.themeGuess);
-  const micro=pickByModeWithHistory((dailyLib&&dailyLib.micro_tools)||[],mode,'micro',flowState.themeGuess);
-  if(len===3){blocks.push((mode==='lugn'||mode==='sömn')?{kind:'breathing',item:breath}:{kind:'micro',item:micro});}
-  if(len===6){blocks.push({kind:'breathing',item:breath||{id:'built-46',title:'Inbyggd andning 4-6',steps:['Andas in 4 sek','Andas ut 6 sek','Upprepa i 2 minuter']}});blocks.push({kind:'cbt-mini'});}
+  const breath=pickByModeWithHistory((dailyLib&&dailyLib.breathing_sessions)||[],mode,'breathing',null);
+  const micro=pickByModeWithHistory((dailyLib&&dailyLib.micro_tools)||[],mode,'micro',null);
+  const builtBreath46={id:'built-46',title:'Inbyggd andning 4-6',steps:['Andas in 4 sek','Andas ut 6 sek','Upprepa lugnt i 2 minuter']};
+  const builtBreath446={id:'built-446',title:'Inbyggd andning 4-4-6',steps:['Andas in 4 sek','Håll 4 sek','Andas ut 6 sek','Upprepa i 2 minuter']};
+  if(len===3){
+    blocks.push((mode==='lugn'||mode==='sömn')?{kind:'breathing',item:breath}:{kind:'micro',item:micro});
+  }
+  if(len===6){
+    blocks.push({kind:'breathing',item:breath||(Math.random()<0.5?builtBreath46:builtBreath446)});
+    blocks.push({kind:'cbt-mini'});
+  }
   if(len===10){
-    if(mode==='lugn'||mode==='sömn') blocks.push({kind:'breathing',item:breath});
-    else blocks.push({kind:'micro',item:micro});
+    if(mode==='fokus'||mode==='pepp') blocks.push({kind:'breathing',item:builtBreath46});
+    blocks.push((mode==='lugn'||mode==='sömn')?{kind:'breathing',item:breath}:{kind:'micro',item:micro});
     blocks.push({kind:'thought-record'});
   }
   flowState.blocks=blocks;
@@ -936,7 +963,8 @@ function buildBlocks(){
 function renderMainStep(){
   const len=flowState.sessionLengthMin;
   const blocks=flowState.blocks||[];
-  let html='<div class="card"><strong>Steg 2/4: Huvudövning</strong>';
+  const totalSteps=flowState.sessionLengthMin===3?3:4;
+  let html=`<div class="card"><strong>Steg 2/${totalSteps}: Huvudövning</strong><div class="flow-note">Anpassat för ${len} min (${len===3?'~90–120s övning':len===6?'andning 2:00 + CBT-mini 2:00':'andning/mikro 3:00 + thought record'})</div>`;
   blocks.forEach((b,i)=>{
     if(b.kind==='breathing'||b.kind==='micro'){
       const item=b.item||{title:'Kort övning',steps:['Ta tre lugna andetag.']};
@@ -967,7 +995,7 @@ function renderClosing(){
   const cl=flowState.closing||{type:'single',source:{text:'Bra att du tog en paus.'}};
   const text=cl.type==='double'?(cl.source.lines||[]).map(l=>`<div class="closing-line">${l}</div>`).join(''):`<div class="closing-line">${cl.source.text||''}</div>`;
   return `<div class="closing-card">${text}</div>
-    <div class="card"><strong>Steg 4/4: Post-rating</strong>
+    <div class="card"><strong>Steg ${flowState.sessionLengthMin===3?3:4}/${flowState.sessionLengthMin===3?3:4}: Post-rating</strong>
       <div style="margin-top:10px;">${['stress','humör'].map(k=>`<div class="ci-row"><div>${k}</div><input type="range" class="ci-slider" min="0" max="10" value="${flowState.post[k]??pre[k]??5}" oninput="updatePost('${k}',this.value)"><span class="ci-val">${flowState.post[k]??pre[k]??5}</span></div>`).join('')}</div>
       <button class="flow-btn" onclick="submitFlow()" style="margin-top:10px;">✅ Spara check</button>
       <button class="flow-btn-ghost" onclick="flowState.step=1;renderFlow()">Till startsidan</button>
@@ -1035,8 +1063,8 @@ function importFile(input){
         if(data.quoteList)myQuotes=[...new Set([...myQuotes,...data.quoteList])];
         if(data.dailyFlowLogs){
           const existing=loadFlowLogs();
-          const existingDates=new Set(existing.map(l=>l.dateISO));
-          const newLogs=data.dailyFlowLogs.filter(l=>!existingDates.has(l.dateISO));
+          const existingDates=new Set(existing.map(l=>`${l.date}|${l.completedAt||''}`));
+          const newLogs=data.dailyFlowLogs.filter(l=>!existingDates.has(`${l.date}|${l.completedAt||''}`));
           saveFlowLogs([...existing,...newLogs]);
         }
       } else {
