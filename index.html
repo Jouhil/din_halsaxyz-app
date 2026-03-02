@@ -234,6 +234,13 @@ body.dark .closing-line{border-color:rgba(140,230,80,.1);}
 .flow-btn:active{transform:translateY(4px);box-shadow:0 1px 0 #1a3a17;}
 .flow-btn-ghost{background:none;border:1.5px solid var(--border);color:var(--text2);border-radius:16px;padding:11px 24px;font-size:.9rem;font-weight:600;font-family:inherit;cursor:pointer;width:100%;transition:.2s;margin-top:8px;}
 .flow-btn-ghost:active{background:var(--input-bg);}
+.flow-btn-danger{background:none;border:1.5px solid rgba(239,83,80,.4);color:#ef5350;border-radius:16px;padding:11px 24px;font-size:.9rem;font-weight:700;font-family:inherit;cursor:pointer;width:100%;transition:.2s;margin-top:8px;}
+.flow-btn-danger:active{background:rgba(239,83,80,.08);}
+.flow-chip-wrap{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 10px;}
+.flow-chip{border:1.5px solid var(--border);background:var(--input-bg);color:var(--text);border-radius:999px;padding:8px 12px;font-size:.86rem;cursor:pointer;}
+.flow-chip.sel{border-color:var(--accent);background:rgba(45,90,39,.15);color:var(--accent);font-weight:600;}
+.flow-note{font-size:.78rem;color:var(--text2);line-height:1.5;}
+.flow-status{margin-top:10px;background:rgba(45,90,39,.1);border:1px solid rgba(45,90,39,.2);border-radius:10px;padding:8px 10px;font-size:.82rem;color:var(--text2);}
 
 /* Loading state */
 .flow-loading{text-align:center;padding:40px 20px;color:var(--text2);}
@@ -440,6 +447,15 @@ body.dark .closing-line{border-color:rgba(140,230,80,.1);}
       </div>
 
       <div class="s-card">
+        <h3>🧠 Dagens check</h3>
+        <div class="s-row">
+          <span class="s-lbl">Spara fri text i loggen</span>
+          <label class="toggle"><input type="checkbox" id="freeTextToggle" onchange="onFreeTextToggle(this.checked)"><span class="slider"></span></label>
+        </div>
+        <p style="font-size:.78rem;color:var(--text2);margin-top:8px;line-height:1.5;">Av som standard. När den är av sparas bara val/chips och nivåer.</p>
+      </div>
+
+      <div class="s-card">
         <h3>💾 Exportera & Importera</h3>
         <p style="font-size:.85rem;color:var(--text2);margin-bottom:12px;line-height:1.6;">Exportera all din data (tacksamheter, citat, statistik, flödesloggar) till en JSON-fil, eller importera från en tidigare export.</p>
         <div style="display:flex;gap:10px;flex-wrap:wrap;">
@@ -618,6 +634,7 @@ async function regBio(){
   catch(e){alert('Kunde inte aktivera: '+e.message);document.getElementById('bioToggle').checked=false;}
 }
 function onBioToggle(on){if(on){regBio();}else{localStorage.setItem('bioOn','0');localStorage.removeItem('bioCred');document.getElementById('faceid-btn').classList.add('hidden');}}
+function onFreeTextToggle(on){localStorage.setItem('saveFreeTextLogs',on?'1':'0');}
 function bufToB64(b){return btoa(String.fromCharCode(...new Uint8Array(b)));}
 function b64toBuf(s){const bin=atob(s);const buf=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)buf[i]=bin.charCodeAt(i);return buf.buffer;}
 
@@ -656,6 +673,7 @@ setInterval(()=>{if(currentTheme==='auto')applyTheme();},60000);
   document.querySelectorAll('.theme-opt').forEach(b=>b.classList.remove('active'));
   document.getElementById('th-'+t).classList.add('active');
   document.getElementById('bioToggle').checked=localStorage.getItem('bioOn')==='1';
+  document.getElementById('freeTextToggle').checked=localStorage.getItem('saveFreeTextLogs')==='1';
   loadStats();updateScreenInfo();initLock();
   await loadLibraries();
   renderGratitude();newQuote();renderHelp();
@@ -854,7 +872,9 @@ let flowState={
   closing:null,
   mode:null,
   counted:false,
-  postRating:null
+  postRating:null,
+  sessionLengthMin:3,
+  cbt:{}
 };
 
 // ══════════════════════════════════════════
@@ -893,12 +913,15 @@ function renderFlowDone(root, log){
       </div>
       <button class="flow-btn" onclick="startFlowAgain(false)">🔄 Kör igen (räknas inte)</button>
       <button class="flow-btn-ghost" onclick="viewFlowHistory()">📋 Se historik</button>
+      <button class="flow-btn-danger" onclick="clearFlowTextToday()">Rensa dagens text</button>
+      <button class="flow-btn-danger" onclick="clearFlowTextLast7()">Rensa text senaste 7 dagar</button>
+      <div id="flow-status" class="flow-status" style="display:none;"></div>
     </div>
   `;
 }
 
 function startFlowAgain(counted){
-  flowState={step:1,pre:null,exercise:null,closing:null,mode:null,counted:counted,postRating:null};
+  flowState={step:1,pre:null,exercise:null,closing:null,mode:null,counted:counted,postRating:null,sessionLengthMin:flowState.sessionLengthMin||3,cbt:{}};
   renderFlowStep(document.getElementById('flow-root'));
 }
 
@@ -937,8 +960,12 @@ function renderStepCheckin(){
     {key:'energi',label:'Energi',emoji:'⚡',low:'Helt slut',high:'Full energi',def:5},
     {key:'sömn',label:'Sömn',emoji:'💤',low:'Sovit dåligt',high:'Vilad',def:6}
   ];
+  const len=flowState.sessionLengthMin||3;
   let html=`<div class="card">
-    <div style="margin-bottom:14px;"><strong style="font-size:1.05rem;">Hur mår du just nu?</strong><br><span style="font-size:.83rem;color:var(--text2);">Dra reglagen – det tar 30 sekunder.</span></div>`;
+    <div style="margin-bottom:12px;"><strong style="font-size:1.05rem;">Dagens check</strong><br><span style="font-size:.83rem;color:var(--text2);">Välj längd och dra reglagen – startar snabbt.</span></div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;">
+      ${[3,6,10].map(v=>`<button class="flow-chip ${len===v?'sel':''}" onclick="setSessionLength(${v})" type="button">${v} min${v===6?' (balans)':v===10?' (djup)':''}</button>`).join('')}
+    </div>`;
   sliders.forEach(({key,label,emoji,low,high,def})=>{
     html+=`<div style="margin-bottom:16px;">
       <div class="ci-label">${emoji} ${label}</div>
@@ -950,8 +977,16 @@ function renderStepCheckin(){
     </div>`;
   });
   html+=`<button class="flow-btn" onclick="submitCheckin()" style="margin-top:4px;">Nästa →</button>
+    <button class="flow-btn-danger" onclick="clearFlowTextToday()">Rensa dagens text</button>
+    <button class="flow-btn-danger" onclick="clearFlowTextLast7()">Rensa text senaste 7 dagar</button>
+    <div id="flow-status" class="flow-status" style="display:none;"></div>
   </div>`;
   return html;
+}
+
+function setSessionLength(min){
+  flowState.sessionLengthMin=min;
+  renderFlowStep(document.getElementById('flow-root'));
 }
 
 function submitCheckin(){
@@ -963,39 +998,75 @@ function submitCheckin(){
   };
   flowState.pre=pre;
   flowState.mode=determineMode(pre);
-  flowState.exercise=pickExercise(flowState.mode);
+  flowState.exercise=flowState.sessionLengthMin===3?pickExercise(flowState.mode):null;
   flowState.closing=pickClosing(pre);
   flowState.step=2;
   renderFlowStep(document.getElementById('flow-root'));
 }
 
+function renderChipGroup(name, chips, multi=false, maxSel=99){
+  const selected=flowState.cbt[name]||[];
+  return `<div class="flow-chip-wrap">${chips.map(c=>`<button class="flow-chip ${selected.includes(c)?'sel':''}" type="button" onclick="toggleCbtChip('${name}', '${c.replace(/'/g,"\'")}', ${multi}, ${maxSel})">${c}</button>`).join('')}</div>`;
+}
+function toggleCbtChip(name, value, multi, maxSel){
+  let selected=flowState.cbt[name]||[];
+  if(!multi){selected=selected[0]===value?[]:[value];}
+  else if(selected.includes(value)){selected=selected.filter(v=>v!==value);} else {if(selected.length<maxSel)selected=[...selected,value];}
+  flowState.cbt[name]=selected;
+  renderFlowStep(document.getElementById('flow-root'));
+}
+function updateCbtField(name, value){flowState.cbt[name]=value;}
+
 function renderStepExercise(){
+  const len=flowState.sessionLengthMin||3;
+  if(len===6){
+    return `<div class="card"><strong>6 min (balans) · CBT-mini</strong><div class="flow-note" style="margin-top:6px;">Detta sparas bara på din enhet.</div>
+      <div style="margin-top:10px;font-weight:600;">Situation (1 val)</div>
+      ${renderChipGroup('situ', ['Jobb/Skola','Familj','Relationer','Hälsa','Ekonomi','Sömn','Socialt','Självkänsla'])}
+      <input class="txt-in" maxlength="120" placeholder="Annat… (valfritt, max 120 tecken)" value="${flowState.cbt.situOther||''}" oninput="updateCbtField('situOther',this.value)">
+      <div style="margin-top:10px;font-weight:600;">Känslor (max 3)</div>
+      ${renderChipGroup('feel', ['Stressad','Orolig','Ledsen','Irriterad','Arg','Skamsen','Trött','Ensam','Överväldigad','Tom','Pressad'], true, 3)}
+      <div class="ci-row" style="margin-top:8px;"><input type="range" class="ci-slider" min="0" max="10" value="${flowState.cbt.feelIntensity||5}" oninput="updateCbtField('feelIntensity',this.value)"><span class="ci-val">${flowState.cbt.feelIntensity||5}</span></div>
+      <div style="margin-top:10px;font-weight:600;">Alternativ tanke (1 val)</div>
+      ${renderChipGroup('alt', ['Det här är en jobbig tanke, inte ett faktum.','Jag kan ta en liten del nu.','Jag behöver inte lösa allt på en gång.','Jag kan be om hjälp eller stöd.','Jag har klarat liknande saker förr.','Det är okej att det känns svårt.'])}
+      <input class="txt-in" maxlength="140" placeholder="Skriv egen… (valfritt)" value="${flowState.cbt.altOther||''}" oninput="updateCbtField('altOther',this.value)">
+    </div>
+    <button class="flow-btn" onclick="submitExercise()" style="margin-top:14px;">Klar → Avslutning</button>
+    <button class="flow-btn-ghost" onclick="skipCbtWriting()">Hoppa över skrivdelen</button>`;
+  }
+  if(len===10){
+    return `<div class="card"><strong>10 min (djup) · Thought record</strong><div class="flow-note" style="margin-top:6px;">Detta sparas bara på din enhet.</div>
+      <div style="margin-top:10px;font-weight:600;">1) Situation</div>${renderChipGroup('trSitu', ['Jobb/Skola','Familj','Relationer','Hälsa','Ekonomi','Sömn','Socialt','Självkänsla'])}<input class="txt-in" maxlength="120" placeholder="Annat…" value="${flowState.cbt.trSituOther||''}" oninput="updateCbtField('trSituOther',this.value)">
+      <div style="margin-top:10px;font-weight:600;">2) Känslor + intensitet</div>${renderChipGroup('trFeel', ['Stressad','Orolig','Ledsen','Irriterad','Arg','Skamsen','Trött','Ensam','Överväldigad','Tom','Pressad'], true, 3)}<div class="ci-row" style="margin-top:8px;"><input type="range" class="ci-slider" min="0" max="10" value="${flowState.cbt.trFeelIntensity||5}" oninput="updateCbtField('trFeelIntensity',this.value)"><span class="ci-val">${flowState.cbt.trFeelIntensity||5}</span></div>
+      <div style="margin-top:10px;font-weight:600;">3) Ohjälpsamma tankar (max 2)</div>${renderChipGroup('trUnhelp', ['Jag duger inte','Jag kommer misslyckas','Det är kört','Jag är efter','Jag måste vara perfekt','Ingen bryr sig','Jag klarar inte det här','Jag gjorde fel','Jag har ingen energi'], true, 2)}<input class="txt-in" maxlength="120" placeholder="Annat…" value="${flowState.cbt.trUnhelpOther||''}" oninput="updateCbtField('trUnhelpOther',this.value)">
+      <div style="margin-top:10px;font-weight:600;">4) Evidens som stödjer</div>${renderChipGroup('trFor', ['Det hände nyss','Jag missade något','Jag fick kritik','Jag har haft liknande problem','Jag är trött','Jag sköt upp något'], true)}<input class="txt-in" maxlength="120" placeholder="Annat…" value="${flowState.cbt.trForOther||''}" oninput="updateCbtField('trForOther',this.value)">
+      <div style="margin-top:10px;font-weight:600;">5) Evidens emot</div>${renderChipGroup('trAgainst', ['Jag har klarat liknande','Jag gjorde också saker rätt','Jag har fått positiv feedback','Det finns andra förklaringar','Jag är extra trött idag','Jag kan ta hjälp','Jag kan göra ett mindre steg'], true)}<input class="txt-in" maxlength="120" placeholder="Annat…" value="${flowState.cbt.trAgainstOther||''}" oninput="updateCbtField('trAgainstOther',this.value)">
+      <div style="margin-top:10px;font-weight:600;">6) Alternativ tanke</div>${renderChipGroup('trAlt', ['Det här är en jobbig tanke, inte ett faktum.','Jag kan ta en liten del nu.','Jag behöver inte lösa allt på en gång.','Jag kan be om hjälp eller stöd.','Jag har klarat liknande saker förr.','Det är okej att det känns svårt.'])}<input class="txt-in" maxlength="140" placeholder="Annat…" value="${flowState.cbt.trAltOther||''}" oninput="updateCbtField('trAltOther',this.value)">
+      <div style="margin-top:10px;font-weight:600;">7) Hur känns det nu?</div>${renderChipGroup('trNow', ['Lite lugnare','Mer hopp','Fortfarande jobbigt men hanterbart','Trött men okej'])}<div class="ci-row" style="margin-top:8px;"><input type="range" class="ci-slider" min="0" max="10" value="${flowState.cbt.trNowIntensity||5}" oninput="updateCbtField('trNowIntensity',this.value)"><span class="ci-val">${flowState.cbt.trNowIntensity||5}</span></div>
+    </div>
+    <button class="flow-btn" onclick="submitExercise()" style="margin-top:14px;">Klar → Avslutning</button>
+    <button class="flow-btn-ghost" onclick="skipCbtWriting()">Hoppa över skrivdelen</button>`;
+  }
+
   const ex=flowState.exercise;
   if(!ex){
     return `<div class="card"><p style="color:var(--text2);">Ingen övning hittades. Försök igen senare.</p><button class="flow-btn-ghost" onclick="flowState.step=1;renderFlowStep(document.getElementById('flow-root'));">← Tillbaka</button></div>`;
   }
   const modeLabels={lugn:'🌊 Lugn & Ro',pepp:'⚡ Energi',fokus:'🎯 Fokus',sömn:'🌙 Sömn'};
   const stepsHtml=(ex.steps||[]).map((st,i)=>`<li class="ex-step"><span class="ex-step-num">${i+1}</span><span class="ex-step-txt">${st}</span></li>`).join('');
-
   let extraHtml='';
-  // CBT har extra prompts
   if(ex.prompt_fråga_1){
-    extraHtml=`<div style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(140,230,80,.1);">
-      <div style="font-size:.82rem;font-weight:700;color:#a8e87c;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;">Reflektera</div>
-      <div style="background:rgba(0,0,0,.2);border-radius:12px;padding:12px;margin-bottom:8px;font-size:.9rem;color:#d0f0cc;line-height:1.6;">💭 ${ex.prompt_fråga_1}</div>
-      <div style="background:rgba(0,0,0,.2);border-radius:12px;padding:12px;margin-bottom:8px;font-size:.9rem;color:#d0f0cc;line-height:1.6;">💭 ${ex.prompt_fråga_2}</div>
-      <div style="background:rgba(140,230,80,.08);border-radius:12px;padding:12px;font-size:.9rem;color:#c8f0a0;line-height:1.6;">✏️ ${ex.alternativ_tanke_prompt}</div>
-    </div>`;
+    extraHtml=`<div style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(140,230,80,.1);"><div style="font-size:.82rem;font-weight:700;color:#a8e87c;text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;">Reflektera</div><div style="background:rgba(0,0,0,.2);border-radius:12px;padding:12px;margin-bottom:8px;font-size:.9rem;color:#d0f0cc;line-height:1.6;">💭 ${ex.prompt_fråga_1}</div><div style="background:rgba(0,0,0,.2);border-radius:12px;padding:12px;margin-bottom:8px;font-size:.9rem;color:#d0f0cc;line-height:1.6;">💭 ${ex.prompt_fråga_2}</div><div style="background:rgba(140,230,80,.08);border-radius:12px;padding:12px;font-size:.9rem;color:#c8f0a0;line-height:1.6;">✏️ ${ex.alternativ_tanke_prompt}</div></div>`;
   }
 
-  return `<div class="ex-card">
-    <span class="ex-badge">${modeLabels[flowState.mode]||flowState.mode}</span>
-    <div class="ex-title">${ex.title}</div>
-    <ul class="ex-steps">${stepsHtml}</ul>
-    ${extraHtml}
-  </div>
+  return `<div class="ex-card"><span class="ex-badge">${modeLabels[flowState.mode]||flowState.mode}</span><div class="ex-title">${ex.title}</div><ul class="ex-steps">${stepsHtml}</ul>${extraHtml}</div>
   <button class="flow-btn" onclick="submitExercise()" style="margin-top:14px;">Klar → Avslutning</button>
   <button class="flow-btn-ghost" onclick="flowState.step=1;renderFlowStep(document.getElementById('flow-root'));">← Börja om</button>`;
+}
+
+function skipCbtWriting(){
+  Object.keys(flowState.cbt||{}).forEach(k=>{if(/other|text|note|free|custom/i.test(k)&&typeof flowState.cbt[k]==='string')flowState.cbt[k]='';});
+  submitExercise();
 }
 
 function submitExercise(){
@@ -1064,6 +1135,9 @@ function saveFlowLog(counted){
     exerciseId:flowState.exercise?.id||null,
     exerciseTitle:flowState.exercise?.title||null,
     mode:flowState.mode,
+    sessionLengthMin:flowState.sessionLengthMin||3,
+    themeGuess:document.body.classList.contains('dark')?'dark':'light',
+    cbt:localStorage.getItem('saveFreeTextLogs')==='1'?(flowState.cbt||{}):scrubFreeText(flowState.cbt||{}),
     counted:counted
   });
   saveFlowLogs(logs);
@@ -1100,6 +1174,51 @@ function viewFlowHistory(){
   </div>`;
 }
 
+function scrubFreeText(value){
+  const re=/(text|note|free|custom|other|notes)/i;
+  if(Array.isArray(value)) return value.map(v=>scrubFreeText(v));
+  if(value&&typeof value==='object'){
+    const out={};
+    Object.keys(value).forEach(k=>{
+      const v=value[k];
+      if(re.test(k)&&typeof v==='string') out[k]='';
+      else out[k]=scrubFreeText(v);
+    });
+    return out;
+  }
+  return value;
+}
+function setFlowStatus(msg){
+  const el=document.getElementById('flow-status');
+  if(!el)return;
+  el.style.display='block';
+  el.textContent=msg;
+  setTimeout(()=>{el.style.display='none';},2600);
+}
+function clearFlowTextToday(){
+  if(!confirm('Rensa all fri text för dagens check?'))return;
+  const logs=loadFlowLogs();
+  const today=new Date();
+  const y=today.getFullYear(),m=today.getMonth(),d=today.getDate();
+  const next=new Date(y,m,d+1).getTime(),start=new Date(y,m,d).getTime();
+  logs.forEach(l=>{const t=new Date(l.dateISO||0).getTime();if(t>=start&&t<next){if(l.cbt)l.cbt=scrubFreeText(l.cbt);}});
+  saveFlowLogs(logs);
+  flowState.cbt=scrubFreeText(flowState.cbt||{});
+  renderFlow();
+  setFlowStatus('Dagens fria text rensades.');
+}
+function clearFlowTextLast7(){
+  if(!confirm('Rensa fri text för senaste 7 dagar (inklusive idag)?'))return;
+  const logs=loadFlowLogs();
+  const now=new Date();
+  const start=new Date(now.getFullYear(),now.getMonth(),now.getDate()-6).getTime();
+  logs.forEach(l=>{const t=new Date(l.dateISO||0).getTime();if(t>=start){if(l.cbt)l.cbt=scrubFreeText(l.cbt);}});
+  saveFlowLogs(logs);
+  flowState.cbt=scrubFreeText(flowState.cbt||{});
+  renderFlow();
+  setFlowStatus('Fri text för senaste 7 dagar rensades.');
+}
+
 // ══════════════════════════════════════════
 //  EXPORT / IMPORT
 // ══════════════════════════════════════════
@@ -1112,7 +1231,7 @@ function exportAll(){
     stats:JSON.parse(localStorage.getItem('stats')||'{}'),
     dailyFocus:JSON.parse(localStorage.getItem('dailyFocus')||'{}'),
     dailyFlowLogs:loadFlowLogs(),
-    settings:{theme:localStorage.getItem('theme')||'auto',bioOn:localStorage.getItem('bioOn')||'0'}
+    settings:{theme:localStorage.getItem('theme')||'auto',bioOn:localStorage.getItem('bioOn')||'0',saveFreeTextLogs:localStorage.getItem('saveFreeTextLogs')||'0'}
   };
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob);
@@ -1145,6 +1264,7 @@ function importFile(input){
         if(data.dailyFocus)localStorage.setItem('dailyFocus',JSON.stringify(data.dailyFocus));
         if(data.dailyFlowLogs)saveFlowLogs(data.dailyFlowLogs);
         if(data.settings?.theme)setTheme(data.settings.theme);
+        if(data.settings?.saveFreeTextLogs!==undefined){localStorage.setItem('saveFreeTextLogs',data.settings.saveFreeTextLogs);document.getElementById('freeTextToggle').checked=data.settings.saveFreeTextLogs==='1';}
       }
       saveL('gratList',myGrat);saveL('quoteList',myQuotes);
       alert('Import lyckades! ✅');renderLists();loadStats();
