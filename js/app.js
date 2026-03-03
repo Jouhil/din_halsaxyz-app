@@ -11,6 +11,8 @@ import { init as initStatsModule } from './modules/statsModule.js';
 import { init as initSettingsModule } from './modules/settingsModule.js';
 import { initGuideOverlay, openGuide } from './ui/helpOverlay.js';
 
+let checkinFlowApi = null;
+
 // ══════════════════════════════════════════
 //  KONSTANTER & URLS
 // ══════════════════════════════════════════
@@ -162,11 +164,12 @@ setInterval(()=>{if(currentTheme==='auto')applyTheme();},60000);
   document.getElementById('bioToggle').checked=localStorage.getItem('bioOn')==='1';
   document.getElementById('freeTextToggle').checked=localStorage.getItem('saveFreeTextLogs')==='1';
   loadStats();updateScreenInfo();initLock();
-  initToolsModule();initPerspectiveModule();initStatsModule();initSettingsModule();initCheckinFlow();
+  initToolsModule();initPerspectiveModule();initStatsModule();initSettingsModule();
+  checkinFlowApi = initCheckinFlow({});
   await loadLibraries();
   renderGratitude();newQuote();renderHelp();
   // om check-infliken är aktiv redan – rendera
-  if(document.getElementById('tab-checkin').classList.contains('active')) renderFlow();
+  if(document.getElementById('tab-checkin').classList.contains('active')) checkinFlowApi?.render?.();
 })();
 
 // ══════════════════════════════════════════
@@ -182,7 +185,7 @@ const router = initRouter({
       renderGratitude();
       newQuote();
     }
-    if(name==='checkin')renderFlow();
+    if(name==='checkin')checkinFlowApi?.render?.();
   }
 });
 initGuideOverlay({ router });
@@ -281,19 +284,36 @@ function loadStats(){
   document.getElementById('st-pepp').innerText=s.pepp||0;
   const streak=s.streak||0;
   document.getElementById('st-streak').innerText=streak;
-  document.getElementById('streak-badge').innerText='🔥 '+streak+' dagars streak';
-  const logs=loadFlowLogs().filter(l=>l.counted===true);
+
+  const logs=loadFlowLogs().filter(l=>l&&l.counted===true);
   document.getElementById('st-flow').innerText=logs.length;
+
   const latest7=logs.slice(-7);
   if(latest7.length){
-    const avgStressPre=latest7.reduce((a,l)=>a+((l.pre&&l.pre.stress)||0),0)/latest7.length;
-    const avgStressPost=latest7.reduce((a,l)=>a+((l.post&&l.post.stress)||0),0)/latest7.length;
-    const avgMoodPre=latest7.reduce((a,l)=>a+((l.pre&&l.pre.humör)||0),0)/latest7.length;
-    const avgMoodPost=latest7.reduce((a,l)=>a+((l.post&&l.post.humör)||0),0)/latest7.length;
-    document.getElementById('st-lift').innerText=`S ${avgStressPre.toFixed(1)}→${avgStressPost.toFixed(1)} · H ${avgMoodPre.toFixed(1)}→${avgMoodPost.toFixed(1)}`;
+    const avg=(arr,key,post=false)=>arr.reduce((a,l)=>a+Number(post?l?.after?.[key]??l?.post?.[key]:l?.pre?.[key]??(key==='tankar'?null:0)??0),0)/arr.length;
+    const sp=avg(latest7,'stress');
+    const hp=avg(latest7,'humör');
+    const tp=avg(latest7,'tankar');
+    const sAfter=latest7.reduce((a,l)=>a+Number(l?.after?.afterSliderNeedVal??l?.post?.stress??l?.after?.stress??sp),0)/latest7.length;
+    const hAfter=latest7.reduce((a,l)=>a+Number(l?.post?.humör??hp),0)/latest7.length;
+    const tAfter=latest7.reduce((a,l)=>a+Number((l?.focusNeed==='tankar'?l?.after?.afterSliderNeedVal:null)??l?.after?.tankar??tp),0)/latest7.length;
+    document.getElementById('st-lift').innerText=`S ${sp.toFixed(1)}→${sAfter.toFixed(1)} · H ${hp.toFixed(1)}→${hAfter.toFixed(1)} · T ${tp.toFixed(1)}→${tAfter.toFixed(1)}`;
   } else document.getElementById('st-lift').innerText='–';
-  const dist={3:0,6:0,10:0}; logs.forEach(l=>{if(dist[l.sessionLengthMin]!==undefined)dist[l.sessionLengthMin]++;});
-  document.getElementById('streak-badge').innerText=`🔥 ${streak} dagars streak · 3m:${dist[3]} 6m:${dist[6]} 10m:${dist[10]}`;
+
+  const deltas=latest7.map(l=>{
+    if(Number(l.flowMinutes||l.sessionLengthMin)===8&&Number.isFinite(l?.after?.intensityBefore)&&Number.isFinite(l?.after?.intensityAfter)){
+      return `8m ${l.after.intensityBefore}→${l.after.intensityAfter}`;
+    }
+    if(l.focusNeed&&Number.isFinite(l?.pre?.[l.focusNeed])&&Number.isFinite(l?.after?.afterSliderNeedVal)){
+      return `3m ${l.focusNeed}: ${l.pre[l.focusNeed]}→${l.after.afterSliderNeedVal}`;
+    }
+    return null;
+  }).filter(Boolean);
+  const deltaEl=document.getElementById('st-delta');
+  if(deltaEl) deltaEl.innerText=deltas.length?deltas.slice(-3).join(' · '):'–';
+
+  const dist={3:0,8:0,10:0}; logs.forEach(l=>{const k=Number(l.flowMinutes||l.sessionLengthMin);if(dist[k]!==undefined)dist[k]++;});
+  document.getElementById('streak-badge').innerText=`🔥 ${streak} dagars streak · 3m:${dist[3]} 8m:${dist[8]} 10m:${dist[10]}`;
 }
 function incStat(key){const s=JSON.parse(localStorage.getItem('stats')||'{}');s[key]=(s[key]||0)+1;localStorage.setItem('stats',JSON.stringify(s));loadStats();}
 function resetStats(){if(confirm('Nollställa all statistik?')){localStorage.removeItem('stats');loadStats();}}
