@@ -252,6 +252,27 @@ body.dark .closing-line{border-color:rgba(140,230,80,.1);}
 .exp-btn{padding:10px 18px;border-radius:12px;border:1.5px solid var(--border);background:var(--input-bg);color:var(--text);font-family:inherit;font-size:.9rem;font-weight:600;cursor:pointer;transition:.2s;display:inline-flex;align-items:center;gap:6px;}
 .exp-btn:hover{border-color:var(--accent);color:var(--accent);}
 .imp-btn{padding:10px 18px;border-radius:12px;border:none;background:var(--accent);color:#fff;font-family:inherit;font-size:.9rem;font-weight:600;cursor:pointer;transition:.2s;display:inline-flex;align-items:center;gap:6px;}
+
+/* Guide overlay */
+body.guide-open #content{overflow:hidden;}
+.ovl{position:fixed;inset:0;z-index:1200;display:flex;align-items:flex-end;justify-content:center;}
+.ovl.hidden{display:none;}
+.ovl-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.42);backdrop-filter:blur(2px);}
+.ovl-panel{position:relative;width:min(720px,100%);max-height:min(82vh,760px);background:var(--card);border:1px solid var(--border);border-radius:20px 20px 0 0;box-shadow:var(--shadow-lg);display:flex;flex-direction:column;animation:ovlUp .22s ease-out;}
+.ovl-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border);}
+.ovl-title{font-size:1.05rem;font-weight:700;color:var(--text);}
+.ovl-close{border:none;background:none;color:var(--text2);font-size:1.4rem;cursor:pointer;line-height:1;padding:4px;}
+.ovl-body{padding:14px 16px;overflow:auto;display:grid;gap:10px;}
+.ovl-card{background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:12px;}
+.ovl-card h3{font-size:.95rem;margin-bottom:6px;color:var(--text);}
+.ovl-card p{font-size:.88rem;color:var(--text2);line-height:1.5;}
+.ovl-foot{padding:12px 16px;border-top:1px solid var(--border);}
+.link-btn{border:none;background:none;color:var(--accent);font:inherit;font-weight:600;cursor:pointer;padding:4px 0;}
+@keyframes ovlUp{from{transform:translateY(16px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+@media(min-width:769px){
+  .ovl{align-items:center;padding:16px;}
+  .ovl-panel{border-radius:20px;}
+}
 </style>
 </head>
 <body>
@@ -341,6 +362,12 @@ body.dark .closing-line{border-color:rgba(140,230,80,.1);}
         <div class="sound-row"><span class="snd-label">🟤 Brunt brus</span><button class="snd-toggle" id="brown-btn" onclick="toggleSound('brown')">AV</button><input type="range" id="brown-vol" min="0" max="1" step="0.05" value="0.35" oninput="setVol('brown',this.value)"></div>
       </div>
 
+      <div class="card" style="margin-top:14px;">
+        <strong>🧭 Guide: Vad ska jag välja?</strong>
+        <p style="margin-top:6px;color:var(--text2);font-size:.9rem;line-height:1.5;">Få snabb vägledning baserat på hur det känns just nu.</p>
+        <button class="flow-btn-ghost" onclick="openGuideTrigger('tools_intro')">Lär mer</button>
+      </div>
+
       <details class="card" data-hidden-tab="help" style="margin-top:14px;">
         <summary style="cursor:pointer;font-weight:600;">🧠 Hjälp & Självhjälp</summary>
         <div style="margin-top:12px;">
@@ -366,6 +393,7 @@ body.dark .closing-line{border-color:rgba(140,230,80,.1);}
         <button class="flow-chip sel" type="button" data-perspective="gratitude">Tacksam</button>
         <button class="flow-chip" type="button" data-perspective="pepp">Pepp</button>
       </div>
+      <button class="link-btn" onclick="openGuideTrigger('perspective_why')">Lär mer om perspektiv</button>
 
       <div id="perspective-gratitude">
         <div class="grat-header">
@@ -503,6 +531,20 @@ body.dark .closing-line{border-color:rgba(140,230,80,.1);}
     <button class="bnav-btn" onclick="showTab('stats')" data-tab="stats"><span class="ico">📊</span>Statistik</button>
     <button class="bnav-btn" onclick="showTab('settings')" data-tab="settings"><span class="ico">⚙️</span>Inställn.</button>
   </nav>
+</div>
+
+<div id="guideOverlay" class="ovl hidden" aria-hidden="true">
+  <div class="ovl-backdrop" data-ovl-close></div>
+  <div class="ovl-panel" role="dialog" aria-modal="true" aria-labelledby="ovlTitle" tabindex="-1">
+    <div class="ovl-head">
+      <div id="ovlTitle" class="ovl-title">Guide</div>
+      <button class="ovl-close" data-ovl-close aria-label="Stäng">✕</button>
+    </div>
+    <div id="ovlBody" class="ovl-body"></div>
+    <div class="ovl-foot">
+      <button id="ovlCtaTools" class="flow-btn-ghost">Gå till Verktyg</button>
+    </div>
+  </div>
 </div>
 
 <script type="module" src="js/app.js"></script>
