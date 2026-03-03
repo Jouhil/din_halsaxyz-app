@@ -5,10 +5,8 @@ import { loadDataLibraries } from './data/dataLoader.js';
 import { pickByModeWithHistory as enginePickByMode, hasThemeMatch as engineThemeMatch } from './engines/matchingEngine.js';
 import { getRecentIds as getRecentIdsFromRotation } from './engines/rotationEngine.js';
 import { initCheckinFlow } from './flows/checkinFlow.js';
-import { init as initGratitudeModule } from './modules/gratitudeModule.js';
-import { init as initCalmModule } from './modules/calmModule.js';
-import { init as initPeppModule } from './modules/peppModule.js';
-import { init as initHelpModule } from './modules/helpModule.js';
+import { init as initToolsModule } from './modules/toolsModule.js';
+import { init as initPerspectiveModule } from './modules/perspectiveModule.js';
 import { init as initStatsModule } from './modules/statsModule.js';
 import { init as initSettingsModule } from './modules/settingsModule.js';
 
@@ -163,11 +161,11 @@ setInterval(()=>{if(currentTheme==='auto')applyTheme();},60000);
   document.getElementById('bioToggle').checked=localStorage.getItem('bioOn')==='1';
   document.getElementById('freeTextToggle').checked=localStorage.getItem('saveFreeTextLogs')==='1';
   loadStats();updateScreenInfo();initLock();
-  initGratitudeModule();initCalmModule();initPeppModule();initHelpModule();initStatsModule();initSettingsModule();initCheckinFlow();
+  initToolsModule();initPerspectiveModule();initStatsModule();initSettingsModule();initCheckinFlow();
   await loadLibraries();
   renderGratitude();newQuote();renderHelp();
-  // om flödesfliken är aktiv redan – rendera
-  if(document.getElementById('tab-flow').classList.contains('active')) renderFlow();
+  // om check-infliken är aktiv redan – rendera
+  if(document.getElementById('tab-checkin').classList.contains('active')) renderFlow();
 })();
 
 // ══════════════════════════════════════════
@@ -175,16 +173,20 @@ setInterval(()=>{if(currentTheme==='auto')applyTheme();},60000);
 // ══════════════════════════════════════════
 const router = initRouter({
   onTabChange(name){
-    if(name!=='calm')stopBreath();
+    if(name!=='tools')stopBreath();
     if(name==='settings'){renderLists();updateScreenInfo();}
     if(name==='stats'){loadStats();loadFocus();}
-    if(name==='help')renderHelp();
-    if(name==='flow')renderFlow();
+    if(name==='tools')renderHelp();
+    if(name==='perspective'){
+      renderGratitude();
+      newQuote();
+    }
+    if(name==='checkin')renderFlow();
   }
 });
 
-function showTab(name, btn){
-  router.goToTab(name, btn);
+function showTab(name){
+  router.goToTab(name);
 }
 function updateScreenInfo(){const w=window.innerWidth,h=window.innerHeight;const d=w>=1024?'🖥️ Dator':w>=768?'📱 iPad':'📱 Mobil';const el=document.getElementById('screen-info');if(el)el.innerText=d+' · '+w+'×'+h+'px';}
 window.addEventListener('resize',updateScreenInfo);
