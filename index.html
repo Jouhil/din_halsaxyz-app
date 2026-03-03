@@ -79,9 +79,9 @@ body.dark .grat-line{color:#e8f0e8!important;}
 .btn3d:active{transform:translateY(4px);box-shadow:0 1px 0 #1a3a17,0 4px 8px rgba(0,0,0,.2);}
 
 /* ── CALM ── */
-#tab-calm{background:#0d1f0d url('https://picsum.photos/id/15/1200/800') center/cover;border-radius:var(--radius);padding:clamp(14px,3vw,24px);min-height:calc(100vh - 160px);position:relative;overflow:hidden;}
-#tab-calm::before{content:'';position:absolute;inset:0;background:rgba(5,20,5,.62);border-radius:var(--radius);pointer-events:none;}
-@media(max-width:768px){#tab-calm{min-height:auto;}}
+#tab-tools{background:#0d1f0d url('https://picsum.photos/id/15/1200/800') center/cover;border-radius:var(--radius);padding:clamp(14px,3vw,24px);min-height:calc(100vh - 160px);position:relative;overflow:hidden;}
+#tab-tools::before{content:'';position:absolute;inset:0;background:rgba(5,20,5,.62);border-radius:var(--radius);pointer-events:none;}
+@media(max-width:768px){#tab-tools{min-height:auto;}}
 .calm-title{color:#c8f0a0;font-size:clamp(1.2rem,3.5vw,1.8rem);font-weight:700;text-align:center;margin-bottom:6px;position:relative;}
 #timer-disp{font-size:clamp(2.2rem,8vw,4rem);font-weight:700;color:#a8e87c;text-align:center;letter-spacing:2px;text-shadow:0 0 30px rgba(140,230,80,.5);margin:4px 0;position:relative;}
 #breath-lbl{font-size:clamp(.95rem,2.8vw,1.2rem);font-weight:600;color:#b8e89c;text-align:center;min-height:26px;margin:4px 0;transition:color .5s;position:relative;}
@@ -181,7 +181,8 @@ input:checked+.slider:before{transform:translateX(22px);}
 .del-btn{background:none;border:none;color:#ef5350;cursor:pointer;font-size:1.1rem;padding:0 4px;}
 
 /* ══ DAGENS 3 MIN ══ */
-#tab-flow{animation:fadeIn .4s ease;}
+#tab-checkin{animation:fadeIn .4s ease;}
+.perspective-segments{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px;}
 
 /* Step indicator */
 .flow-steps{display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:22px;}
@@ -298,30 +299,25 @@ body.dark .closing-line{border-color:rgba(140,230,80,.1);}
   <!-- SIDEBAR -->
   <nav id="sidebar">
     <div class="side-logo">🌿 Hälsa XYZ</div>
-    <button class="side-btn active" onclick="showTab('gratitude',this)" id="sb-gratitude"><span class="ico">♥</span> Tacksamhet</button>
-    <button class="side-btn" onclick="showTab('calm',this)" id="sb-calm"><span class="ico">🧘</span> Lugn & Ro</button>
-    <button class="side-btn" onclick="showTab('inspire',this)" id="sb-inspire"><span class="ico">✨</span> Pepp</button>
-    <button class="side-btn" onclick="showTab('help',this)" id="sb-help"><span class="ico">🧠</span> Hjälp</button>
-    <button class="side-btn" onclick="showTab('flow',this)" id="sb-flow"><span class="ico">⏱</span> Dagens check</button>
-    <button class="side-btn" onclick="showTab('stats',this)" id="sb-stats"><span class="ico">📊</span> Statistik</button>
-    <button class="side-btn" onclick="showTab('settings',this)" id="sb-settings"><span class="ico">⚙️</span> Inställningar</button>
+    <button class="side-btn active" onclick="showTab('checkin')" id="sb-checkin" data-tab="checkin"><span class="ico">⏱</span> Check-in</button>
+    <button class="side-btn" onclick="showTab('tools')" id="sb-tools" data-tab="tools"><span class="ico">🧘</span> Verktyg</button>
+    <button class="side-btn" onclick="showTab('perspective')" id="sb-perspective" data-tab="perspective"><span class="ico">✨</span> Perspektiv</button>
+    <button class="side-btn" onclick="showTab('stats')" id="sb-stats" data-tab="stats"><span class="ico">📊</span> Statistik</button>
+    <button class="side-btn" onclick="showTab('settings')" id="sb-settings" data-tab="settings"><span class="ico">⚙️</span> Inställningar</button>
     <div class="side-version">v3.0 · jouhil.github.io</div>
   </nav>
 
   <!-- CONTENT -->
   <div id="content">
 
-    <!-- TACKSAMHET -->
-    <div id="tab-gratitude" class="tab active">
-      <div class="grat-header">
-        <div class="page-title">Dagens Tacksamhet</div>
-        <button class="btn3d" onclick="renderGratitude()">Nya tankar ✨</button>
-      </div>
-      <div id="grat-cont"></div>
+    <!-- CHECK-IN -->
+    <div id="tab-checkin" class="tab active">
+      <div class="page-title">⏱ Dagens check</div>
+      <div id="flow-root"></div>
     </div>
 
-    <!-- LUGN -->
-    <div id="tab-calm" class="tab">
+    <!-- VERKTYG -->
+    <div id="tab-tools" class="tab">
       <div class="calm-title">🌊 Lugn & Ro</div>
       <div id="timer-disp">00:00</div>
       <div id="breath-lbl">Välj tid och starta</div>
@@ -344,48 +340,59 @@ body.dark .closing-line{border-color:rgba(140,230,80,.1);}
         <div class="sound-row"><span class="snd-label">🌲 Skog</span><button class="snd-toggle" id="forest-btn" onclick="toggleSound('forest')">AV</button><input type="range" id="forest-vol" min="0" max="1" step="0.05" value="0.35" oninput="setVol('forest',this.value)"></div>
         <div class="sound-row"><span class="snd-label">🟤 Brunt brus</span><button class="snd-toggle" id="brown-btn" onclick="toggleSound('brown')">AV</button><input type="range" id="brown-vol" min="0" max="1" step="0.05" value="0.35" oninput="setVol('brown',this.value)"></div>
       </div>
+
+      <details class="card" data-hidden-tab="help" style="margin-top:14px;">
+        <summary style="cursor:pointer;font-weight:600;">🧠 Hjälp & Självhjälp</summary>
+        <div style="margin-top:12px;">
+          <div class="help-search-wrap">
+            <span class="help-search-icon">🔍</span>
+            <input type="search" class="help-search" id="help-search" placeholder="Sök t.ex. negativa tankar, ångest..." oninput="filterHelp(this.value)">
+          </div>
+          <div class="help-cats">
+            <button class="help-cat active" onclick="filterCat('all',this)">Allt</button>
+            <button class="help-cat" onclick="filterCat('tankar',this)">Tankar</button>
+            <button class="help-cat" onclick="filterCat('tankefallor',this)">Tankefällor</button>
+            <button class="help-cat" onclick="filterCat('verktyg',this)">Verktyg</button>
+          </div>
+          <div id="help-results"></div>
+        </div>
+      </details>
     </div>
 
-    <!-- PEPP -->
-    <div id="tab-inspire" class="tab">
-      <div class="page-title">✨ Inspiration</div>
-      <div class="pepp-stars"><span class="p-star">⭐</span><span class="p-star">✨</span><span class="p-star">⭐</span></div>
-      <div class="pepp-card">
-        <span class="pepp-emoji" id="pepp-emoji">💚</span>
-        <p id="quote-txt">Tryck på knappen för din dagliga dos pepp!</p>
+    <!-- PERSPEKTIV -->
+    <div id="tab-perspective" class="tab">
+      <div class="page-title">✨ Perspektiv</div>
+      <div class="perspective-segments">
+        <button class="flow-chip sel" type="button" data-perspective="gratitude">Tacksam</button>
+        <button class="flow-chip" type="button" data-perspective="pepp">Pepp</button>
       </div>
-      <button class="pepp-btn" onclick="newQuote()">⚡ Ge mig pepp!</button>
-      <div class="mantra-card">
-        <div class="mantra-icon">🌅</div>
-        <h3 class="mantra-title">Dagens intention</h3>
-        <p class="mantra-line">Detta kommer bli den bästa dagen i mitt liv — inte för att det är perfekt, utan för att jag kommer fullt närvarande och lär mig vad dagen medför.</p>
-        <div class="mantra-divider"></div>
-        <p class="mantra-line">Jag kontrollerar min tanke — den kontrollerar inte mig. Jag väljer hur jag agerar och hur jag svarar — med glädje och kärlek, vad som än händer.</p>
-        <div class="mantra-divider"></div>
-        <p class="mantra-line mantra-closing">Glad för vad jag har nu, även om det är något litet. 🌿</p>
-      </div>
-    </div>
 
-    <!-- HJÄLP -->
-    <div id="tab-help" class="tab">
-      <div class="page-title">🧠 Hjälp & Självhjälp</div>
-      <div class="help-search-wrap">
-        <span class="help-search-icon">🔍</span>
-        <input type="search" class="help-search" id="help-search" placeholder="Sök t.ex. negativa tankar, ångest..." oninput="filterHelp(this.value)">
+      <div id="perspective-gratitude">
+        <div class="grat-header">
+          <div class="page-title">Dagens Tacksamhet</div>
+          <button class="btn3d" onclick="renderGratitude()">Nya tankar ✨</button>
+        </div>
+        <div id="grat-cont"></div>
       </div>
-      <div class="help-cats">
-        <button class="help-cat active" onclick="filterCat('all',this)">Allt</button>
-        <button class="help-cat" onclick="filterCat('tankar',this)">Tankar</button>
-        <button class="help-cat" onclick="filterCat('tankefallor',this)">Tankefällor</button>
-        <button class="help-cat" onclick="filterCat('verktyg',this)">Verktyg</button>
-      </div>
-      <div id="help-results"></div>
-    </div>
 
-    <!-- DAGENS 3 MIN -->
-    <div id="tab-flow" class="tab">
-      <div class="page-title">⏱ Dagens check</div>
-      <div id="flow-root"></div>
+      <div id="perspective-pepp" style="display:none;">
+        <div class="page-title">✨ Inspiration</div>
+        <div class="pepp-stars"><span class="p-star">⭐</span><span class="p-star">✨</span><span class="p-star">⭐</span></div>
+        <div class="pepp-card">
+          <span class="pepp-emoji" id="pepp-emoji">💚</span>
+          <p id="quote-txt">Tryck på knappen för din dagliga dos pepp!</p>
+        </div>
+        <button class="pepp-btn" onclick="newQuote()">⚡ Ge mig pepp!</button>
+        <div class="mantra-card">
+          <div class="mantra-icon">🌅</div>
+          <h3 class="mantra-title">Dagens intention</h3>
+          <p class="mantra-line">Detta kommer bli den bästa dagen i mitt liv — inte för att det är perfekt, utan för att jag kommer fullt närvarande och lär mig vad dagen medför.</p>
+          <div class="mantra-divider"></div>
+          <p class="mantra-line">Jag kontrollerar min tanke — den kontrollerar inte mig. Jag väljer hur jag agerar och hur jag svarar — med glädje och kärlek, vad som än händer.</p>
+          <div class="mantra-divider"></div>
+          <p class="mantra-line mantra-closing">Glad för vad jag har nu, även om det är något litet. 🌿</p>
+        </div>
+      </div>
     </div>
 
     <!-- STATISTIK -->
@@ -490,13 +497,11 @@ body.dark .closing-line{border-color:rgba(140,230,80,.1);}
 
   <!-- BOTTOM NAV -->
   <nav id="bottomnav">
-    <button class="bnav-btn active" onclick="showTab('gratitude',this)"><span class="ico">♥</span>Tacksam</button>
-    <button class="bnav-btn" onclick="showTab('calm',this)"><span class="ico">🧘</span>Lugn</button>
-    <button class="bnav-btn" onclick="showTab('inspire',this)"><span class="ico">✨</span>Pepp</button>
-    <button class="bnav-btn" onclick="showTab('help',this)"><span class="ico">🧠</span>Hjälp</button>
-    <button class="bnav-btn" onclick="showTab('flow',this)"><span class="ico">⏱</span>Check</button>
-    <button class="bnav-btn" onclick="showTab('stats',this)"><span class="ico">📊</span>Stats</button>
-    <button class="bnav-btn" onclick="showTab('settings',this)"><span class="ico">⚙️</span>Inställn.</button>
+    <button class="bnav-btn active" onclick="showTab('checkin')" data-tab="checkin"><span class="ico">⏱</span>Check-in</button>
+    <button class="bnav-btn" onclick="showTab('tools')" data-tab="tools"><span class="ico">🧘</span>Verktyg</button>
+    <button class="bnav-btn" onclick="showTab('perspective')" data-tab="perspective"><span class="ico">✨</span>Perspektiv</button>
+    <button class="bnav-btn" onclick="showTab('stats')" data-tab="stats"><span class="ico">📊</span>Statistik</button>
+    <button class="bnav-btn" onclick="showTab('settings')" data-tab="settings"><span class="ico">⚙️</span>Inställn.</button>
   </nav>
 </div>
 
