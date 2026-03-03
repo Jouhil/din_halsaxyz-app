@@ -253,6 +253,17 @@ body.dark .closing-line{border-color:rgba(140,230,80,.1);}
 .exp-btn:hover{border-color:var(--accent);color:var(--accent);}
 .imp-btn{padding:10px 18px;border-radius:12px;border:none;background:var(--accent);color:#fff;font-family:inherit;font-size:.9rem;font-weight:600;cursor:pointer;transition:.2s;display:inline-flex;align-items:center;gap:6px;}
 
+
+.dur-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;}
+@media(max-width:640px){.dur-grid{grid-template-columns:1fr;}}
+.chip-wrap{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0;}
+.chip{border:1px solid var(--border);background:var(--input-bg);color:var(--text);padding:7px 10px;border-radius:999px;cursor:pointer;font-family:inherit;}
+.chip.active{background:var(--accent);color:#fff;border-color:transparent;}
+.ci-block{margin-top:10px;}
+.anchor{font-size:.75rem;color:var(--text2);min-width:84px;}
+.star-row{display:flex;gap:6px;margin:8px 0 12px;}
+.reward-pop{display:inline-block;background:rgba(45,90,39,.12);border:1px solid rgba(45,90,39,.25);padding:8px 12px;border-radius:12px;animation:twinkle 1.6s ease infinite;}
+
 /* Guide overlay */
 body.guide-open #content{overflow:hidden;}
 .ovl{position:fixed;inset:0;z-index:1200;display:flex;align-items:flex-end;justify-content:center;pointer-events:none;overscroll-behavior:contain;}
@@ -447,7 +458,8 @@ body.guide-open #content{overflow:hidden;}
           <li class="stat-item"><span>⚡ Pepp-citat lästa</span><span class="stat-val" id="st-pepp">0</span></li>
           <li class="stat-item"><span>⏱ Genomförda checkar</span><span class="stat-val" id="st-flow">0</span></li>
           <li class="stat-item"><span>📅 Dagars streak</span><span class="stat-val" id="st-streak">0</span></li>
-          <li class="stat-item"><span>📉→📈 Stress/Humör senaste 7</span><span class="stat-val" id="st-lift">–</span></li>
+          <li class="stat-item"><span>📉→📈 Stress/Humör/Tanketryck senaste 7</span><span class="stat-val" id="st-lift">–</span></li>
+          <li class="stat-item"><span>🔁 Före/efter senaste checkar</span><span class="stat-val" id="st-delta">–</span></li>
         </ul>
         <div style="text-align:center;margin-top:10px;">
           <span class="streak-badge" id="streak-badge">🔥 0 dagars streak</span>
