@@ -9,6 +9,7 @@ import { init as initToolsModule } from './modules/toolsModule.js';
 import { init as initPerspectiveModule } from './modules/perspectiveModule.js';
 import { init as initStatsModule } from './modules/statsModule.js';
 import { init as initSettingsModule } from './modules/settingsModule.js';
+import { initGuideOverlay, openGuide } from './ui/helpOverlay.js';
 
 // ══════════════════════════════════════════
 //  KONSTANTER & URLS
@@ -184,9 +185,29 @@ const router = initRouter({
     if(name==='checkin')renderFlow();
   }
 });
+initGuideOverlay({ router });
 
 function showTab(name){
   router.goToTab(name);
+}
+function primaryNeedFromCheckin(){
+  const pre=flowState.pre||flowState.preLocked||{stress:5,humör:5,energi:5,sömn:5};
+  if((pre.stress||0)>=8) return 'tankar';
+  const scores=[
+    {need:'stress',score:pre.stress||0},
+    {need:'humör',score:10-(pre.humör||0)},
+    {need:'energi',score:10-(pre.energi||0)},
+    {need:'sömn',score:10-(pre.sömn||0)}
+  ].sort((a,b)=>b.score-a.score);
+  return scores[0]?.need||'stress';
+}
+function openGuideFromCheckin(){
+  openGuide({ need: primaryNeedFromCheckin(), title: 'Snabb hjälp' });
+}
+function openGuideTrigger(topic){
+  if(topic==='perspective_why') return openGuide({ topic, title:'Varför perspektiv?' });
+  if(topic==='tools_intro') return openGuide({ topic, need:'stress', title:'Välj verktyg' });
+  return openGuide({ topic, title:'Guide' });
 }
 function updateScreenInfo(){const w=window.innerWidth,h=window.innerHeight;const d=w>=1024?'🖥️ Dator':w>=768?'📱 iPad':'📱 Mobil';const el=document.getElementById('screen-info');if(el)el.innerText=d+' · '+w+'×'+h+'px';}
 window.addEventListener('resize',updateScreenInfo);
@@ -399,7 +420,7 @@ function renderFlowStep(root){
 function renderCheckin(){
   const pre=flowState.pre||{stress:5,humör:5,energi:5,sömn:5};
   const row=(k,l,e)=>`<div><div class="ci-label">${l}</div><div class="ci-row"><input ${flowState.preLocked?'disabled':''} type="range" min="0" max="10" value="${pre[k]}" class="ci-slider" oninput="updatePre('${k}',this.value)"><span class="ci-emoji">${e}</span><span class="ci-val">${pre[k]}</span></div></div>`;
-  return `<div class="card"><strong>Steg 1/${flowState.sessionLengthMin===3?3:4}: Check-in</strong><div class="flow-note">Samma check-in för 3/6/10 min.</div><div style="margin-top:12px;">${row('stress','Stress','😵')}${row('humör','Humör','🙂')}${row('energi','Energi','⚡')}${row('sömn','Sömnkvalitet','🌙')}</div>
+  return `<div class="card"><strong>Steg 1/${flowState.sessionLengthMin===3?3:4}: Check-in</strong><div class="flow-note">Samma check-in för 3/6/10 min.</div><button class="link-btn" onclick="openGuideFromCheckin()">Lär mer</button><div style="margin-top:12px;">${row('stress','Stress','😵')}${row('humör','Humör','🙂')}${row('energi','Energi','⚡')}${row('sömn','Sömnkvalitet','🌙')}</div>
   <button class="flow-btn" onclick="lockAndStartFlow()">Starta (${flowState.sessionLengthMin} min)</button><button class="flow-btn-ghost" onclick="flowState.step=1;renderFlow()">← Tillbaka</button></div>`;
 }
 function updatePre(k,v){flowState.pre=flowState.pre||{stress:5,humör:5,energi:5,sömn:5};flowState.pre[k]=parseInt(v,10)||0;renderFlow();}
@@ -622,5 +643,5 @@ Object.assign(window, {
   toggleSound, setVol, newQuote, filterCat, filterHelp, saveFocus, resetStats, setTheme, changePin,
   onBioToggle, onFreeTextToggle, importFile, exportAll, addGrat, addQuote, toggleHelpDetail, startFlow, startFlowAgain, renderFlow,
   lockAndStartFlow, updatePre, updateCbt, updatePost, submitFlow, viewFlowHistory,
-  clearFlowTextToday, clearFlowTextLast7
+  clearFlowTextToday, clearFlowTextLast7, openGuideTrigger, openGuideFromCheckin
 });
