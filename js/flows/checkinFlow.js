@@ -6,6 +6,7 @@ import { openGuide } from '../ui/helpOverlay.js';
 
 const NEED_KEYS = ['stress', 'humör', 'energi', 'sömn', 'tankar'];
 const NEED_LABELS = { stress: 'Stress', humör: 'Humör', energi: 'Energi', sömn: 'Sömn', tankar: 'Tankar' };
+const NEED_EMOJIS = { stress: '🫁', humör: '🙂', energi: '⚡', sömn: '🌙', tankar: '🧠' };
 const SLIDER_META = {
   stress: { left: 'Stressad', right: 'Lugn' },
   humör: { left: 'Nere', right: 'På topp' },
@@ -25,15 +26,15 @@ const microFeedbackByNeed = Object.fromEntries(NEED_KEYS.map((need) => [need, Ar
 const takeAwayByNeed = Object.fromEntries(NEED_KEYS.map((need) => [need, Array.from({ length: 10 }, (_, i) => ({ id: `${need}-tw-${i + 1}`, lines: [`Ta med dig: ${NEED_LABELS[need]} kan skifta med små steg.`, `Välj en mikropaus (${i + 1} minut) senare idag och upprepa.`] }))]));
 
 const tools = [
-  ...['4-6 andning', 'Box breathing', 'Axelsläpp', '5-4-3-2-1 grounding', 'Långsam utandning', 'Tryck fötterna i golvet'].map((t, i) => mkTool(`stress-${i}`, t, 'stress', 70 + i * 10)),
-  ...['Märk tanken', '3-sinneankare', 'Worry container', 'Tanke ≠ fakta', 'Namnge och släpp', 'Andning med fokusord'].map((t, i) => mkTool(`tankar-${i}`, t, 'tankar', 80 + i * 10)),
-  ...['Självmedkänsla 60s', 'Tacksamhetsmicro', 'Skicka ett hej', 'Vänlig hand på bröstet', 'Mjuk aktivering', 'Säg något snällt till dig'].map((t, i) => mkTool(`humor-${i}`, t, 'humör', 70 + i * 10)),
-  ...['60s rörelse', 'Kallt vatten', 'Res dig & sträck', 'Ljuspaus', 'Powerpose', 'Skaka loss'].map((t, i) => mkTool(`energi-${i}`, t, 'energi', 60 + i * 10, 'pepp')),
-  ...['4-7-8', 'Body scan mini', 'Skärm ned 1 min', 'Långsam utandning', 'Progressiv avslappning', 'Mjuk kvällsankare'].map((t, i) => mkTool(`somn-${i}`, t, 'sömn', 90 + i * 10)),
+  ...['4-6 andning', 'Box breathing', 'Axelsläpp', '5-4-3-2-1 grounding', 'Långsam utandning', 'Tryck fötterna i golvet'].map((t, i) => mkTool(`stress-${i}`, t, 'stress', 70 + i * 10, ['Andas in mjukt genom näsan i 4 sekunder.', 'Andas ut långsamt i 6 sekunder och släpp axlarna.', 'Upprepa 6–10 andetag i jämn rytm.'])),
+  ...['Märk tanken', '3-sinneankare', 'Worry container', 'Tanke ≠ fakta', 'Namnge och släpp', 'Andning med fokusord'].map((t, i) => mkTool(`tankar-${i}`, t, 'tankar', 80 + i * 10, ['Stanna upp och märk tanken som dyker upp.', 'Flytta fokus till ett sinnesintryck runt dig.', 'Säg en hjälpsam fras och återgå till nuet.'])),
+  ...['Självmedkänsla 60s', 'Tacksamhetsmicro', 'Skicka ett hej', 'Vänlig hand på bröstet', 'Mjuk aktivering', 'Säg något snällt till dig'].map((t, i) => mkTool(`humor-${i}`, t, 'humör', 70 + i * 10, ['Lägg handen på bröstet och andas lugnt.', 'Säg något vänligt till dig själv i tysthet.', 'Avsluta med en liten handling som känns snäll.'])),
+  ...['60s rörelse', 'Kallt vatten', 'Res dig & sträck', 'Ljuspaus', 'Powerpose', 'Skaka loss'].map((t, i) => mkTool(`energi-${i}`, t, 'energi', 60 + i * 10, ['Res dig upp och aktivera kroppen i lugn takt.', 'Håll tempot i cirka en minut med medveten andning.', 'Stanna och notera energi i kroppen innan du går vidare.'], 'pepp')),
+  ...['4-7-8', 'Body scan mini', 'Skärm ned 1 min', 'Långsam utandning', 'Progressiv avslappning', 'Mjuk kvällsankare'].map((t, i) => mkTool(`somn-${i}`, t, 'sömn', 90 + i * 10, ['Slut ögonen och låt kroppen få stöd.', 'Skanna av kroppen från topp till tå i lugn takt.', 'Sänk tempot ytterligare med en långsam utandning.'])),
 ];
 
-function mkTool(id, title, need, durationSec, mode = 'lugn') {
-  return { id, title, durationSec, needs: [need], mode, intensityMin: 0, intensityMax: 10, steps: ['Sätt en stabil position.', 'Följ övningen lugnt.', 'Avsluta med ett medvetet andetag.'] };
+function mkTool(id, title, need, durationSec, steps, mode = 'lugn') {
+  return { id, title, durationSec, needs: [need], mode, intensityMin: 0, intensityMax: 10, steps };
 }
 
 let flow;
@@ -50,6 +51,8 @@ export function initCheckinFlow({ router } = {}) {
     after: { stars: 0, afterSliderNeedVal: null, intensityAfter: null },
     timestamps: {},
     countdown: 0,
+    timerRunning: false,
+    toolReady: false,
   };
   render();
   return { render };
@@ -64,9 +67,16 @@ function render() {
   }
 
   const steps = flow.currentFlow === '8' ? ['Check-in', 'Fokus', 'Reflektion', 'Mikro-verktyg', 'Avslut'] : ['Check-in', 'Fokus', 'Mikro-verktyg', 'Avslut'];
-  const active = flow.step > 0 ? `<div class="flow-note">Steg ${flow.step}/${steps.length}: ${steps[flow.step - 1]}</div>` : '';
+  const showLearn = [2, 3, 4].includes(flow.step) && flow.currentFlow;
+  const learnAction = flow.step === 3 && flow.currentFlow === '8' ? 'guide-cbt' : 'guide-focus';
+  const headerRow = flow.step > 0
+    ? `<div class="step-head-row"><div class="flow-note">Steg ${flow.step}/${steps.length}</div>${showLearn ? `<button class="btn-link" data-action="${learnAction}">Lär mer</button>` : ''}</div>`
+    : '';
+  const lengthSelector = flow.currentFlow
+    ? ''
+    : `<div class="card duration-card"><strong>Välj längd</strong><div class="dur-grid"><button class="btn-primary" data-action="start-flow" data-flow="3">3 min Snabb Reset</button><button class="btn-primary" data-action="start-flow" data-flow="8">8 min Reflektion & Reset</button></div></div>`;
 
-  root.innerHTML = `<div class="card"><strong>Välj längd</strong><div class="dur-grid"><button class="flow-btn" data-action="start-flow" data-flow="3">3 min Snabb Reset</button><button class="flow-btn" data-action="start-flow" data-flow="8">8 min Reflektion & Reset</button></div>${active}</div>${renderStep()}`;
+  root.innerHTML = `<div class="checkin-flow-wrap">${lengthSelector}${flow.currentFlow ? `<div class="flow-top-row"><div class="flow-step-title">${steps[flow.step - 1]}</div><button class="btn-link" data-action="reset-flow">Byt längd</button></div>` : ''}${headerRow}${renderStep()}</div>`;
   bind(root);
 }
 
@@ -80,17 +90,26 @@ function renderStep() {
 }
 
 function renderPre() {
-  return `<div class="card">${NEED_KEYS.map((key) => `<div class="ci-block"><div class="ci-label">${NEED_LABELS[key]}</div><div class="ci-row"><span class="anchor">${SLIDER_META[key].left}</span><input type="range" min="0" max="10" value="${flow.preValues[key]}" class="ci-slider" data-action="set-pre" data-key="${key}"><span class="anchor">${SLIDER_META[key].right}</span><small class="ci-val">${flow.preValues[key]}</small></div></div>`).join('')}<div class="flow-status">${pickFeedback(flow.selectedNeed || getPrimaryNeed(flow.preValues)).text}</div><button class="flow-btn" data-action="next-pre">Fortsätt</button></div>`;
+  return `<div class="card">${NEED_KEYS.map((key) => `
+    <div class="ci-block">
+      <div class="ci-label">${NEED_LABELS[key]}</div>
+      <div class="ci-row">
+        <div class="ci-row-main"><input type="range" min="0" max="10" value="${flow.preValues[key]}" class="ci-slider" data-action="set-pre" data-key="${key}"></div>
+        <small class="ci-val">${flow.preValues[key]}</small>
+      </div>
+      <div class="ci-anchors"><span class="anchor">${SLIDER_META[key].left}</span><span class="anchor">${SLIDER_META[key].right}</span></div>
+    </div>
+  `).join('')}<div class="flow-status">${pickFeedback(flow.selectedNeed || getPrimaryNeed(flow.preValues)).text}</div><button class="btn-primary" data-action="next-pre">Fortsätt</button></div>`;
 }
 
 function renderNeed() {
   const selected = flow.selectedNeed || getPrimaryNeed(flow.preValues);
-  return `<div class="card"><strong>Välj fokus</strong><button class="link-btn" data-action="guide-focus">Lär mer</button><div class="chip-wrap">${NEED_KEYS.map((need) => `<button class="chip ${selected === need ? 'active' : ''}" data-action="set-need" data-need="${need}">${NEED_LABELS[need]}</button>`).join('')}</div><button class="flow-btn" data-action="next-need">Fortsätt</button></div>`;
+  return `<div class="card"><strong>Välj fokus</strong><div class="neo-tile-grid">${NEED_KEYS.map((need) => `<button class="neo-tile ${selected === need ? 'sel' : ''}" data-action="set-need" data-need="${need}"><span class="neo-emoji">${NEED_EMOJIS[need]}</span><span class="neo-label">${NEED_LABELS[need]}</span></button>`).join('')}</div><button class="btn-primary" data-action="next-need">Fortsätt</button></div>`;
 }
 
 function renderReflection() {
   const r = flow.reflection;
-  return `<div class="card"><strong>CBT-light</strong><button class="link-btn" data-action="guide-cbt">Lär mer</button>${renderChipSet('situation', r.situation, chips.situation)}<input class="txt-in" placeholder="Annat..." value="${r.situationOther || ''}" data-action="field" data-field="situationOther" /><div class="ci-label">Känslor (max 3)</div>${chips.emotion.map((e) => `<button class="chip ${r.emotions.includes(e) ? 'active' : ''}" data-action="toggle-emotion" data-value="${e}">${e}</button>`).join('')}<div class="ci-row"><span class="anchor">Låg</span><input type="range" min="0" max="10" value="${r.intensityBefore}" class="ci-slider" data-action="field" data-field="intensityBefore"><span class="anchor">Hög</span><small class="ci-val">${r.intensityBefore}</small></div>${renderChipSet('thought', r.thought, chips.thought)}<input class="txt-in" placeholder="Egen tanke" value="${r.thoughtOther || ''}" data-action="field" data-field="thoughtOther"/><div class="chip-wrap">${['Ja', 'Delvis', 'Osäker'].map((v) => `<button class="chip ${r.truthiness === v ? 'active' : ''}" data-action="field-chip" data-field="truthiness" data-value="${v}">${v}</button>`).join('')}</div>${renderChipSet('alternative', r.alternative, chips.alternative)}<div class="ci-row"><span class="anchor">Låg</span><input type="range" min="0" max="10" value="${r.intensityAfter}" class="ci-slider" data-action="field" data-field="intensityAfter"><span class="anchor">Hög</span><small class="ci-val">${r.intensityAfter}</small></div><button class="flow-btn-ghost" data-action="skip-text">Hoppa över skrivdelen</button><button class="flow-btn" data-action="next-reflection">Fortsätt</button></div>`;
+  return `<div class="card"><strong>CBT-light</strong>${renderChipSet('situation', r.situation, chips.situation)}<input class="txt-in" placeholder="Annat..." value="${r.situationOther || ''}" data-action="field" data-field="situationOther" /><div class="ci-label">Känslor (max 3)</div>${chips.emotion.map((e) => `<button class="chip ${r.emotions.includes(e) ? 'active' : ''}" data-action="toggle-emotion" data-value="${e}">${e}</button>`).join('')}<div class="ci-row"><div class="ci-row-main"><input type="range" min="0" max="10" value="${r.intensityBefore}" class="ci-slider" data-action="field" data-field="intensityBefore"></div><small class="ci-val">${r.intensityBefore}</small></div><div class="ci-anchors"><span class="anchor">Låg</span><span class="anchor">Hög</span></div>${renderChipSet('thought', r.thought, chips.thought)}<input class="txt-in" placeholder="Egen tanke" value="${r.thoughtOther || ''}" data-action="field" data-field="thoughtOther"/><div class="chip-wrap">${['Ja', 'Delvis', 'Osäker'].map((v) => `<button class="chip ${r.truthiness === v ? 'active' : ''}" data-action="field-chip" data-field="truthiness" data-value="${v}">${v}</button>`).join('')}</div>${renderChipSet('alternative', r.alternative, chips.alternative)}<div class="ci-row"><div class="ci-row-main"><input type="range" min="0" max="10" value="${r.intensityAfter}" class="ci-slider" data-action="field" data-field="intensityAfter"></div><small class="ci-val">${r.intensityAfter}</small></div><div class="ci-anchors"><span class="anchor">Låg</span><span class="anchor">Hög</span></div><button class="btn-secondary" data-action="skip-text">Hoppa över skrivdelen</button><button class="btn-primary" data-action="next-reflection">Fortsätt</button></div>`;
 }
 
 function renderChipSet(field, current, values) {
@@ -101,7 +120,13 @@ function renderTool() {
   const tool = flow.selectedTool || pickTool();
   flow.selectedTool = tool;
   const left = Math.max(0, flow.countdown || tool.durationSec);
-  return `<div class="card"><div class="ex-card"><div class="ex-badge">Mikro-verktyg</div><div class="ex-title">${tool.title}</div><div class="flow-note">~${tool.durationSec}s rekommenderat</div><ul class="ex-steps">${tool.steps.map((s, i) => `<li class="ex-step"><span class="ex-step-num">${i + 1}</span><span class="ex-step-txt">${s}</span></li>`).join('')}</ul></div><div class="flow-status">Tid kvar: ${left}s</div><button class="flow-btn" data-action="start-tool">Starta</button><button class="flow-btn-ghost" data-action="swap-tool">Byt verktyg</button><button class="link-btn" data-action="guide-focus">Lär mer</button><button class="flow-btn" data-action="next-tool">Fortsätt</button></div>`;
+  const timerRow = flow.toolReady
+    ? '<div class="flow-status done">Klart</div>'
+    : `<div class="flow-status">Tid kvar: ${left}s</div>`;
+  const primaryLabel = flow.timerRunning ? 'Pausa' : (flow.countdown > 0 ? 'Återuppta' : 'Starta');
+  const showContinue = flow.toolReady;
+
+  return `<div class="card"><div class="ex-card"><div class="ex-badge">MIKRO-VERKTYG</div><div class="ex-title">${tool.title}</div><div class="flow-note">~${tool.durationSec}s rekommenderat</div><ul class="ex-steps">${tool.steps.map((s, i) => `<li class="ex-step"><span class="ex-step-num">${i + 1}</span><span class="ex-step-txt">${s}</span></li>`).join('')}</ul></div>${timerRow}<div class="flow-actions"><button class="btn-primary" data-action="start-tool">${primaryLabel}</button><button class="btn-secondary" data-action="swap-tool">Byt verktyg</button><button class="btn-link" data-action="guide-focus">Lär mer</button>${showContinue ? '<button class="btn-primary" data-action="next-tool">Fortsätt</button>' : ''}${!showContinue ? '<button class="btn-secondary" data-action="mark-tool-done">Markera klar</button>' : ''}</div></div>`;
 }
 
 function renderClosing() {
@@ -113,7 +138,7 @@ function renderClosing() {
   const result = afterValue === null ? `${pre} → –` : `${pre} → ${afterValue}`;
   const r = flow.reflection;
 
-  return `<div class="card"><div class="closing-card">${(closing.lines || ['Bra jobbat.']).slice(0, 3).map((line) => `<div class="closing-line">${line}</div>`).join('')}</div><div class="flow-status"><strong>Före → Efter (${NEED_LABELS[focusNeed]}):</strong> ${result}</div>${flow.currentFlow === '8' ? `<div class="flow-note">Situation: ${r.situation || r.situationOther || '–'} · Känslor: ${(r.emotions || []).join(', ') || '–'} (${r.intensityBefore}/10) · Alternativ tanke: ${r.alternative || '–'}</div>` : ''}<div class="ci-block"><div class="ci-label">Snabb efter-skala (${NEED_LABELS[focusNeed]})</div><div class="ci-row"><span class="anchor">${SLIDER_META[focusNeed].left}</span><input type="range" min="0" max="10" value="${afterValue ?? pre}" class="ci-slider" data-action="set-after-slider"><span class="anchor">${SLIDER_META[focusNeed].right}</span><small class="ci-val">${afterValue ?? pre}</small></div></div><div class="ci-label">Hur hjälpsam var checken?</div><div class="star-row">${[1, 2, 3, 4, 5].map((n) => `<button class="chip ${flow.after.stars >= n ? 'active' : ''}" data-action="set-star" data-star="${n}">★</button>`).join('')}</div><div class="flow-status"><strong>Ta med dig:</strong><br>${takeAway.lines.join('<br>')}</div><div class="reward-pop">✅ Bra jobbat!</div><button class="flow-btn" data-action="save-log">Spara check</button></div>`;
+  return `<div class="card"><div class="closing-card">${(closing.lines || ['Bra jobbat.']).slice(0, 3).map((line) => `<div class="closing-line">${line}</div>`).join('')}</div><div class="flow-status"><strong>Före → Efter (${NEED_LABELS[focusNeed]}):</strong> ${result}</div>${flow.currentFlow === '8' ? `<div class="flow-note">Situation: ${r.situation || r.situationOther || '–'} · Känslor: ${(r.emotions || []).join(', ') || '–'} (${r.intensityBefore}/10) · Alternativ tanke: ${r.alternative || '–'}</div>` : ''}<div class="ci-block"><div class="ci-label">Snabb efter-skala (${NEED_LABELS[focusNeed]})</div><div class="ci-row"><div class="ci-row-main"><input type="range" min="0" max="10" value="${afterValue ?? pre}" class="ci-slider" data-action="set-after-slider"></div><small class="ci-val">${afterValue ?? pre}</small></div><div class="ci-anchors"><span class="anchor">${SLIDER_META[focusNeed].left}</span><span class="anchor">${SLIDER_META[focusNeed].right}</span></div></div><div class="ci-label">Hur hjälpsam var checken?</div><div class="star-row">${[1, 2, 3, 4, 5].map((n) => `<button class="chip ${flow.after.stars >= n ? 'active' : ''}" data-action="set-star" data-star="${n}">★</button>`).join('')}</div><div class="flow-status"><strong>Ta med dig:</strong><br>${takeAway.lines.join('<br>')}</div><div class="reward-pop">✅ Bra jobbat!</div><button class="btn-primary" data-action="save-log">Spara check</button></div>`;
 }
 
 function pickFeedback(need) {
@@ -139,16 +164,40 @@ function pickClosing() {
   return pickRotated(closingPool.length ? closingPool : state.dailyClosing?.closing_double || [], { keyFn: (x) => x.id, historyKey: `rot_closing_${need}`, avoidLastN: 1 }) || { lines: ['Bra jobbat.', 'Du tog hand om dig.'] };
 }
 
+function stopTimer() {
+  clearInterval(timer);
+  timer = null;
+  flow.timerRunning = false;
+}
+
+function resetFlow() {
+  stopTimer();
+  flow.currentFlow = null;
+  flow.step = 0;
+  flow.selectedNeed = null;
+  flow.selectedTool = null;
+  flow.countdown = 0;
+  flow.toolReady = false;
+}
+
 function bind(root) {
   root.querySelectorAll('[data-action="start-flow"]').forEach((el) => el.addEventListener('click', () => {
+    stopTimer();
     flow.currentFlow = el.dataset.flow;
     flow.step = 1;
     flow.timestamps.startedAt = new Date().toISOString();
     flow.selectedNeed = null;
     flow.selectedTool = null;
+    flow.countdown = 0;
+    flow.toolReady = false;
     flow.after = { stars: 0, afterSliderNeedVal: null, intensityAfter: null };
     render();
   }));
+
+  root.querySelector('[data-action="reset-flow"]')?.addEventListener('click', () => {
+    resetFlow();
+    render();
+  });
 
   root.querySelectorAll('[data-action="set-pre"]').forEach((el) => el.addEventListener('input', () => {
     flow.preValues[el.dataset.key] = Number(el.value);
@@ -162,7 +211,7 @@ function bind(root) {
   }));
 
   root.querySelector('[data-action="next-pre"]')?.addEventListener('click', () => { flow.step = 2; render(); });
-  root.querySelector('[data-action="next-need"]')?.addEventListener('click', () => { flow.selectedNeed = flow.selectedNeed || getPrimaryNeed(flow.preValues); flow.step = flow.currentFlow === '8' ? 3 : 3; render(); });
+  root.querySelector('[data-action="next-need"]')?.addEventListener('click', () => { flow.selectedNeed = flow.selectedNeed || getPrimaryNeed(flow.preValues); flow.step = 3; render(); });
   root.querySelector('[data-action="next-reflection"]')?.addEventListener('click', () => { flow.step = 4; render(); });
   root.querySelector('[data-action="next-tool"]')?.addEventListener('click', () => { flow.step = flow.currentFlow === '8' ? 5 : 4; render(); });
 
@@ -197,19 +246,40 @@ function bind(root) {
   });
 
   root.querySelector('[data-action="start-tool"]')?.addEventListener('click', () => {
-    clearInterval(timer);
-    const duration = flow.selectedTool?.durationSec || 60;
-    flow.countdown = duration;
+    if (flow.timerRunning) {
+      stopTimer();
+      render();
+      return;
+    }
+
+    const tool = flow.selectedTool || pickTool();
+    flow.selectedTool = tool;
+    if (!flow.countdown || flow.countdown <= 0) flow.countdown = tool.durationSec;
+    flow.toolReady = false;
+    flow.timerRunning = true;
     timer = setInterval(() => {
       flow.countdown -= 1;
-      if (flow.countdown <= 0) clearInterval(timer);
+      if (flow.countdown <= 0) {
+        flow.countdown = 0;
+        flow.toolReady = true;
+        stopTimer();
+      }
       render();
     }, 1000);
+    render();
+  });
+
+  root.querySelector('[data-action="mark-tool-done"]')?.addEventListener('click', () => {
+    flow.toolReady = true;
+    stopTimer();
+    render();
   });
 
   root.querySelector('[data-action="swap-tool"]')?.addEventListener('click', () => {
+    stopTimer();
     flow.selectedTool = pickTool();
     flow.countdown = 0;
+    flow.toolReady = false;
     render();
   });
 
@@ -249,7 +319,6 @@ function saveLog() {
   };
   logs.push(entry);
   saveJSON('dailyFlowLogs', logs);
-  flow.step = 0;
-  flow.currentFlow = null;
+  resetFlow();
   render();
 }
