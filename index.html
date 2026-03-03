@@ -255,24 +255,25 @@ body.dark .closing-line{border-color:rgba(140,230,80,.1);}
 
 /* Guide overlay */
 body.guide-open #content{overflow:hidden;}
-.ovl{position:fixed;inset:0;z-index:1200;display:flex;align-items:flex-end;justify-content:center;}
-.ovl.hidden{display:none;}
-.ovl-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.42);backdrop-filter:blur(2px);}
-.ovl-panel{position:relative;width:min(720px,100%);max-height:min(82vh,760px);background:var(--card);border:1px solid var(--border);border-radius:20px 20px 0 0;box-shadow:var(--shadow-lg);display:flex;flex-direction:column;animation:ovlUp .22s ease-out;}
-.ovl-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border);}
+.ovl{position:fixed;inset:0;z-index:1200;display:flex;align-items:flex-end;justify-content:center;pointer-events:none;overscroll-behavior:contain;}
+.ovl.hidden{visibility:hidden;}
+.ovl-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.42);backdrop-filter:blur(2px);opacity:0;transition:opacity .26s ease;}
+.ovl-panel{position:relative;width:min(560px,100%);height:min(40vh,82vh);max-height:min(85vh,760px);background:var(--card);border:1px solid var(--border);border-radius:26px 26px 0 0;box-shadow:var(--shadow-lg);display:flex;flex-direction:column;transform:translateY(110%);transition:transform .28s cubic-bezier(.22,.9,.32,1),height .28s cubic-bezier(.22,.9,.32,1);will-change:transform,height;padding-bottom:env(safe-area-inset-bottom,0);touch-action:none;}
+.ovl.is-open{pointer-events:auto;visibility:visible;}
+.ovl.is-open .ovl-backdrop{opacity:1;}
+.ovl.is-open .ovl-panel{transform:translateY(0);}
+.ovl-handle{width:44px;height:5px;border-radius:999px;background:var(--border);margin:10px auto 8px;cursor:grab;flex-shrink:0;}
+.ovl-panel:active .ovl-handle{cursor:grabbing;}
+.ovl-head{display:flex;align-items:center;justify-content:space-between;padding:10px 16px 12px;border-bottom:1px solid var(--border);touch-action:none;}
 .ovl-title{font-size:1.05rem;font-weight:700;color:var(--text);}
 .ovl-close{border:none;background:none;color:var(--text2);font-size:1.4rem;cursor:pointer;line-height:1;padding:4px;}
-.ovl-body{padding:14px 16px;overflow:auto;display:grid;gap:10px;}
+.ovl-body{padding:14px 16px;overflow:auto;display:grid;gap:10px;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y;flex:1;min-height:0;}
 .ovl-card{background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:12px;}
 .ovl-card h3{font-size:.95rem;margin-bottom:6px;color:var(--text);}
 .ovl-card p{font-size:.88rem;color:var(--text2);line-height:1.5;}
 .ovl-foot{padding:12px 16px;border-top:1px solid var(--border);}
 .link-btn{border:none;background:none;color:var(--accent);font:inherit;font-weight:600;cursor:pointer;padding:4px 0;}
-@keyframes ovlUp{from{transform:translateY(16px);opacity:0;}to{transform:translateY(0);opacity:1;}}
-@media(min-width:769px){
-  .ovl{align-items:center;padding:16px;}
-  .ovl-panel{border-radius:20px;}
-}
+@media(min-width:769px){.ovl-panel{border-left-width:1px;border-right-width:1px;}}
 </style>
 </head>
 <body>
@@ -536,6 +537,7 @@ body.guide-open #content{overflow:hidden;}
 <div id="guideOverlay" class="ovl hidden" aria-hidden="true">
   <div class="ovl-backdrop" data-ovl-close></div>
   <div class="ovl-panel" role="dialog" aria-modal="true" aria-labelledby="ovlTitle" tabindex="-1">
+    <div class="ovl-handle" aria-hidden="true"></div>
     <div class="ovl-head">
       <div id="ovlTitle" class="ovl-title">Guide</div>
       <button class="ovl-close" data-ovl-close aria-label="Stäng">✕</button>
