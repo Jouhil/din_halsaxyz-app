@@ -14,11 +14,11 @@ const FOCUS_META = {
   tankar: { label: 'Tankar', subtitle: 'Klargör ditt sinne', emoji: '💭', dim: 'thoughts' },
 };
 const SLIDER_META = {
-  stress: { left: 'Stressad', right: 'Lugn' },
-  humör: { left: 'Nere', right: 'På topp' },
-  energi: { left: 'Trött', right: 'Pigg' },
-  sömn: { left: 'Dålig', right: 'Utvilad' },
-  tankar: { left: 'Fast i tankar', right: 'Närvarande' },
+  stress: { left: 'Stressad', right: 'Lugn', emoji: '😰', dim: 'stress' },
+  humör: { left: 'Nere', right: 'På topp', emoji: '🙂', dim: 'mood' },
+  energi: { left: 'Trött', right: 'Pigg', emoji: '⚡', dim: 'energy' },
+  sömn: { left: 'Dålig', right: 'Utvilad', emoji: '🌙', dim: 'sleep' },
+  tankar: { left: 'Fast i tankar', right: 'Närvarande', emoji: '💭', dim: 'thoughts' },
 };
 
 const chips = {
@@ -45,8 +45,9 @@ function mkTool(id, title, need, durationSec, steps, mode = 'lugn') {
 
 let flow;
 let timer;
+let saveToastTimer;
 
-export function initCheckinFlow({ router } = {}) {
+export function initCheckinFlow() {
   flow = {
     currentFlow: null,
     step: 0,
@@ -59,6 +60,7 @@ export function initCheckinFlow({ router } = {}) {
     countdown: 0,
     timerRunning: false,
     toolReady: false,
+    saveToast: false,
   };
   render();
   return { render };
@@ -72,80 +74,105 @@ function render() {
     return;
   }
 
-  const steps = flow.currentFlow === '8' ? ['Check-in', 'Fokus', 'Reflektion', 'Mikro-verktyg', 'Avslut'] : ['Check-in', 'Fokus', 'Mikro-verktyg', 'Avslut'];
-  const headerRow = flow.step > 0
-    ? `<div class="step-head-row"><div class="flow-note">Steg ${flow.step}/${steps.length}</div></div>`
-    : '';
-  const lengthSelector = flow.currentFlow
-    ? ''
-    : `<div class="card duration-card"><strong>Välj längd</strong><div class="dur-grid"><button class="neo-btn neo-btn--filled neo-btn--cta" data-action="start-flow" data-flow="3">✨ 3 min Snabb Reset</button><button class="neo-btn neo-btn--filled neo-btn--cta" data-action="start-flow" data-flow="8">🌱 8 min Reflektion & Reset</button></div></div>`;
+  const steps = flow.currentFlow === '8'
+    ? ['Check-in', 'Fokus', 'Reflektion', 'Mikro-verktyg', 'Avslut']
+    : ['Check-in', 'Fokus', 'Mikro-verktyg', 'Avslut'];
 
-  root.innerHTML = `<div class="checkin-flow-wrap">${lengthSelector}${flow.currentFlow ? `<div class="flow-top-row"><div class="flow-step-title">${steps[flow.step - 1]}</div></div>` : ''}${headerRow}${renderStep()}</div>`;
+  const headerRow = flow.step > 0 ? `<div class="step-head-row"><div class="flow-note">Steg ${flow.step}/${steps.length}</div></div>` : '';
+
+  const topHeader = flow.currentFlow
+    ? `<div class="flow-top-row"><div class="flow-step-title">${steps[flow.step - 1] || 'Check-in'}</div>${showLengthSwitch() ? '<button class="neo-btn neo-btn--outline neo-btn--sm" data-action="reset-flow">↺ Byt längd</button>' : ''}</div>${headerRow}`
+    : '';
+
+  const startTiles = flow.currentFlow ? '' : renderStartTiles();
+
+  let content = '';
+  if (flow.currentFlow) {
+    if (flow.step === 1) content = renderPreStep();
+    else if (flow.step === 2) content = renderFocusStep();
+    else if (flow.currentFlow === '8' && flow.step === 3) content = renderReflectionStep();
+    else if ((flow.currentFlow === '8' && flow.step === 4) || (flow.currentFlow === '3' && flow.step === 3)) content = renderToolStep();
+    else content = renderClosing();
+  }
+
+  const successToast = flow.saveToast ? '<div class="reward-pop">✅ Bra jobbat!</div>' : '';
+  root.innerHTML = `<div class="checkin-flow-wrap">${startTiles}${successToast}${topHeader}${content}</div>`;
   bind(root);
 }
 
-function renderStep() {
-  if (!flow.currentFlow) return '';
-  if (flow.step === 1) return renderPre();
-  if (flow.step === 2) return renderNeed();
-  if (flow.step === 3 && flow.currentFlow === '8') return renderReflection();
-  if ((flow.step === 3 && flow.currentFlow === '3') || (flow.step === 4 && flow.currentFlow === '8')) return renderTool();
-  return renderClosing();
+function showLengthSwitch() {
+  if (!flow.currentFlow) return false;
+  if (flow.currentFlow === '8') return flow.step >= 1 && flow.step <= 4;
+  return flow.step >= 1 && flow.step <= 3;
 }
 
-function renderPre() {
-  return `<div class="card">${NEED_KEYS.map((key) => `
-    <div class="ci-block">
-      <div class="ci-label">${NEED_LABELS[key]}</div>
-      <div class="ci-row">
-        <div class="ci-row-main"><input type="range" min="0" max="10" value="${flow.preValues[key]}" class="ci-slider" data-action="set-pre" data-key="${key}"></div>
-        <small class="ci-val">${flow.preValues[key]}</small>
-      </div>
-      <div class="ci-anchors"><span class="anchor">${SLIDER_META[key].left}</span><span class="anchor">${SLIDER_META[key].right}</span></div>
-    </div>
-  `).join('')}<div class="flow-status">${pickFeedback(flow.selectedNeed || getPrimaryNeed(flow.preValues)).text}</div><div class="flow-actions"><button class="neo-btn neo-btn--filled neo-btn--cta" data-action="next-pre">Fortsätt →</button><button class="neo-btn neo-btn--outline neo-btn--sm" data-action="reset-flow">↺ Byt längd</button></div></div>`;
+function renderStartTiles() {
+  return `<div class="card duration-card"><div class="ci-label">Välj längd</div><div class="dur-grid"><button class="neo-tile duration-tile duration-tile--3" data-action="start-flow" data-flow="3"><div class="row-main"><strong>⏱️ 3 min Snabb Reset</strong><span class="row-sub">Snabb reglering</span></div></button><button class="neo-tile duration-tile duration-tile--8" data-action="start-flow" data-flow="8"><div class="row-main"><strong>⏱️✨ 8 min Reflektion & Reset</strong><span class="row-sub">Reflektion + reset</span></div></button></div></div>`;
 }
 
-function renderNeed() {
-  const selected = flow.selectedNeed;
-  const ctaLabel = selected ? `Fortsätt med ${FOCUS_META[selected].emoji} ${FOCUS_META[selected].label}` : 'Välj fokus för att fortsätta';
-  return `<div class="card"><strong>Välj fokus</strong><div class="focus-list">${NEED_KEYS.map((need) => {
+function renderPreStep() {
+  const primary = flow.selectedNeed || getPrimaryNeed(flow.preValues);
+  return `<div class="card">${NEED_KEYS.map((key) => {
+    const meta = SLIDER_META[key];
+    return `<div class="ci-row" data-dim="${meta.dim}"><div class="ci-row-main"><div class="ci-label">${meta.emoji} ${NEED_LABELS[key]}</div><input type="range" min="0" max="10" value="${flow.preValues[key]}" class="ci-slider" data-action="set-pre" data-key="${key}"></div><small class="ci-val">${flow.preValues[key]}</small></div><div class="ci-anchors"><span class="anchor">${meta.left}</span><span class="anchor">${meta.right}</span></div>`;
+  }).join('')}<div class="flow-status">${pickFeedback(primary).text}</div><div class="flow-actions"><button class="neo-btn neo-btn--filled neo-btn--cta" data-action="next-pre">Fortsätt →</button></div></div>`;
+}
+
+function renderFocusStep() {
+  const selected = flow.selectedNeed || getPrimaryNeed(flow.preValues);
+  const ctaLabel = flow.currentFlow === '8' ? 'Nästa: Reflektion →' : 'Nästa: Mikro-verktyg →';
+  return `<div class="card"><div class="focus-list">${NEED_KEYS.map((need) => {
     const meta = FOCUS_META[need];
-    return `<button class="row-btn neo-tile ${selected === need ? 'is-selected' : ''}" data-dim="${meta.dim}" data-action="set-need" data-need="${need}" aria-pressed="${selected === need}"><span class="row-emoji">${meta.emoji}</span><span class="row-main"><strong>${meta.label}</strong><span class="row-sub">${meta.subtitle}</span></span><span class="row-check" aria-hidden="true">✓</span></button>`;
-  }).join('')}</div><div class="flow-actions"><button class="neo-btn neo-btn--filled neo-btn--cta" data-action="next-need" ${selected ? '' : 'disabled'}>${ctaLabel}</button><button class="neo-btn neo-btn--outline neo-btn--sm" data-action="reset-flow">↺ Byt längd</button></div></div>`;
+    const isSelected = selected === need;
+    return `<button class="row-btn ${isSelected ? 'is-selected' : ''}" data-action="set-need" data-need="${need}" data-dim="${meta.dim}"><span class="row-emoji">${meta.emoji}</span><span class="row-main"><strong>${meta.label}</strong><span class="row-sub">${meta.subtitle}</span></span><span class="row-check" aria-hidden="true">✓</span></button>`;
+  }).join('')}</div><div class="flow-actions"><button class="neo-btn neo-btn--filled neo-btn--cta" data-action="next-need" ${selected ? '' : 'disabled'}>${ctaLabel}</button></div></div>`;
 }
 
-function renderReflection() {
+function renderChipSet(field, selectedValue, options) {
+  return `<div class="chip-wrap">${options.map((option) => `<button class="chip ${selectedValue === option ? 'active' : ''}" data-action="field-chip" data-field="${field}" data-value="${option}">${option}</button>`).join('')}</div>`;
+}
+
+function renderReflectionStep() {
   const r = flow.reflection;
   const thoughtIsCustom = r.thought === 'Egen tanke';
-  return `<div class="card"><strong>CBT-light</strong>
-  <div class="ci-block"><div class="ci-label">Vad triggar detta?</div>${renderChipSet('situation', r.situation, chips.situation)}${r.situation === 'Annat' ? '<input class="txt-in txt-in-sm" placeholder="Skriv kort (valfritt)…" value="' + (r.situationOther || '') + '" data-action="field" data-field="situationOther" />' : ''}</div>
-  <div class="ci-block"><div class="ci-label">Vad känner du? (max 3)</div><div class="chip-wrap">${chips.emotion.map((e) => `<button class="chip ${r.emotions.includes(e) ? 'active' : ''}" data-action="toggle-emotion" data-value="${e}">${e}</button>`).join('')}</div><div class="ci-row"><div class="ci-row-main"><input type="range" min="0" max="10" value="${r.intensityBefore}" class="ci-slider" data-action="field" data-field="intensityBefore"></div><small class="ci-val">${r.intensityBefore}</small></div><div class="ci-anchors"><span class="anchor">Låg</span><span class="anchor">Stark</span></div><div class="flow-note">Det här hjälper dig se om det blir lättare efteråt.</div></div>
-  <div class="ci-block"><div class="ci-label">Vilken tanke dyker upp?</div>${renderChipSet('thought', r.thought, chips.thought)}${thoughtIsCustom ? '<input class="txt-in txt-in-sm" placeholder="Skriv egen (valfritt)…" value="' + (r.thoughtOther || '') + '" data-action="field" data-field="thoughtOther"/>' : ''}</div>
-  <div class="ci-block"><div class="ci-label">Välj en mer hjälpsam tanke</div>${renderChipSet('alternative', r.alternative, chips.alternative)}<div class="flow-status">${r.alternative || 'Välj en tanke som hjälper dig här och nu.'}</div></div>
-  <div class="ci-block"><div class="ci-label">Hur stark känns känslan nu?</div><div class="ci-row"><div class="ci-row-main"><input type="range" min="0" max="10" value="${r.intensityAfter}" class="ci-slider" data-action="field" data-field="intensityAfter"></div><small class="ci-val">${r.intensityAfter}</small></div><div class="ci-anchors"><span class="anchor">Låg</span><span class="anchor">Stark</span></div><div class="flow-note">Före: ${r.intensityBefore}/10 → Efter: ${r.intensityAfter}/10</div></div>
-  <div class="flow-actions"><button class="neo-btn neo-btn--outline neo-btn--cta" data-action="skip-text">Hoppa över skrivdelen</button><button class="neo-link" data-action="guide-cbt">❓ Lär mer</button><button class="neo-btn neo-btn--filled neo-btn--cta" data-action="next-reflection">Fortsätt →</button><button class="neo-btn neo-btn--outline neo-btn--sm" data-action="reset-flow">↺ Byt längd</button></div></div>`;
+  return `<div class="card">
+    <div class="ci-block"><div class="ci-label">Vad triggar detta?</div>${renderChipSet('situation', r.situation, chips.situation)}${r.situation === 'Annat' ? `<input class="txt-in txt-in-sm" placeholder="Skriv kort (valfritt)…" value="${r.situationOther || ''}" data-action="field" data-field="situationOther" />` : ''}</div>
+    <div class="ci-block"><div class="ci-label">Vad känner du? (max 3)</div><div class="chip-wrap">${chips.emotion.map((emotion) => `<button class="chip ${r.emotions.includes(emotion) ? 'active' : ''}" data-action="toggle-emotion" data-value="${emotion}">${emotion}</button>`).join('')}</div><div class="ci-row"><div class="ci-row-main"><input type="range" min="0" max="10" value="${r.intensityBefore}" class="ci-slider" data-action="field" data-field="intensityBefore"></div><small class="ci-val">${r.intensityBefore}</small></div><div class="ci-anchors"><span class="anchor">Låg</span><span class="anchor">Stark</span></div><div class="flow-note">Det här hjälper dig se om det blir lättare efteråt.</div></div>
+    <div class="ci-block"><div class="ci-label">Vilken tanke dyker upp?</div>${renderChipSet('thought', r.thought, chips.thought)}${thoughtIsCustom ? `<input class="txt-in txt-in-sm" placeholder="Skriv egen (valfritt)…" value="${r.thoughtOther || ''}" data-action="field" data-field="thoughtOther"/>` : ''}</div>
+    <div class="ci-block"><div class="ci-label">Vad kan vara en hjälpsam tanke?</div>${renderChipSet('alternative', r.alternative, chips.alternative)}</div>
+    <div class="ci-block"><div class="ci-label">Hur stark känns känslan nu?</div><div class="ci-row"><div class="ci-row-main"><input type="range" min="0" max="10" value="${r.intensityAfter}" class="ci-slider" data-action="field" data-field="intensityAfter"></div><small class="ci-val">${r.intensityAfter}</small></div><div class="ci-anchors"><span class="anchor">Låg</span><span class="anchor">Stark</span></div><div class="flow-note">Före: ${r.intensityBefore}/10 → Efter: ${r.intensityAfter}/10</div></div>
+    <div class="flow-actions"><button class="neo-btn neo-btn--outline neo-btn--cta" data-action="skip-text">Hoppa över skrivdelen</button><button class="neo-link" data-action="guide-cbt">❓ Lär mer</button><button class="neo-btn neo-btn--filled neo-btn--cta" data-action="next-reflection">Fortsätt →</button></div>
+  </div>`;
 }
 
-function renderChipSet(field, current, values) {
-  return `<div class="chip-wrap">${values.map((value) => `<button class="chip ${current === value ? 'active' : ''}" data-action="field-chip" data-field="${field}" data-value="${value}">${value}</button>`).join('')}</div>`;
+function formatTime(sec) {
+  const minutes = Math.floor(sec / 60);
+  const seconds = sec % 60;
+  return `${minutes}:${String(seconds).padStart(2, '0')}`;
 }
 
-function renderTool() {
+function renderToolStep() {
   const tool = flow.selectedTool || pickTool();
   flow.selectedTool = tool;
-  const left = Math.max(0, flow.countdown || tool.durationSec);
-  const total = tool.durationSec || 1;
-  const progress = Math.max(0, Math.min(100, ((total - left) / total) * 100));
-  const mm = Math.floor(left / 60);
-  const ss = `${left % 60}`.padStart(2, '0');
-  const timerRow = flow.toolReady
-    ? '<div class="flow-status done">✅ Klar</div>'
-    : `<div class="tool-progress"><div class="tool-progress-bar"><span style="width:${progress.toFixed(1)}%"></span></div><div class="tool-time">Tid kvar: <span>${mm}:${ss}</span></div></div>`;
-  const primaryLabel = flow.timerRunning ? '⏸ Pausa' : '▶ Fortsätt';
-  const showContinue = flow.toolReady;
 
-  return `<div class="card"><div class="ex-card"><div class="ex-badge">MIKRO-VERKTYG</div><div class="ex-title">${tool.title}</div><div class="flow-note">~${tool.durationSec}s rekommenderat</div><ul class="ex-steps">${tool.steps.map((s, i) => `<li class="ex-step"><span class="ex-step-num">${i + 1}</span><span class="ex-step-txt">${s}</span></li>`).join('')}</ul></div>${timerRow}<div class="flow-actions"><button class="neo-btn neo-btn--filled neo-btn--cta" data-action="start-tool">${primaryLabel}</button><button class="neo-btn neo-btn--outline neo-btn--cta" data-action="swap-tool">🔁 Byt verktyg</button><button class="neo-link" data-action="guide-focus">❓ Lär mer</button>${!showContinue ? '<button class="neo-btn neo-btn--soft neo-btn--sm" data-action="mark-tool-done">✅ Markera klar</button>' : ''}${showContinue ? '<button class="neo-btn neo-btn--filled neo-btn--cta" data-action="next-tool">Fortsätt →</button>' : ''}<button class="neo-btn neo-btn--outline neo-btn--sm" data-action="reset-flow">↺ Byt längd</button></div></div>`;
+  const progress = tool.durationSec > 0 ? Math.round(((tool.durationSec - flow.countdown) / tool.durationSec) * 100) : 0;
+  const remaining = formatTime(flow.countdown || tool.durationSec);
+  const isDone = flow.toolReady || flow.countdown === 0;
+
+  return `<div class="card">
+    <div class="neo-card micro-tool-card">
+      <div class="ex-badge">MIKRO-VERKTYG</div>
+      <div class="micro-tool-head"><div class="ex-title">${tool.title}</div><button class="neo-btn neo-btn--soft neo-btn--sm" data-action="start-tool">${flow.timerRunning ? '⏸ Pausa' : '▶ Fortsätt'}</button></div>
+      <div class="flow-note">~${tool.durationSec}s rekommenderat</div>
+      <ul class="ex-steps">${tool.steps.map((step, i) => `<li class="ex-step"><span class="ex-step-num">${i + 1}</span><span class="ex-step-txt">${step}</span></li>`).join('')}</ul>
+      <div class="tool-progress"><div class="tool-progress-bar"><span style="width:${Math.max(0, Math.min(progress, 100))}%"></span></div><div class="tool-time">Tid kvar: <span>${remaining}</span></div></div>
+    </div>
+    <div class="flow-actions">
+      <button class="neo-btn neo-btn--outline neo-btn--cta" data-action="swap-tool">🔁 Byt verktyg</button>
+      <button class="neo-link" data-action="guide-focus">❓ Lär mer</button>
+      ${isDone ? '<button class="neo-btn neo-btn--filled neo-btn--cta" data-action="next-tool">Fortsätt →</button>' : '<button class="neo-btn neo-btn--filled neo-btn--cta" data-action="mark-tool-done">✅ Markera klar</button>'}
+    </div>
+  </div>`;
 }
 
 function renderClosing() {
@@ -153,7 +180,13 @@ function renderClosing() {
   const takeAway = pickTakeAway();
   const r = flow.reflection;
 
-  return `<div class="card"><div class="closing-card">${(closing.lines || ['Bra jobbat.']).slice(0, 3).map((line) => `<div class="closing-line">${line}</div>`).join('')}</div>${flow.currentFlow === '8' ? `<div class="flow-note">Situation: ${r.situation || r.situationOther || '–'} · Känslor: ${(r.emotions || []).join(', ') || '–'} (${r.intensityBefore}/10) · Alternativ tanke: ${r.alternative || '–'} · Efter: ${r.intensityAfter}/10</div>` : ''}<div class="ci-label">Hur hjälpsam var checken?</div><div class="star-row">${[1, 2, 3, 4, 5].map((n) => `<button class="chip ${flow.after.stars >= n ? 'active' : ''}" data-action="set-star" data-star="${n}">★</button>`).join('')}</div><div class="flow-status"><strong>Ta med dig:</strong><br>${takeAway.lines.join('<br>')}</div><div class="reward-pop"><span aria-hidden="true">✅</span> Bra jobbat!</div><div class="flow-actions"><button class="neo-btn neo-btn--filled neo-btn--cta" data-action="save-log">💾 Spara check</button><button class="neo-btn neo-btn--outline neo-btn--sm" data-action="reset-flow">↺ Byt längd</button></div></div>`;
+  return `<div class="card closing-layout">
+    <div class="neo-card">${(closing.lines || ['Bra jobbat.']).slice(0, 3).map((line) => `<div class="closing-line">${line}</div>`).join('')}</div>
+    ${flow.currentFlow === '8' ? `<div class="flow-note">Situation: ${r.situation || r.situationOther || '–'} · Känslor: ${(r.emotions || []).join(', ') || '–'} (${r.intensityBefore}/10) · Alternativ tanke: ${r.alternative || '–'} · Efter: ${r.intensityAfter}/10</div>` : ''}
+    <div class="closing-rating"><div class="ci-label">Hur hjälpsam var checken?</div><div class="star-row">${[1, 2, 3, 4, 5].map((n) => `<button class="chip ${flow.after.stars >= n ? 'active' : ''}" data-action="set-star" data-star="${n}">★</button>`).join('')}</div></div>
+    <div class="neo-card"><div class="flow-status"><strong>Ta med dig:</strong><br>${takeAway.lines.join('<br>')}</div></div>
+    <div class="flow-actions"><button class="neo-btn neo-btn--filled neo-btn--cta" data-action="save-log">💾 Spara check</button></div>
+  </div>`;
 }
 
 function pickFeedback(need) {
@@ -185,12 +218,13 @@ function stopTimer() {
   flow.timerRunning = false;
 }
 
-function ensureToolAutoStart() {
-  if (flow.step !== 4 && !(flow.currentFlow === '3' && flow.step === 3)) return;
-  if (flow.toolReady || flow.timerRunning) return;
+function startToolTimer(restart = false) {
   const tool = flow.selectedTool || pickTool();
   flow.selectedTool = tool;
-  flow.countdown = tool.durationSec;
+  if (restart || !flow.countdown || flow.countdown <= 0) {
+    flow.countdown = tool.durationSec;
+  }
+  flow.toolReady = false;
   flow.timerRunning = true;
   clearInterval(timer);
   timer = setInterval(() => {
@@ -204,14 +238,22 @@ function ensureToolAutoStart() {
   }, 1000);
 }
 
+function ensureToolAutoStart() {
+  if (flow.step !== 4 && !(flow.currentFlow === '3' && flow.step === 3)) return;
+  if (flow.toolReady || flow.timerRunning) return;
+  startToolTimer(true);
+}
+
 function resetFlow() {
   stopTimer();
+  clearTimeout(saveToastTimer);
   flow.currentFlow = null;
   flow.step = 0;
   flow.selectedNeed = null;
   flow.selectedTool = null;
   flow.countdown = 0;
   flow.toolReady = false;
+  flow.saveToast = false;
 }
 
 function bind(root) {
@@ -254,7 +296,7 @@ function bind(root) {
   root.querySelector('[data-action="next-reflection"]')?.addEventListener('click', () => { flow.step = 4; ensureToolAutoStart(); render(); });
   root.querySelector('[data-action="next-tool"]')?.addEventListener('click', () => { flow.step = flow.currentFlow === '8' ? 5 : 4; render(); });
 
-  root.querySelector('[data-action="guide-focus"]')?.addEventListener('click', () => openGuide({ need: flow.selectedNeed || getPrimaryNeed(flow.preValues), title: 'Snabb hjälp' }));
+  root.querySelector('[data-action="guide-focus"]')?.addEventListener('click', () => openGuide({ need: flow.selectedNeed || getPrimaryNeed(flow.preValues), title: 'Snabb hjälp', source: 'checkin' }));
   root.querySelector('[data-action="guide-cbt"]')?.addEventListener('click', () => openGuide({ topic: 'cbt_light', title: 'Hur funkar detta?' }));
 
   root.querySelectorAll('[data-action="field"]').forEach((el) => el.addEventListener('input', () => {
@@ -289,21 +331,7 @@ function bind(root) {
       render();
       return;
     }
-
-    const tool = flow.selectedTool || pickTool();
-    flow.selectedTool = tool;
-    if (!flow.countdown || flow.countdown <= 0) flow.countdown = tool.durationSec;
-    flow.toolReady = false;
-    flow.timerRunning = true;
-    timer = setInterval(() => {
-      flow.countdown -= 1;
-      if (flow.countdown <= 0) {
-        flow.countdown = 0;
-        flow.toolReady = true;
-        stopTimer();
-      }
-      render();
-    }, 1000);
+    startToolTimer(false);
     render();
   });
 
@@ -314,12 +342,9 @@ function bind(root) {
   });
 
   root.querySelector('[data-action="swap-tool"]')?.addEventListener('click', () => {
-    const wasPaused = !flow.timerRunning;
     stopTimer();
     flow.selectedTool = pickTool();
-    flow.countdown = flow.selectedTool.durationSec;
-    flow.toolReady = false;
-    if (!wasPaused) ensureToolAutoStart();
+    startToolTimer(true);
     render();
   });
 
@@ -362,6 +387,12 @@ function saveLog() {
   };
   logs.push(entry);
   saveJSON('dailyFlowLogs', logs);
-  resetFlow();
+
+  flow.saveToast = true;
   render();
+  clearTimeout(saveToastTimer);
+  saveToastTimer = window.setTimeout(() => {
+    resetFlow();
+    render();
+  }, 1200);
 }
