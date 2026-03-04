@@ -149,7 +149,12 @@ state.myQuotes=myQuotes;
 let currentTheme=getItem('theme','auto');
 state.currentTheme=currentTheme;
 function isNight(){const h=new Date().getHours();return h>=19||h<7;}
-function applyTheme(){document.body.classList.toggle('dark',currentTheme==='dark'||(currentTheme==='auto'&&isNight()));}
+function applyTheme(){
+  const isDark=currentTheme==='dark'||(currentTheme==='auto'&&isNight());
+  document.body.classList.toggle('dark',isDark);
+  document.body.classList.toggle('surface--dark',isDark);
+  document.body.classList.toggle('surface--light',!isDark);
+}
 function setTheme(t){currentTheme=t;state.currentTheme=t;setItem('theme',t);applyTheme();document.querySelectorAll('.theme-opt').forEach(b=>b.classList.remove('active'));document.getElementById('th-'+t).classList.add('active');}
 setInterval(()=>{if(currentTheme==='auto')applyTheme();},60000);
 

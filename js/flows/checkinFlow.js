@@ -7,11 +7,11 @@ import { openGuide } from '../ui/helpOverlay.js';
 const NEED_KEYS = ['stress', 'humör', 'energi', 'sömn', 'tankar'];
 const NEED_LABELS = { stress: 'Stress', humör: 'Humör', energi: 'Energi', sömn: 'Sömn', tankar: 'Tankar' };
 const FOCUS_META = {
-  stress: { label: 'Lugn & ro', subtitle: 'Hantera stress och oro', emoji: '🌿', bg: 'rgba(76, 175, 80, 0.12)', active: '#3b8f45', color: '#2a6b32' },
-  humör: { label: 'Humör', subtitle: 'Stärk ditt välmående', emoji: '☀️', bg: 'rgba(255, 193, 7, 0.12)', active: '#d29516', color: '#9f6f07' },
-  energi: { label: 'Energi', subtitle: 'Öka din vitalitet', emoji: '⚡', bg: 'rgba(255, 152, 0, 0.12)', active: '#dc7f12', color: '#9b5804' },
-  sömn: { label: 'Sömnkvalitet', subtitle: 'Förbättra din återhämtning', emoji: '🌙', bg: 'rgba(103, 58, 183, 0.12)', active: '#6b4eb0', color: '#4d3589' },
-  tankar: { label: 'Tankar', subtitle: 'Klargör ditt sinne', emoji: '💭', bg: 'rgba(33, 150, 243, 0.12)', active: '#2c7fc4', color: '#1f5f92' },
+  stress: { label: 'Lugn & ro', subtitle: 'Hantera stress och oro', emoji: '🌿', dim: 'stress' },
+  humör: { label: 'Humör', subtitle: 'Stärk ditt välmående', emoji: '☀️', dim: 'mood' },
+  energi: { label: 'Energi', subtitle: 'Öka din vitalitet', emoji: '⚡', dim: 'energy' },
+  sömn: { label: 'Sömnkvalitet', subtitle: 'Förbättra din återhämtning', emoji: '🌙', dim: 'sleep' },
+  tankar: { label: 'Tankar', subtitle: 'Klargör ditt sinne', emoji: '💭', dim: 'thoughts' },
 };
 const SLIDER_META = {
   stress: { left: 'Stressad', right: 'Lugn' },
@@ -76,13 +76,13 @@ function render() {
   const showLearn = flow.step === (flow.currentFlow === '8' ? 4 : 3) && flow.currentFlow;
   const learnAction = 'guide-focus';
   const headerRow = flow.step > 0
-    ? `<div class="step-head-row"><div class="flow-note">Steg ${flow.step}/${steps.length}</div>${showLearn ? `<button class="btn-link" data-action="${learnAction}">Lär mer</button>` : ''}</div>`
+    ? `<div class="step-head-row"><div class="flow-note">Steg ${flow.step}/${steps.length}</div>${showLearn ? `<button class="btn btn--outline btn--sm btn--inline" data-action="${learnAction}">Lär mer</button>` : ''}</div>`
     : '';
   const lengthSelector = flow.currentFlow
     ? ''
-    : `<div class="card duration-card"><strong>Välj längd</strong><div class="dur-grid"><button class="btn-primary" data-action="start-flow" data-flow="3">3 min Snabb Reset</button><button class="btn-primary" data-action="start-flow" data-flow="8">8 min Reflektion & Reset</button></div></div>`;
+    : `<div class="card duration-card"><strong>Välj längd</strong><div class="dur-grid"><button class="btn btn--filled btn--cta" data-action="start-flow" data-flow="3">3 min Snabb Reset</button><button class="btn btn--filled btn--cta" data-action="start-flow" data-flow="8">8 min Reflektion & Reset</button></div></div>`;
 
-  root.innerHTML = `<div class="checkin-flow-wrap">${lengthSelector}${flow.currentFlow ? `<div class="flow-top-row"><div class="flow-step-title">${steps[flow.step - 1]}</div><button class="btn-link" data-action="reset-flow">Byt längd</button></div>` : ''}${headerRow}${renderStep()}</div>`;
+  root.innerHTML = `<div class="checkin-flow-wrap">${lengthSelector}${flow.currentFlow ? `<div class="flow-top-row"><div class="flow-step-title">${steps[flow.step - 1]}</div><button class="btn btn--outline btn--sm btn--inline" data-action="reset-flow">Byt längd</button></div>` : ''}${headerRow}${renderStep()}</div>`;
   bind(root);
 }
 
@@ -105,7 +105,7 @@ function renderPre() {
       </div>
       <div class="ci-anchors"><span class="anchor">${SLIDER_META[key].left}</span><span class="anchor">${SLIDER_META[key].right}</span></div>
     </div>
-  `).join('')}<div class="flow-status">${pickFeedback(flow.selectedNeed || getPrimaryNeed(flow.preValues)).text}</div><button class="btn-primary" data-action="next-pre">Fortsätt</button></div>`;
+  `).join('')}<div class="flow-status">${pickFeedback(flow.selectedNeed || getPrimaryNeed(flow.preValues)).text}</div><button class="btn btn--filled btn--cta" data-action="next-pre">Fortsätt</button></div>`;
 }
 
 function renderNeed() {
@@ -113,8 +113,8 @@ function renderNeed() {
   const ctaLabel = selected ? `Fortsätt med ${FOCUS_META[selected].emoji} ${FOCUS_META[selected].label}` : 'Välj fokus för att fortsätta';
   return `<div class="card"><strong>Välj fokus</strong><div class="focus-list">${NEED_KEYS.map((need) => {
     const meta = FOCUS_META[need];
-    return `<button class="focus-tile ${selected === need ? 'is-selected' : ''}" style="--opt-bg:${meta.bg};--opt-active:${meta.active};--opt-color:${meta.color}" data-action="set-need" data-need="${need}"><span class="focus-emoji">${meta.emoji}</span><span class="focus-text"><strong>${meta.label}</strong><span class="focus-sub">${meta.subtitle}</span></span><span class="focus-check" aria-hidden="true">✓</span></button>`;
-  }).join('')}</div><button class="btn-primary" data-action="next-need" ${selected ? '' : 'disabled'}>${ctaLabel}</button></div>`;
+    return `<button class="row-btn ${selected === need ? 'is-selected' : ''}" data-dim="${meta.dim}" data-action="set-need" data-need="${need}" aria-pressed="${selected === need}"><span class="row-emoji">${meta.emoji}</span><span class="row-main"><strong>${meta.label}</strong><span class="row-sub">${meta.subtitle}</span></span><span class="row-check" aria-hidden="true">✓</span></button>`;
+  }).join('')}</div><button class="btn btn--filled btn--cta" data-action="next-need" ${selected ? '' : 'disabled'}>${ctaLabel}</button></div>`;
 }
 
 function renderReflection() {
@@ -126,7 +126,7 @@ function renderReflection() {
   <div class="ci-block"><div class="ci-label">Vilken tanke dyker upp?</div>${renderChipSet('thought', r.thought, chips.thought)}${thoughtIsCustom ? '<input class="txt-in txt-in-sm" placeholder="Skriv egen (valfritt)…" value="' + (r.thoughtOther || '') + '" data-action="field" data-field="thoughtOther"/>' : ''}</div>
   <div class="ci-block"><div class="ci-label">Välj en mer hjälpsam tanke</div>${renderChipSet('alternative', r.alternative, chips.alternative)}<div class="flow-status">${r.alternative || 'Välj en tanke som hjälper dig här och nu.'}</div></div>
   <div class="ci-block"><div class="ci-label">Hur stark känns känslan nu?</div><div class="ci-row"><div class="ci-row-main"><input type="range" min="0" max="10" value="${r.intensityAfter}" class="ci-slider" data-action="field" data-field="intensityAfter"></div><small class="ci-val">${r.intensityAfter}</small></div><div class="ci-anchors"><span class="anchor">Låg</span><span class="anchor">Stark</span></div><div class="flow-note">Före: ${r.intensityBefore}/10 → Efter: ${r.intensityAfter}/10</div></div>
-  <div class="flow-actions"><button class="btn-secondary" data-action="skip-text">Hoppa över skrivdelen</button><button class="btn-link" data-action="guide-cbt">Lär mer</button><button class="btn-primary" data-action="next-reflection">Fortsätt</button></div></div>`;
+  <div class="flow-actions"><button class="btn btn--outline btn--cta" data-action="skip-text">Hoppa över skrivdelen</button><button class="btn btn--outline btn--sm btn--inline" data-action="guide-cbt">Lär mer</button><button class="btn btn--filled btn--cta" data-action="next-reflection">Fortsätt</button></div></div>`;
 }
 
 function renderChipSet(field, current, values) {
@@ -147,7 +147,7 @@ function renderTool() {
   const primaryLabel = flow.timerRunning ? 'Pausa' : 'Fortsätt';
   const showContinue = flow.toolReady;
 
-  return `<div class="card"><div class="ex-card"><div class="ex-badge">MIKRO-VERKTYG</div><div class="ex-title">${tool.title}</div><div class="flow-note">~${tool.durationSec}s rekommenderat</div><ul class="ex-steps">${tool.steps.map((s, i) => `<li class="ex-step"><span class="ex-step-num">${i + 1}</span><span class="ex-step-txt">${s}</span></li>`).join('')}</ul></div>${timerRow}<div class="flow-actions"><button class="btn-primary" data-action="start-tool">${primaryLabel}</button><button class="btn-secondary" data-action="swap-tool">Byt verktyg</button><button class="btn-link" data-action="guide-focus">Lär mer</button>${!showContinue ? '<button class="btn-link" data-action="mark-tool-done">Markera klar</button>' : ''}${showContinue ? '<button class="btn-primary" data-action="next-tool">Fortsätt</button>' : ''}</div></div>`;
+  return `<div class="card"><div class="ex-card"><div class="ex-badge">MIKRO-VERKTYG</div><div class="ex-title">${tool.title}</div><div class="flow-note">~${tool.durationSec}s rekommenderat</div><ul class="ex-steps">${tool.steps.map((s, i) => `<li class="ex-step"><span class="ex-step-num">${i + 1}</span><span class="ex-step-txt">${s}</span></li>`).join('')}</ul></div>${timerRow}<div class="flow-actions"><button class="btn btn--filled btn--cta" data-action="start-tool">${primaryLabel}</button><button class="btn btn--outline btn--cta" data-action="swap-tool">Byt verktyg</button><button class="btn btn--outline btn--sm btn--inline" data-action="guide-focus">Lär mer</button>${!showContinue ? '<button class="btn btn--outline btn--sm btn--inline" data-action="mark-tool-done">Markera klar</button>' : ''}${showContinue ? '<button class="btn btn--filled btn--cta" data-action="next-tool">Fortsätt</button>' : ''}</div></div>`;
 }
 
 function renderClosing() {
@@ -155,7 +155,7 @@ function renderClosing() {
   const takeAway = pickTakeAway();
   const r = flow.reflection;
 
-  return `<div class="card"><div class="closing-card">${(closing.lines || ['Bra jobbat.']).slice(0, 3).map((line) => `<div class="closing-line">${line}</div>`).join('')}</div>${flow.currentFlow === '8' ? `<div class="flow-note">Situation: ${r.situation || r.situationOther || '–'} · Känslor: ${(r.emotions || []).join(', ') || '–'} (${r.intensityBefore}/10) · Alternativ tanke: ${r.alternative || '–'} · Efter: ${r.intensityAfter}/10</div>` : ''}<div class="ci-label">Hur hjälpsam var checken?</div><div class="star-row">${[1, 2, 3, 4, 5].map((n) => `<button class="chip ${flow.after.stars >= n ? 'active' : ''}" data-action="set-star" data-star="${n}">★</button>`).join('')}</div><div class="flow-status"><strong>Ta med dig:</strong><br>${takeAway.lines.join('<br>')}</div><div class="reward-pop"><span aria-hidden="true">✅</span> Bra jobbat!</div><button class="btn-primary" data-action="save-log">Spara check</button></div>`;
+  return `<div class="card"><div class="closing-card">${(closing.lines || ['Bra jobbat.']).slice(0, 3).map((line) => `<div class="closing-line">${line}</div>`).join('')}</div>${flow.currentFlow === '8' ? `<div class="flow-note">Situation: ${r.situation || r.situationOther || '–'} · Känslor: ${(r.emotions || []).join(', ') || '–'} (${r.intensityBefore}/10) · Alternativ tanke: ${r.alternative || '–'} · Efter: ${r.intensityAfter}/10</div>` : ''}<div class="ci-label">Hur hjälpsam var checken?</div><div class="star-row">${[1, 2, 3, 4, 5].map((n) => `<button class="chip ${flow.after.stars >= n ? 'active' : ''}" data-action="set-star" data-star="${n}">★</button>`).join('')}</div><div class="flow-status"><strong>Ta med dig:</strong><br>${takeAway.lines.join('<br>')}</div><div class="reward-pop"><span aria-hidden="true">✅</span> Bra jobbat!</div><button class="btn btn--filled btn--cta" data-action="save-log">Spara check</button></div>`;
 }
 
 function pickFeedback(need) {
