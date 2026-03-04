@@ -23,6 +23,8 @@ body.dark{
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 body{font-family:'Onest',-apple-system,sans-serif;background:var(--bg);color:var(--text);overflow:hidden;transition:background .4s,color .4s;}
+body.surface--light{}
+body.surface--dark{}
 
 /* ── PIN / LOCK ── */
 #lock{position:fixed;inset:0;background:linear-gradient(160deg,#1a3a2a,#0d1f14);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;z-index:9999;}
@@ -237,15 +239,36 @@ body.dark .closing-line{border-color:rgba(140,230,80,.1);}
 .flow-done-title{font-size:1.2rem;font-weight:700;color:var(--accent);margin-bottom:6px;}
 .flow-done-sub{font-size:.9rem;color:var(--text2);line-height:1.6;margin-bottom:16px;}
 
-/* Common flow buttons */
-.btn-primary,.flow-btn{background:linear-gradient(145deg,var(--accent2),var(--accent));color:#fff;border:none;border-radius:18px;padding:13px 24px;font-size:1rem;font-weight:700;font-family:inherit;cursor:pointer;box-shadow:0 5px 0 #1a3a17,0 8px 20px rgba(0,0,0,.2);transform:translateY(0);transition:.14s;width:100%;}
-.btn-primary:active,.flow-btn:active{transform:translateY(4px);box-shadow:0 1px 0 #1a3a17;}
-.btn-primary:disabled{opacity:.5;cursor:not-allowed;box-shadow:none;transform:none;}
-.btn-secondary,.flow-btn-ghost{background:none;border:1.5px solid var(--border);color:var(--text2);border-radius:16px;padding:11px 24px;font-size:.9rem;font-weight:600;font-family:inherit;cursor:pointer;width:100%;transition:.2s;margin-top:8px;}
-.btn-secondary:active,.flow-btn-ghost:active{background:var(--input-bg);}
-.btn-link,.link-btn{border:none;background:none;color:var(--accent);font:inherit;font-weight:600;cursor:pointer;padding:4px 0;text-decoration:none;}
-.flow-btn-danger{background:none;border:1.5px solid rgba(239,83,80,.4);color:#ef5350;border-radius:16px;padding:11px 24px;font-size:.9rem;font-weight:700;font-family:inherit;cursor:pointer;width:100%;transition:.2s;margin-top:8px;}
-.flow-btn-danger:active{background:rgba(239,83,80,.08);}
+/* Unified button system */
+.btn{border-radius:14px;font-weight:700;border:none;outline:none;transition:all .15s ease;display:inline-flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;user-select:none;font-family:inherit;line-height:1.25;text-align:center;}
+.btn:active{transform:scale(.97) translateY(1px);box-shadow:none !important;}
+.btn[disabled],.btn.is-disabled{cursor:not-allowed;transform:none !important;box-shadow:none !important;background:rgba(255,255,255,.08) !important;color:rgba(255,255,255,.25) !important;border-color:transparent !important;}
+.btn--filled{background:#2D6A4F;color:#fff;box-shadow:0 4px 16px rgba(45,106,79,.4);}
+.btn--filled:hover{filter:brightness(.97);transform:translateY(-1px);}
+.btn--outline{background:transparent;border:1.5px solid #2D6A4F;color:#2D6A4F;}
+.btn--outline:hover{background:rgba(45,106,79,.08);transform:translateY(-1px);}
+body.dark .btn--outline,body.surface--dark .btn--outline{border-color:rgba(255,255,255,.7);color:#fff;}
+body.dark .btn--outline:hover,body.surface--dark .btn--outline:hover{background:rgba(255,255,255,.08);}
+.btn--cta{width:100%;padding:15px 16px;}
+.btn--sm{padding:10px 12px;font-weight:600;}
+.btn--inline{width:auto;}
+
+.btn-primary,.flow-btn,.imp-btn,.time-start-btn{background:#2D6A4F;color:#fff;border:none;box-shadow:0 4px 16px rgba(45,106,79,.4);border-radius:14px;font-weight:700;transition:all .15s ease;padding:15px 16px;display:inline-flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;}
+.btn-primary,.flow-btn{width:100%;}
+.btn-primary:hover,.flow-btn:hover,.imp-btn:hover,.time-start-btn:hover{filter:brightness(.97);transform:translateY(-1px);}
+.btn-primary:active,.flow-btn:active,.imp-btn:active,.time-start-btn:active{transform:scale(.97) translateY(1px);box-shadow:none !important;}
+.btn-primary:disabled,.flow-btn:disabled,.imp-btn:disabled,.time-start-btn:disabled{cursor:not-allowed;transform:none !important;box-shadow:none !important;background:rgba(255,255,255,.08) !important;color:rgba(255,255,255,.25) !important;}
+
+.btn-secondary,.flow-btn-ghost,.exp-btn,.time-stop-btn,.help-cat,.theme-opt,.snd-toggle,.ovl-close,.btn-link,.link-btn,.flow-btn-danger{background:transparent;border:1.5px solid #2D6A4F;color:#2D6A4F;border-radius:14px;font-weight:600;transition:all .15s ease;padding:11px 14px;font-family:inherit;cursor:pointer;}
+.btn-secondary,.flow-btn-ghost{width:100%;margin-top:8px;}
+body.dark .btn-secondary,body.dark .flow-btn-ghost,body.dark .exp-btn,body.dark .time-stop-btn,body.dark .help-cat,body.dark .theme-opt,body.dark .snd-toggle,body.dark .ovl-close,body.dark .btn-link,body.dark .link-btn,body.dark .flow-btn-danger,
+body.surface--dark .btn-secondary,body.surface--dark .flow-btn-ghost,body.surface--dark .exp-btn,body.surface--dark .time-stop-btn,body.surface--dark .help-cat,body.surface--dark .theme-opt,body.surface--dark .snd-toggle,body.surface--dark .ovl-close,body.surface--dark .btn-link,body.surface--dark .link-btn,body.surface--dark .flow-btn-danger{border-color:rgba(255,255,255,.68);color:#fff;}
+.btn-secondary:hover,.flow-btn-ghost:hover,.exp-btn:hover,.time-stop-btn:hover,.help-cat:hover,.theme-opt:hover,.snd-toggle:hover,.ovl-close:hover,.btn-link:hover,.link-btn:hover,.flow-btn-danger:hover{background:rgba(45,106,79,.08);transform:translateY(-1px);}
+body.dark .btn-secondary:hover,body.dark .flow-btn-ghost:hover,body.dark .exp-btn:hover,body.dark .time-stop-btn:hover,body.dark .help-cat:hover,body.dark .theme-opt:hover,body.dark .snd-toggle:hover,body.dark .ovl-close:hover,body.dark .btn-link:hover,body.dark .link-btn:hover,body.dark .flow-btn-danger:hover,
+body.surface--dark .btn-secondary:hover,body.surface--dark .flow-btn-ghost:hover,body.surface--dark .exp-btn:hover,body.surface--dark .time-stop-btn:hover,body.surface--dark .help-cat:hover,body.surface--dark .theme-opt:hover,body.surface--dark .snd-toggle:hover,body.surface--dark .ovl-close:hover,body.surface--dark .btn-link:hover,body.surface--dark .link-btn:hover,body.surface--dark .flow-btn-danger:hover{background:rgba(255,255,255,.08);}
+
+.flow-btn-danger{border-color:rgba(239,83,80,.6);color:#ef5350;}
+
 .flow-chip-wrap{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 10px;}
 .flow-chip{border:1.5px solid var(--border);background:var(--input-bg);color:var(--text);border-radius:999px;padding:8px 12px;font-size:.86rem;cursor:pointer;}
 .flow-chip.sel{border-color:var(--accent);background:rgba(45,90,39,.15);color:var(--accent);font-weight:600;}
@@ -266,15 +289,36 @@ body.dark .closing-line{border-color:rgba(140,230,80,.1);}
 .dur-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;}
 @media(max-width:640px){.dur-grid{grid-template-columns:1fr;}}
 .focus-list{display:grid;gap:10px;margin:12px 0 14px;}
-.focus-tile{display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;border-radius:18px;border:1px solid color-mix(in srgb,var(--opt-color) 24%, transparent);background:var(--opt-bg);color:var(--opt-color);cursor:pointer;text-align:left;font-family:inherit;transition:transform .16s ease,background .16s ease,box-shadow .16s ease,color .16s ease;}
-.focus-tile:hover{transform:translateX(3px);background:color-mix(in srgb,var(--opt-bg) 75%, #fff 25%);}
-.focus-tile:focus-visible{outline:2px solid var(--opt-active);outline-offset:2px;}
-.focus-tile.is-selected{background:var(--opt-active);color:#fff;box-shadow:0 10px 22px color-mix(in srgb,var(--opt-active) 45%, transparent);border-color:transparent;}
-.focus-emoji{font-size:1.4rem;line-height:1;}
-.focus-text{display:flex;flex-direction:column;gap:2px;flex:1;}
-.focus-sub{font-size:.82rem;opacity:.9;font-weight:500;}
-.focus-check{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.25);opacity:0;transform:scale(.9);transition:.14s ease;}
-.focus-tile.is-selected .focus-check{opacity:1;transform:scale(1);}
+.row-btn{width:100%;padding:14px 18px;border-radius:14px;border:none;display:flex;align-items:center;gap:14px;text-align:left;transition:all .15s ease;cursor:pointer;}
+.row-btn:hover{transform:translateX(3px);}
+.row-btn:active{transform:scale(.97) translateY(1px);box-shadow:none !important;}
+.row-btn .row-main{display:flex;flex-direction:column;gap:2px;flex:1;}
+.row-btn[data-dim="stress"]{--dim-main:#2D6A4F;--dim-pastel:#7EC8A0;--dim-tint:rgba(45,106,79,.12);--dim-shadow:rgba(45,106,79,.4);--dim-tint-hover:rgba(45,106,79,.18);}
+.row-btn[data-dim="mood"]{--dim-main:#D9AF3C;--dim-pastel:#FFD066;--dim-tint:rgba(217,175,60,.12);--dim-shadow:rgba(217,175,60,.4);--dim-tint-hover:rgba(217,175,60,.18);}
+.row-btn[data-dim="energy"]{--dim-main:#C47820;--dim-pastel:#FFB347;--dim-tint:rgba(196,120,32,.12);--dim-shadow:rgba(196,120,32,.4);--dim-tint-hover:rgba(196,120,32,.18);}
+.row-btn[data-dim="sleep"]{--dim-main:#6B3EB8;--dim-pastel:#B39DDB;--dim-tint:rgba(107,62,184,.12);--dim-shadow:rgba(107,62,184,.4);--dim-tint-hover:rgba(107,62,184,.18);}
+.row-btn[data-dim="thoughts"]{--dim-main:#2A7A6A;--dim-pastel:#80DEEA;--dim-tint:rgba(42,122,106,.12);--dim-shadow:rgba(42,122,106,.4);--dim-tint-hover:rgba(42,122,106,.18);}
+
+body.surface--light .row-btn,body:not(.dark):not(.surface--dark) .row-btn{background:var(--dim-tint);color:var(--dim-main);box-shadow:none;}
+body.surface--dark .row-btn,body.dark .row-btn{background:rgba(255,255,255,.06);color:var(--dim-pastel);box-shadow:none;}
+body.surface--light .row-btn:hover,body:not(.dark):not(.surface--dark) .row-btn:hover{background:var(--dim-tint-hover);}
+body.surface--dark .row-btn:hover,body.dark .row-btn:hover{background:rgba(255,255,255,.1);}
+.row-btn.is-selected{background:var(--dim-main) !important;color:#fff !important;box-shadow:0 4px 20px var(--dim-shadow);}
+
+.row-emoji{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;}
+body.surface--light .row-emoji,body:not(.dark):not(.surface--dark) .row-emoji{background:rgba(255,255,255,.7);}
+body.surface--dark .row-emoji,body.dark .row-emoji{background:rgba(255,255,255,.08);}
+.row-btn.is-selected .row-emoji{background:rgba(255,255,255,.2);}
+
+.row-sub{font-size:12px;margin-top:2px;}
+body.surface--light .row-sub,body:not(.dark):not(.surface--dark) .row-sub{color:rgba(0,0,0,.4);}
+body.surface--dark .row-sub,body.dark .row-sub{color:rgba(255,255,255,.35);}
+.row-btn.is-selected .row-sub{color:rgba(255,255,255,.75) !important;}
+
+.row-check{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;color:transparent;}
+body.surface--light .row-check,body:not(.dark):not(.surface--dark) .row-check{border:1.5px solid color-mix(in srgb,var(--dim-main) 20%, transparent);}
+body.surface--dark .row-check,body.dark .row-check{border:1.5px solid color-mix(in srgb,var(--dim-pastel) 20%, transparent);}
+.row-btn.is-selected .row-check{background:rgba(255,255,255,.25);color:#fff;border:none;}
 .chip-wrap{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0;}
 .chip{border:1px solid var(--border);background:var(--input-bg);color:var(--text);padding:7px 10px;border-radius:999px;cursor:pointer;font-family:inherit;}
 .chip.active{background:var(--accent);color:#fff;border-color:transparent;}
@@ -387,21 +431,21 @@ body.guide-open #content{overflow:hidden;}
         <div class="time-ctrl-label">⏱ Antal minuter</div>
         <div class="time-ctrl-row">
           <input type="number" class="time-input" id="custom-min" value="5" min="1" max="60">
-          <button class="time-start-btn" onclick="startCustom()">▶ Starta</button>
-          <button class="time-stop-btn" onclick="stopBreath()">⏹ Stopp</button>
+          <button class="time-start-btn btn btn--filled" onclick="startCustom()">▶ Starta</button>
+          <button class="time-stop-btn btn btn--outline" onclick="stopBreath()">⏹ Stopp</button>
         </div>
       </div>
       <div class="sound-panel">
-        <div class="sound-row"><span class="snd-label">🌧️ Regn</span><button class="snd-toggle" id="rain-btn" onclick="toggleSound('rain')">AV</button><input type="range" id="rain-vol" min="0" max="1" step="0.05" value="0.35" oninput="setVol('rain',this.value)"></div>
-        <div class="sound-row"><span class="snd-label">🌊 Hav</span><button class="snd-toggle" id="ocean-btn" onclick="toggleSound('ocean')">AV</button><input type="range" id="ocean-vol" min="0" max="1" step="0.05" value="0.35" oninput="setVol('ocean',this.value)"></div>
-        <div class="sound-row"><span class="snd-label">🌲 Skog</span><button class="snd-toggle" id="forest-btn" onclick="toggleSound('forest')">AV</button><input type="range" id="forest-vol" min="0" max="1" step="0.05" value="0.35" oninput="setVol('forest',this.value)"></div>
-        <div class="sound-row"><span class="snd-label">🟤 Brunt brus</span><button class="snd-toggle" id="brown-btn" onclick="toggleSound('brown')">AV</button><input type="range" id="brown-vol" min="0" max="1" step="0.05" value="0.35" oninput="setVol('brown',this.value)"></div>
+        <div class="sound-row"><span class="snd-label">🌧️ Regn</span><button class="snd-toggle btn btn--outline btn--sm" id="rain-btn" onclick="toggleSound('rain')">AV</button><input type="range" id="rain-vol" min="0" max="1" step="0.05" value="0.35" oninput="setVol('rain',this.value)"></div>
+        <div class="sound-row"><span class="snd-label">🌊 Hav</span><button class="snd-toggle btn btn--outline btn--sm" id="ocean-btn" onclick="toggleSound('ocean')">AV</button><input type="range" id="ocean-vol" min="0" max="1" step="0.05" value="0.35" oninput="setVol('ocean',this.value)"></div>
+        <div class="sound-row"><span class="snd-label">🌲 Skog</span><button class="snd-toggle btn btn--outline btn--sm" id="forest-btn" onclick="toggleSound('forest')">AV</button><input type="range" id="forest-vol" min="0" max="1" step="0.05" value="0.35" oninput="setVol('forest',this.value)"></div>
+        <div class="sound-row"><span class="snd-label">🟤 Brunt brus</span><button class="snd-toggle btn btn--outline btn--sm" id="brown-btn" onclick="toggleSound('brown')">AV</button><input type="range" id="brown-vol" min="0" max="1" step="0.05" value="0.35" oninput="setVol('brown',this.value)"></div>
       </div>
 
       <div class="card" style="margin-top:14px;">
         <strong>🧭 Guide: Vad ska jag välja?</strong>
         <p style="margin-top:6px;color:var(--text2);font-size:.9rem;line-height:1.5;">Få snabb vägledning baserat på hur det känns just nu.</p>
-        <button class="flow-btn-ghost" onclick="openGuideTrigger('tools_intro')">Lär mer</button>
+        <button class="flow-btn-ghost btn btn--outline btn--cta" onclick="openGuideTrigger('tools_intro')">Lär mer</button>
       </div>
 
       <details class="card" data-hidden-tab="help" style="margin-top:14px;">
@@ -429,7 +473,7 @@ body.guide-open #content{overflow:hidden;}
         <button class="flow-chip sel" type="button" data-perspective="gratitude">Tacksam</button>
         <button class="flow-chip" type="button" data-perspective="pepp">Pepp</button>
       </div>
-      <button class="link-btn" onclick="openGuideTrigger('perspective_why')">Lär mer om perspektiv</button>
+      <button class="link-btn btn btn--outline btn--sm btn--inline" onclick="openGuideTrigger('perspective_why')">Lär mer om perspektiv</button>
 
       <div id="perspective-gratitude">
         <div class="grat-header">
@@ -531,8 +575,8 @@ body.guide-open #content{overflow:hidden;}
         <h3>💾 Exportera & Importera</h3>
         <p style="font-size:.85rem;color:var(--text2);margin-bottom:12px;line-height:1.6;">Exportera all din data (tacksamheter, citat, statistik, flödesloggar) till en JSON-fil, eller importera från en tidigare export.</p>
         <div style="display:flex;gap:10px;flex-wrap:wrap;">
-          <button class="exp-btn" onclick="exportAll()">📤 Exportera allt</button>
-          <label class="imp-btn" style="cursor:pointer;">
+          <button class="exp-btn btn btn--outline" onclick="exportAll()">📤 Exportera allt</button>
+          <label class="imp-btn btn btn--filled" style="cursor:pointer;">
             📥 Importera
             <input type="file" accept=".json" style="display:none;" onchange="importFile(this)">
           </label>
@@ -576,11 +620,11 @@ body.guide-open #content{overflow:hidden;}
     <div class="ovl-handle" aria-hidden="true"></div>
     <div class="ovl-head">
       <div id="ovlTitle" class="ovl-title">Guide</div>
-      <button class="ovl-close" data-ovl-close aria-label="Stäng">✕</button>
+      <button class="ovl-close btn btn--outline btn--sm btn--inline" data-ovl-close aria-label="Stäng">✕</button>
     </div>
     <div id="ovlBody" class="ovl-body"></div>
     <div class="ovl-foot">
-      <button id="ovlCtaTools" class="flow-btn-ghost">Gå till Verktyg</button>
+      <button id="ovlCtaTools" class="flow-btn-ghost btn btn--outline btn--cta">Gå till Verktyg</button>
     </div>
   </div>
 </div>
