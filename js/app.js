@@ -304,6 +304,9 @@ function loadStats(){
     if(Number(l.flowMinutes||l.sessionLengthMin)===8&&Number.isFinite(l?.after?.intensityBefore)&&Number.isFinite(l?.after?.intensityAfter)){
       return `8m ${l.after.intensityBefore}→${l.after.intensityAfter}`;
     }
+    if(Number(l.flowMinutes||l.sessionLengthMin)===3&&l.focusNeed){
+      return `3m ${l.focusNeed} · ★${Number(l.stars||0)}`;
+    }
     if(l.focusNeed&&Number.isFinite(l?.pre?.[l.focusNeed])&&Number.isFinite(l?.after?.afterSliderNeedVal)){
       return `3m ${l.focusNeed}: ${l.pre[l.focusNeed]}→${l.after.afterSliderNeedVal}`;
     }

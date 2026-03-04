@@ -13,6 +13,9 @@ export function render() {
     if (Number(log.flowMinutes || log.sessionLengthMin) === 8 && Number.isFinite(log?.after?.intensityBefore) && Number.isFinite(log?.after?.intensityAfter)) {
       return `8m ${log.after.intensityBefore}→${log.after.intensityAfter}`;
     }
+    if (Number(log.flowMinutes || log.sessionLengthMin) === 3 && log.focusNeed) {
+      return `3m ${log.focusNeed} · ★${Number(log.stars || 0)}`;
+    }
     if (log.focusNeed && Number.isFinite(log?.pre?.[log.focusNeed]) && Number.isFinite(log?.after?.afterSliderNeedVal)) {
       return `3m ${log.focusNeed}: ${log.pre[log.focusNeed]}→${log.after.afterSliderNeedVal}`;
     }

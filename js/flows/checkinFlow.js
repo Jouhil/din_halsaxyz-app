@@ -6,7 +6,13 @@ import { openGuide } from '../ui/helpOverlay.js';
 
 const NEED_KEYS = ['stress', 'humör', 'energi', 'sömn', 'tankar'];
 const NEED_LABELS = { stress: 'Stress', humör: 'Humör', energi: 'Energi', sömn: 'Sömn', tankar: 'Tankar' };
-const NEED_EMOJIS = { stress: '🫁', humör: '🙂', energi: '⚡', sömn: '🌙', tankar: '🧠' };
+const FOCUS_META = {
+  stress: { label: 'Lugn & ro', subtitle: 'Hantera stress och oro', emoji: '🌿', bg: 'rgba(76, 175, 80, 0.12)', active: '#3b8f45', color: '#2a6b32' },
+  humör: { label: 'Humör', subtitle: 'Stärk ditt välmående', emoji: '☀️', bg: 'rgba(255, 193, 7, 0.12)', active: '#d29516', color: '#9f6f07' },
+  energi: { label: 'Energi', subtitle: 'Öka din vitalitet', emoji: '⚡', bg: 'rgba(255, 152, 0, 0.12)', active: '#dc7f12', color: '#9b5804' },
+  sömn: { label: 'Sömnkvalitet', subtitle: 'Förbättra din återhämtning', emoji: '🌙', bg: 'rgba(103, 58, 183, 0.12)', active: '#6b4eb0', color: '#4d3589' },
+  tankar: { label: 'Tankar', subtitle: 'Klargör ditt sinne', emoji: '💭', bg: 'rgba(33, 150, 243, 0.12)', active: '#2c7fc4', color: '#1f5f92' },
+};
 const SLIDER_META = {
   stress: { left: 'Stressad', right: 'Lugn' },
   humör: { left: 'Nere', right: 'På topp' },
@@ -16,10 +22,10 @@ const SLIDER_META = {
 };
 
 const chips = {
-  situation: ['Jobb', 'Relation', 'Sömnbrist', 'Kropp', 'Ekonomi', 'Socialt', 'Studier'],
-  emotion: ['Orolig', 'Stressad', 'Ledsen', 'Irriterad', 'Trött', 'Skam', 'Överväldigad'],
-  thought: ['Jag räcker inte', 'Det blir fel', 'Ingen förstår', 'Jag hinner inte', 'Jag borde klara allt'],
-  alternative: ['Det här är en stund, inte hela sanningen', 'Ett litet steg räcker nu', 'Jag kan vara snäll mot mig själv', 'Tanke ≠ fakta', 'Jag får pausa och börja om'],
+  situation: ['Jobb', 'Relation', 'Socialt', 'Kropp', 'Tankar', 'Ekonomi', 'Annat'],
+  emotion: ['Orolig', 'Stressad', 'Ledsen', 'Irriterad', 'Arg', 'Rädd', 'Trött', 'Skam', 'Överväldigad'],
+  thought: ['Jag räcker inte', 'Det blir fel', 'Ingen förstår', 'Jag hinner inte', 'Jag borde klara allt', 'Jag borde vara bättre', 'Egen tanke'],
+  alternative: ['Det här är en stund', 'Ett litet steg räcker', 'Jag får pausa', 'Tanke ≠ fakta', 'Jag kan vara snäll mot mig själv', 'Jag behöver inte lösa allt nu'],
 };
 
 const microFeedbackByNeed = Object.fromEntries(NEED_KEYS.map((need) => [need, Array.from({ length: 15 }, (_, i) => ({ id: `${need}-fb-${i + 1}`, text: `${NEED_LABELS[need]}: liten återställning ${i + 1} — ett lugnt andetag räcker för att börja.` }))]));
@@ -47,8 +53,8 @@ export function initCheckinFlow({ router } = {}) {
     preValues: { stress: 5, humör: 5, energi: 5, sömn: 5, tankar: 5 },
     selectedNeed: null,
     selectedTool: null,
-    reflection: { situation: '', situationOther: '', emotions: [], intensityBefore: 5, thought: '', thoughtOther: '', truthiness: 'Osäker', alternative: '', intensityAfter: 4 },
-    after: { stars: 0, afterSliderNeedVal: null, intensityAfter: null },
+    reflection: { situation: '', situationOther: '', emotions: [], intensityBefore: 5, thought: '', thoughtOther: '', alternative: '', intensityAfter: 4 },
+    after: { stars: 0 },
     timestamps: {},
     countdown: 0,
     timerRunning: false,
@@ -67,8 +73,8 @@ function render() {
   }
 
   const steps = flow.currentFlow === '8' ? ['Check-in', 'Fokus', 'Reflektion', 'Mikro-verktyg', 'Avslut'] : ['Check-in', 'Fokus', 'Mikro-verktyg', 'Avslut'];
-  const showLearn = [2, 3, 4].includes(flow.step) && flow.currentFlow;
-  const learnAction = flow.step === 3 && flow.currentFlow === '8' ? 'guide-cbt' : 'guide-focus';
+  const showLearn = flow.step === (flow.currentFlow === '8' ? 4 : 3) && flow.currentFlow;
+  const learnAction = 'guide-focus';
   const headerRow = flow.step > 0
     ? `<div class="step-head-row"><div class="flow-note">Steg ${flow.step}/${steps.length}</div>${showLearn ? `<button class="btn-link" data-action="${learnAction}">Lär mer</button>` : ''}</div>`
     : '';
@@ -103,13 +109,24 @@ function renderPre() {
 }
 
 function renderNeed() {
-  const selected = flow.selectedNeed || getPrimaryNeed(flow.preValues);
-  return `<div class="card"><strong>Välj fokus</strong><div class="neo-tile-grid">${NEED_KEYS.map((need) => `<button class="neo-tile ${selected === need ? 'sel' : ''}" data-action="set-need" data-need="${need}"><span class="neo-emoji">${NEED_EMOJIS[need]}</span><span class="neo-label">${NEED_LABELS[need]}</span></button>`).join('')}</div><button class="btn-primary" data-action="next-need">Fortsätt</button></div>`;
+  const selected = flow.selectedNeed;
+  const ctaLabel = selected ? `Fortsätt med ${FOCUS_META[selected].emoji} ${FOCUS_META[selected].label}` : 'Välj fokus för att fortsätta';
+  return `<div class="card"><strong>Välj fokus</strong><div class="focus-list">${NEED_KEYS.map((need) => {
+    const meta = FOCUS_META[need];
+    return `<button class="focus-tile ${selected === need ? 'is-selected' : ''}" style="--opt-bg:${meta.bg};--opt-active:${meta.active};--opt-color:${meta.color}" data-action="set-need" data-need="${need}"><span class="focus-emoji">${meta.emoji}</span><span class="focus-text"><strong>${meta.label}</strong><span class="focus-sub">${meta.subtitle}</span></span><span class="focus-check" aria-hidden="true">✓</span></button>`;
+  }).join('')}</div><button class="btn-primary" data-action="next-need" ${selected ? '' : 'disabled'}>${ctaLabel}</button></div>`;
 }
 
 function renderReflection() {
   const r = flow.reflection;
-  return `<div class="card"><strong>CBT-light</strong>${renderChipSet('situation', r.situation, chips.situation)}<input class="txt-in" placeholder="Annat..." value="${r.situationOther || ''}" data-action="field" data-field="situationOther" /><div class="ci-label">Känslor (max 3)</div>${chips.emotion.map((e) => `<button class="chip ${r.emotions.includes(e) ? 'active' : ''}" data-action="toggle-emotion" data-value="${e}">${e}</button>`).join('')}<div class="ci-row"><div class="ci-row-main"><input type="range" min="0" max="10" value="${r.intensityBefore}" class="ci-slider" data-action="field" data-field="intensityBefore"></div><small class="ci-val">${r.intensityBefore}</small></div><div class="ci-anchors"><span class="anchor">Låg</span><span class="anchor">Hög</span></div>${renderChipSet('thought', r.thought, chips.thought)}<input class="txt-in" placeholder="Egen tanke" value="${r.thoughtOther || ''}" data-action="field" data-field="thoughtOther"/><div class="chip-wrap">${['Ja', 'Delvis', 'Osäker'].map((v) => `<button class="chip ${r.truthiness === v ? 'active' : ''}" data-action="field-chip" data-field="truthiness" data-value="${v}">${v}</button>`).join('')}</div>${renderChipSet('alternative', r.alternative, chips.alternative)}<div class="ci-row"><div class="ci-row-main"><input type="range" min="0" max="10" value="${r.intensityAfter}" class="ci-slider" data-action="field" data-field="intensityAfter"></div><small class="ci-val">${r.intensityAfter}</small></div><div class="ci-anchors"><span class="anchor">Låg</span><span class="anchor">Hög</span></div><button class="btn-secondary" data-action="skip-text">Hoppa över skrivdelen</button><button class="btn-primary" data-action="next-reflection">Fortsätt</button></div>`;
+  const thoughtIsCustom = r.thought === 'Egen tanke';
+  return `<div class="card"><strong>CBT-light</strong>
+  <div class="ci-block"><div class="ci-label">Vad triggar detta?</div>${renderChipSet('situation', r.situation, chips.situation)}${r.situation === 'Annat' ? '<input class="txt-in txt-in-sm" placeholder="Skriv kort (valfritt)…" value="' + (r.situationOther || '') + '" data-action="field" data-field="situationOther" />' : ''}</div>
+  <div class="ci-block"><div class="ci-label">Vad känner du? (max 3)</div><div class="chip-wrap">${chips.emotion.map((e) => `<button class="chip ${r.emotions.includes(e) ? 'active' : ''}" data-action="toggle-emotion" data-value="${e}">${e}</button>`).join('')}</div><div class="ci-row"><div class="ci-row-main"><input type="range" min="0" max="10" value="${r.intensityBefore}" class="ci-slider" data-action="field" data-field="intensityBefore"></div><small class="ci-val">${r.intensityBefore}</small></div><div class="ci-anchors"><span class="anchor">Låg</span><span class="anchor">Stark</span></div><div class="flow-note">Det här hjälper dig se om det blir lättare efteråt.</div></div>
+  <div class="ci-block"><div class="ci-label">Vilken tanke dyker upp?</div>${renderChipSet('thought', r.thought, chips.thought)}${thoughtIsCustom ? '<input class="txt-in txt-in-sm" placeholder="Skriv egen (valfritt)…" value="' + (r.thoughtOther || '') + '" data-action="field" data-field="thoughtOther"/>' : ''}</div>
+  <div class="ci-block"><div class="ci-label">Välj en mer hjälpsam tanke</div>${renderChipSet('alternative', r.alternative, chips.alternative)}<div class="flow-status">${r.alternative || 'Välj en tanke som hjälper dig här och nu.'}</div></div>
+  <div class="ci-block"><div class="ci-label">Hur stark känns känslan nu?</div><div class="ci-row"><div class="ci-row-main"><input type="range" min="0" max="10" value="${r.intensityAfter}" class="ci-slider" data-action="field" data-field="intensityAfter"></div><small class="ci-val">${r.intensityAfter}</small></div><div class="ci-anchors"><span class="anchor">Låg</span><span class="anchor">Stark</span></div><div class="flow-note">Före: ${r.intensityBefore}/10 → Efter: ${r.intensityAfter}/10</div></div>
+  <div class="flow-actions"><button class="btn-secondary" data-action="skip-text">Hoppa över skrivdelen</button><button class="btn-link" data-action="guide-cbt">Lär mer</button><button class="btn-primary" data-action="next-reflection">Fortsätt</button></div></div>`;
 }
 
 function renderChipSet(field, current, values) {
@@ -120,25 +137,25 @@ function renderTool() {
   const tool = flow.selectedTool || pickTool();
   flow.selectedTool = tool;
   const left = Math.max(0, flow.countdown || tool.durationSec);
+  const total = tool.durationSec || 1;
+  const progress = Math.max(0, Math.min(100, ((total - left) / total) * 100));
+  const mm = Math.floor(left / 60);
+  const ss = `${left % 60}`.padStart(2, '0');
   const timerRow = flow.toolReady
-    ? '<div class="flow-status done">Klart</div>'
-    : `<div class="flow-status">Tid kvar: ${left}s</div>`;
-  const primaryLabel = flow.timerRunning ? 'Pausa' : (flow.countdown > 0 ? 'Återuppta' : 'Starta');
+    ? '<div class="flow-status done">✅ Klar</div>'
+    : `<div class="tool-progress"><div class="tool-progress-bar"><span style="width:${progress.toFixed(1)}%"></span></div><div class="tool-time">Tid kvar: <span>${mm}:${ss}</span></div></div>`;
+  const primaryLabel = flow.timerRunning ? 'Pausa' : 'Fortsätt';
   const showContinue = flow.toolReady;
 
-  return `<div class="card"><div class="ex-card"><div class="ex-badge">MIKRO-VERKTYG</div><div class="ex-title">${tool.title}</div><div class="flow-note">~${tool.durationSec}s rekommenderat</div><ul class="ex-steps">${tool.steps.map((s, i) => `<li class="ex-step"><span class="ex-step-num">${i + 1}</span><span class="ex-step-txt">${s}</span></li>`).join('')}</ul></div>${timerRow}<div class="flow-actions"><button class="btn-primary" data-action="start-tool">${primaryLabel}</button><button class="btn-secondary" data-action="swap-tool">Byt verktyg</button><button class="btn-link" data-action="guide-focus">Lär mer</button>${showContinue ? '<button class="btn-primary" data-action="next-tool">Fortsätt</button>' : ''}${!showContinue ? '<button class="btn-secondary" data-action="mark-tool-done">Markera klar</button>' : ''}</div></div>`;
+  return `<div class="card"><div class="ex-card"><div class="ex-badge">MIKRO-VERKTYG</div><div class="ex-title">${tool.title}</div><div class="flow-note">~${tool.durationSec}s rekommenderat</div><ul class="ex-steps">${tool.steps.map((s, i) => `<li class="ex-step"><span class="ex-step-num">${i + 1}</span><span class="ex-step-txt">${s}</span></li>`).join('')}</ul></div>${timerRow}<div class="flow-actions"><button class="btn-primary" data-action="start-tool">${primaryLabel}</button><button class="btn-secondary" data-action="swap-tool">Byt verktyg</button><button class="btn-link" data-action="guide-focus">Lär mer</button>${!showContinue ? '<button class="btn-link" data-action="mark-tool-done">Markera klar</button>' : ''}${showContinue ? '<button class="btn-primary" data-action="next-tool">Fortsätt</button>' : ''}</div></div>`;
 }
 
 function renderClosing() {
   const closing = pickClosing();
   const takeAway = pickTakeAway();
-  const focusNeed = flow.selectedNeed || getPrimaryNeed(flow.preValues);
-  const pre = flow.preValues[focusNeed] ?? 5;
-  const afterValue = flow.after.afterSliderNeedVal;
-  const result = afterValue === null ? `${pre} → –` : `${pre} → ${afterValue}`;
   const r = flow.reflection;
 
-  return `<div class="card"><div class="closing-card">${(closing.lines || ['Bra jobbat.']).slice(0, 3).map((line) => `<div class="closing-line">${line}</div>`).join('')}</div><div class="flow-status"><strong>Före → Efter (${NEED_LABELS[focusNeed]}):</strong> ${result}</div>${flow.currentFlow === '8' ? `<div class="flow-note">Situation: ${r.situation || r.situationOther || '–'} · Känslor: ${(r.emotions || []).join(', ') || '–'} (${r.intensityBefore}/10) · Alternativ tanke: ${r.alternative || '–'}</div>` : ''}<div class="ci-block"><div class="ci-label">Snabb efter-skala (${NEED_LABELS[focusNeed]})</div><div class="ci-row"><div class="ci-row-main"><input type="range" min="0" max="10" value="${afterValue ?? pre}" class="ci-slider" data-action="set-after-slider"></div><small class="ci-val">${afterValue ?? pre}</small></div><div class="ci-anchors"><span class="anchor">${SLIDER_META[focusNeed].left}</span><span class="anchor">${SLIDER_META[focusNeed].right}</span></div></div><div class="ci-label">Hur hjälpsam var checken?</div><div class="star-row">${[1, 2, 3, 4, 5].map((n) => `<button class="chip ${flow.after.stars >= n ? 'active' : ''}" data-action="set-star" data-star="${n}">★</button>`).join('')}</div><div class="flow-status"><strong>Ta med dig:</strong><br>${takeAway.lines.join('<br>')}</div><div class="reward-pop">✅ Bra jobbat!</div><button class="btn-primary" data-action="save-log">Spara check</button></div>`;
+  return `<div class="card"><div class="closing-card">${(closing.lines || ['Bra jobbat.']).slice(0, 3).map((line) => `<div class="closing-line">${line}</div>`).join('')}</div>${flow.currentFlow === '8' ? `<div class="flow-note">Situation: ${r.situation || r.situationOther || '–'} · Känslor: ${(r.emotions || []).join(', ') || '–'} (${r.intensityBefore}/10) · Alternativ tanke: ${r.alternative || '–'} · Efter: ${r.intensityAfter}/10</div>` : ''}<div class="ci-label">Hur hjälpsam var checken?</div><div class="star-row">${[1, 2, 3, 4, 5].map((n) => `<button class="chip ${flow.after.stars >= n ? 'active' : ''}" data-action="set-star" data-star="${n}">★</button>`).join('')}</div><div class="flow-status"><strong>Ta med dig:</strong><br>${takeAway.lines.join('<br>')}</div><div class="reward-pop"><span aria-hidden="true">✅</span> Bra jobbat!</div><button class="btn-primary" data-action="save-log">Spara check</button></div>`;
 }
 
 function pickFeedback(need) {
@@ -170,6 +187,25 @@ function stopTimer() {
   flow.timerRunning = false;
 }
 
+function ensureToolAutoStart() {
+  if (flow.step !== 4 && !(flow.currentFlow === '3' && flow.step === 3)) return;
+  if (flow.toolReady || flow.timerRunning) return;
+  const tool = flow.selectedTool || pickTool();
+  flow.selectedTool = tool;
+  flow.countdown = tool.durationSec;
+  flow.timerRunning = true;
+  clearInterval(timer);
+  timer = setInterval(() => {
+    flow.countdown -= 1;
+    if (flow.countdown <= 0) {
+      flow.countdown = 0;
+      flow.toolReady = true;
+      stopTimer();
+    }
+    render();
+  }, 1000);
+}
+
 function resetFlow() {
   stopTimer();
   flow.currentFlow = null;
@@ -190,7 +226,7 @@ function bind(root) {
     flow.selectedTool = null;
     flow.countdown = 0;
     flow.toolReady = false;
-    flow.after = { stars: 0, afterSliderNeedVal: null, intensityAfter: null };
+    flow.after = { stars: 0 };
     render();
   }));
 
@@ -211,8 +247,13 @@ function bind(root) {
   }));
 
   root.querySelector('[data-action="next-pre"]')?.addEventListener('click', () => { flow.step = 2; render(); });
-  root.querySelector('[data-action="next-need"]')?.addEventListener('click', () => { flow.selectedNeed = flow.selectedNeed || getPrimaryNeed(flow.preValues); flow.step = 3; render(); });
-  root.querySelector('[data-action="next-reflection"]')?.addEventListener('click', () => { flow.step = 4; render(); });
+  root.querySelector('[data-action="next-need"]')?.addEventListener('click', () => {
+    flow.selectedNeed = flow.selectedNeed || getPrimaryNeed(flow.preValues);
+    flow.step = 3;
+    if (flow.currentFlow === '3') ensureToolAutoStart();
+    render();
+  });
+  root.querySelector('[data-action="next-reflection"]')?.addEventListener('click', () => { flow.step = 4; ensureToolAutoStart(); render(); });
   root.querySelector('[data-action="next-tool"]')?.addEventListener('click', () => { flow.step = flow.currentFlow === '8' ? 5 : 4; render(); });
 
   root.querySelector('[data-action="guide-focus"]')?.addEventListener('click', () => openGuide({ need: flow.selectedNeed || getPrimaryNeed(flow.preValues), title: 'Snabb hjälp' }));
@@ -221,7 +262,6 @@ function bind(root) {
   root.querySelectorAll('[data-action="field"]').forEach((el) => el.addEventListener('input', () => {
     const key = el.dataset.field;
     flow.reflection[key] = el.type === 'range' ? Number(el.value) : el.value;
-    if (key === 'intensityAfter') flow.after.intensityAfter = Number(el.value);
     render();
   }));
 
@@ -276,15 +316,12 @@ function bind(root) {
   });
 
   root.querySelector('[data-action="swap-tool"]')?.addEventListener('click', () => {
+    const wasPaused = !flow.timerRunning;
     stopTimer();
     flow.selectedTool = pickTool();
-    flow.countdown = 0;
+    flow.countdown = flow.selectedTool.durationSec;
     flow.toolReady = false;
-    render();
-  });
-
-  root.querySelector('[data-action="set-after-slider"]')?.addEventListener('input', (e) => {
-    flow.after.afterSliderNeedVal = Number(e.target.value);
+    if (!wasPaused) ensureToolAutoStart();
     render();
   });
 
@@ -307,12 +344,20 @@ function saveLog() {
     pre: { ...flow.preValues, tankar: flow.preValues.tankar ?? null },
     focusNeed,
     toolId: flow.selectedTool?.id || null,
-    reflection: flow.currentFlow === '8' ? flow.reflection : undefined,
-    after: {
-      intensityBefore: flow.currentFlow === '8' ? flow.reflection.intensityBefore : undefined,
-      intensityAfter: flow.currentFlow === '8' ? flow.reflection.intensityAfter : undefined,
-      afterSliderNeedVal: flow.after.afterSliderNeedVal,
-    },
+    reflection: flow.currentFlow === '8' ? {
+      trigger: flow.reflection.situation,
+      triggerText: flow.reflection.situationOther,
+      feelings: flow.reflection.emotions,
+      intensityBefore: flow.reflection.intensityBefore,
+      thought: flow.reflection.thought,
+      thoughtText: flow.reflection.thoughtOther,
+      altThought: flow.reflection.alternative,
+      intensityAfter: flow.reflection.intensityAfter,
+    } : undefined,
+    after: flow.currentFlow === '8' ? {
+      intensityBefore: flow.reflection.intensityBefore,
+      intensityAfter: flow.reflection.intensityAfter,
+    } : undefined,
     stars: flow.after.stars,
     completedAt: new Date().toISOString(),
     counted: true,
