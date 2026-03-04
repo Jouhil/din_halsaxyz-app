@@ -39,6 +39,38 @@ const tools = [
   ...['4-7-8', 'Body scan mini', 'Skärm ned 1 min', 'Långsam utandning', 'Progressiv avslappning', 'Mjuk kvällsankare'].map((t, i) => mkTool(`somn-${i}`, t, 'sömn', 90 + i * 10, ['Slut ögonen och låt kroppen få stöd.', 'Skanna av kroppen från topp till tå i lugn takt.', 'Sänk tempot ytterligare med en långsam utandning.'])),
 ];
 
+const TOOL_STEP_OVERRIDES = {
+  '4-6 andning': ['Andas in lugnt i 4 sekunder genom näsan.', 'Andas ut i 6 sekunder och släpp käken.', 'Upprepa i jämn rytm och räkna tyst 1–6.'],
+  'Box breathing': ['Andas in i 4 sekunder.', 'Håll andan i 4 sekunder, andas sedan ut i 4.', 'Pausa 4 sekunder innan nästa varv.'],
+  Axelsläpp: ['Lyft axlarna upp mot öronen i en inandning.', 'Andas ut och släpp axlarna tungt ned.', 'Upprepa 5 gånger och känn skillnaden.'],
+  '5-4-3-2-1 grounding': ['Nämn 5 saker du ser omkring dig.', 'Nämn 4 du kan känna och 3 du kan höra.', 'Avsluta med 2 du kan lukta och 1 du kan smaka.'],
+  'Långsam utandning': ['Andas in normalt genom näsan.', 'Förläng utandningen tills den är längre än inandningen.', 'Fortsätt i 60–90 sekunder i lugn takt.'],
+  'Tryck fötterna i golvet': ['Placera båda fötterna stadigt i golvet.', 'Tryck lätt ner och känn kontakt genom benen.', 'Släpp spänningen mjukt och upprepa tre gånger.'],
+  'Märk tanken': ['Sätt ord på tanken: “Jag har en tanke om …”.', 'Notera att det är en tanke, inte ett faktum.', 'För tillbaka uppmärksamheten till andningen.'],
+  '3-sinneankare': ['Välj ett ljud och lyssna aktivt i 10 sekunder.', 'Känn ett kroppsområde tydligt, t.ex. händerna.', 'Fokusera blicken på en färg i rummet.'],
+  'Worry container': ['Skriv ner orostanken i en kort mening.', 'Bestäm en senare tid då du får återkomma till den.', 'Säg “inte nu” och återgå till stunden.'],
+  'Tanke ≠ fakta': ['Identifiera en jobbig tanke.', 'Fråga: vilket bevis har jag för och emot?', 'Formulera en mer hjälpsam och balanserad tanke.'],
+  'Namnge och släpp': ['Namnge känslan eller tanken kort.', 'Ta en långsam utandning medan du säger “släpp”.', 'Låt uppmärksamheten landa i kroppen igen.'],
+  'Andning med fokusord': ['Andas in och tänk ordet “här”.', 'Andas ut och tänk ordet “nu”.', 'Fortsätt i cirka en minut.'],
+  'Självmedkänsla 60s': ['Lägg en hand på bröstet.', 'Säg tyst: “Det här är svårt just nu”.', 'Avsluta med: “Jag får vara vänlig mot mig själv”.'],
+  Tacksamhetsmicro: ['Nämn en liten sak som var okej idag.', 'Notera vad den gjorde med ditt humör.', 'Ta ett lugnt andetag och bär med dig känslan.'],
+  'Skicka ett hej': ['Tänk på en person du uppskattar.', 'Skicka ett kort “hej” eller en vänlig emoji.', 'Lägg märke till om kontakten gav energi.'],
+  'Vänlig hand på bröstet': ['Placera handen mjukt på bröstet.', 'Andas långsamt och känn värmen från handen.', 'Upprepa en vänlig fras till dig själv.'],
+  'Mjuk aktivering': ['Rulla axlarna bakåt i lugn takt.', 'Sträck armarna uppåt och andas in.', 'Andas ut och släpp ner armarna långsamt.'],
+  'Säg något snällt till dig': ['Säg en vänlig mening till dig själv.', 'Upprepa meningen med lite långsammare tempo.', 'Notera om tonen i kroppen mjuknar.'],
+  '60s rörelse': ['Res dig upp och rör kroppen i 60 sekunder.', 'Håll ett tempo där du fortfarande kan andas lugnt.', 'Stanna och känn efter hur energin känns nu.'],
+  'Kallt vatten': ['Skölj handlederna i kallt vatten 20–30 sekunder.', 'Fokusera på känslan och andas jämnt.', 'Torka av dig och notera ökad vakenhet.'],
+  'Res dig & sträck': ['Res dig upp från stolen.', 'Sträck dig uppåt och åt sidorna i tre andetag.', 'Rulla nacken mjukt innan du sätter dig igen.'],
+  Ljuspaus: ['Gå till ett fönster eller tänd starkare ljus.', 'Låt blicken vila långt bort i 20 sekunder.', 'Ta tre djupa andetag medan du står där.'],
+  Powerpose: ['Stå stadigt med fötterna höftbrett.', 'Öppna bröstet och håll en trygg hållning i 45 sekunder.', 'Avsluta med ett långsamt andetag in och ut.'],
+  'Skaka loss': ['Skaka loss armar och händer i 20 sekunder.', 'Lägg till ben och axlar i mjuk rytm.', 'Stanna upp och känn cirkulationen i kroppen.'],
+  '4-7-8': ['Andas in genom näsan i 4 sekunder.', 'Håll andan i 7 sekunder.', 'Andas ut långsamt i 8 sekunder och upprepa.'],
+  'Body scan mini': ['Rikta uppmärksamheten till pannan och käken.', 'Skanna vidare genom axlar, bröst och mage.', 'Släpp spänning där du hittar den.'],
+  'Skärm ned 1 min': ['Sänk skärmens ljusstyrka och lägg bort mobilen.', 'Vila blicken på en stilla punkt.', 'Andas långsamt tills minuten är över.'],
+  'Progressiv avslappning': ['Spänn händerna lätt i 5 sekunder.', 'Släpp och känn skillnaden i avslappning.', 'Fortsätt med axlar eller ben i ett varv till.'],
+  'Mjuk kvällsankare': ['Välj en lugn plats och sitt bekvämt.', 'Låt utandningen bli längre än inandningen.', 'Påminn dig: “Nu får kroppen varva ned”.'],
+};
+
 function mkTool(id, title, need, durationSec, steps, mode = 'lugn') {
   return { id, title, durationSec, needs: [need], mode, intensityMin: 0, intensityMax: 10, steps };
 }
@@ -163,18 +195,29 @@ function renderToolStep() {
 
   return `<div class="card">
     <div class="neo-card micro-tool-card micro-card" data-dim="${selectedDim}">
-      <div class="ex-badge">MIKRO-VERKTYG</div>
-      <div class="micro-tool-head"><div class="ex-title">${tool.title}</div><button class="neo-btn neo-btn--soft neo-btn--sm" data-action="start-tool">${flow.timerRunning ? '⏸ Pausa' : '▶ Fortsätt'}</button></div>
-      <div class="flow-note">~${tool.durationSec}s rekommenderat</div>
-      <ul class="ex-steps">${tool.steps.map((step, i) => `<li class="ex-step"><span class="ex-step-num">${i + 1}</span><span class="ex-step-txt">${step}</span></li>`).join('')}</ul>
+      ${renderMicroTool(tool)}
       <div class="tool-progress"><div class="tool-progress-bar"><span style="width:${Math.max(0, Math.min(progress, 100))}%"></span></div><div class="tool-time">Tid kvar: <span>${remaining}</span></div></div>
     </div>
     <div class="flow-actions">
-      <button class="neo-btn neo-btn--outline neo-btn--cta" data-action="swap-tool">🔁 Byt verktyg</button>
+      <button class="neo-btn neo-btn--outline neo-btn--cta neo-btn--dim" data-dim="${selectedDim}" data-action="swap-tool">🔁 Byt verktyg</button>
       <button class="neo-link" data-action="guide-focus">❓ Lär mer</button>
       ${isDone ? '<button class="neo-btn neo-btn--filled neo-btn--cta" data-action="next-tool">Fortsätt →</button>' : '<button class="neo-btn neo-btn--filled neo-btn--cta" data-action="mark-tool-done">✅ Markera klar</button>'}
     </div>
   </div>`;
+}
+
+function renderMicroTool(tool) {
+  const normalizedSteps = normalizeToolSteps(tool).map((step, i) => (step
+    ? `<li class="ex-step"><span class="ex-step-num">${i + 1}</span><span class="ex-step-txt">${step}</span></li>`
+    : '')).join('');
+  return `<div class="ex-badge">MIKRO-VERKTYG</div>
+      <div class="micro-tool-head"><div><div class="ex-title micro-title">${tool.title}</div><div class="flow-note micro-meta">~${tool.durationSec}s rekommenderat</div></div><button class="neo-btn neo-btn--soft neo-btn--sm" data-action="start-tool">${flow.timerRunning ? '⏸ Pausa' : '▶ Fortsätt'}</button></div>
+      <ul class="ex-steps micro-steps">${normalizedSteps}</ul>`;
+}
+
+function normalizeToolSteps(tool) {
+  const baseSteps = TOOL_STEP_OVERRIDES[tool.title] || tool.steps || [];
+  return [0, 1, 2].map((idx) => baseSteps[idx] || '').filter(Boolean);
 }
 
 function renderClosing() {
