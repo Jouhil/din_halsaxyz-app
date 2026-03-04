@@ -15,6 +15,7 @@ let backdropEl;
 let ctaToolsEl;
 let boundRouter;
 let lastFocusedEl = null;
+let currentSource = '';
 
 let isOpen = false;
 let currentSnap = 'collapsed';
@@ -225,6 +226,11 @@ export function openGuide(params = {}) {
   if (!overlayEl || !panelEl) return;
   if (isOpen) {
     titleEl.textContent = params.title || 'Guide';
+    currentSource = params.source || '';
+    if (ctaToolsEl) {
+      ctaToolsEl.textContent = currentSource === 'checkin' ? 'Stäng' : 'Gå till Verktyg';
+      ctaToolsEl.classList.toggle('hidden', false);
+    }
     renderGuideContent(params);
     animateToSnap('collapsed');
     return;
@@ -232,6 +238,11 @@ export function openGuide(params = {}) {
 
   lastFocusedEl = document.activeElement;
   titleEl.textContent = params.title || 'Guide';
+  currentSource = params.source || '';
+  if (ctaToolsEl) {
+    ctaToolsEl.textContent = currentSource === 'checkin' ? 'Stäng' : 'Gå till Verktyg';
+    ctaToolsEl.classList.toggle('hidden', false);
+  }
   renderGuideContent(params);
   bodyEl.scrollTop = 0;
 
@@ -259,6 +270,7 @@ export function closeGuide() {
   document.body.classList.remove('guide-open');
   isOpen = false;
   dragState = null;
+  currentSource = '';
 
   window.setTimeout(() => {
     if (!isOpen) {
@@ -298,6 +310,10 @@ export function initGuideOverlay({ router } = {}) {
 
   if (ctaToolsEl) {
     ctaToolsEl.addEventListener('click', () => {
+      if (currentSource === 'checkin') {
+        closeGuide();
+        return;
+      }
       closeGuide();
       boundRouter?.goToTab('tools');
     });
