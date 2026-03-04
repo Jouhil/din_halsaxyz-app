@@ -107,7 +107,7 @@ function showLengthSwitch() {
 }
 
 function renderStartTiles() {
-  return `<div class="card duration-card"><div class="ci-label">Välj längd</div><div class="dur-grid"><button class="neo-tile duration-tile duration-tile--3" data-action="start-flow" data-flow="3"><div class="row-main"><strong>⏱️ 3 min Snabb Reset</strong><span class="row-sub">Snabb reglering</span></div></button><button class="neo-tile duration-tile duration-tile--8" data-action="start-flow" data-flow="8"><div class="row-main"><strong>⏱️✨ 8 min Reflektion & Reset</strong><span class="row-sub">Reflektion + reset</span></div></button></div></div>`;
+  return `<div class="card duration-card"><div class="ci-label">Välj längd</div><div class="dur-grid"><button class="neo-tile duration-tile duration-tile--3" data-action="start-flow" data-flow="3"><span class="tile-icon" aria-hidden="true">⏱️</span><span class="tile-text"><span class="tile-title">3 min Snabb Reset</span><span class="tile-sub">Snabb reglering</span></span></button><button class="neo-tile duration-tile duration-tile--8" data-action="start-flow" data-flow="8"><span class="tile-icon" aria-hidden="true">⏱️✨</span><span class="tile-text"><span class="tile-title">8 min Reflektion & Reset</span><span class="tile-sub">Reflektion + reset</span></span></button></div></div>`;
 }
 
 function renderPreStep() {
@@ -153,6 +153,8 @@ function formatTime(sec) {
 
 function renderToolStep() {
   const tool = flow.selectedTool || pickTool();
+  const selectedNeed = flow.selectedNeed || getPrimaryNeed(flow.preValues);
+  const selectedDim = FOCUS_META[selectedNeed]?.dim || 'stress';
   flow.selectedTool = tool;
 
   const progress = tool.durationSec > 0 ? Math.round(((tool.durationSec - flow.countdown) / tool.durationSec) * 100) : 0;
@@ -160,7 +162,7 @@ function renderToolStep() {
   const isDone = flow.toolReady || flow.countdown === 0;
 
   return `<div class="card">
-    <div class="neo-card micro-tool-card">
+    <div class="neo-card micro-tool-card micro-card" data-dim="${selectedDim}">
       <div class="ex-badge">MIKRO-VERKTYG</div>
       <div class="micro-tool-head"><div class="ex-title">${tool.title}</div><button class="neo-btn neo-btn--soft neo-btn--sm" data-action="start-tool">${flow.timerRunning ? '⏸ Pausa' : '▶ Fortsätt'}</button></div>
       <div class="flow-note">~${tool.durationSec}s rekommenderat</div>
