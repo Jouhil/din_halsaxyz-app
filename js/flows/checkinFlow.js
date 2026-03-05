@@ -6,7 +6,7 @@ import { openGuide } from '../ui/helpOverlay.js';
 
 const NEED_KEYS = ['stress', 'humör', 'energi', 'sömn', 'tankar'];
 const NEED_LABELS = { stress: 'Stress', humör: 'Humör', energi: 'Energi', sömn: 'Sömn', tankar: 'Tankar' };
-const FLOW_STEP = Object.freeze({
+const STEPS = Object.freeze({
   START: 'start',
   PRE: 'pre',
   FOCUS: 'focus',
@@ -16,8 +16,8 @@ const FLOW_STEP = Object.freeze({
   DONE: 'done',
 });
 const FLOW_PATHS = {
-  3: [FLOW_STEP.PRE, FLOW_STEP.FOCUS, FLOW_STEP.TOOL, FLOW_STEP.CLOSING, FLOW_STEP.DONE],
-  8: [FLOW_STEP.PRE, FLOW_STEP.FOCUS, FLOW_STEP.REFLECTION, FLOW_STEP.TOOL, FLOW_STEP.CLOSING, FLOW_STEP.DONE],
+  3: [STEPS.PRE, STEPS.FOCUS, STEPS.TOOL, STEPS.CLOSING, STEPS.DONE],
+  8: [STEPS.PRE, STEPS.FOCUS, STEPS.REFLECTION, STEPS.TOOL, STEPS.CLOSING, STEPS.DONE],
 };
 const FOCUS_META = {
   stress: { label: 'Lugn & ro', subtitle: 'Hantera stress och oro', emoji: '🌿', dim: 'stress' },
@@ -95,7 +95,7 @@ let saveToastTimer;
 export function initCheckinFlow() {
   flow = {
     currentFlow: null,
-    step: FLOW_STEP.START,
+    step: STEPS.START,
     preValues: { stress: 5, humör: 5, energi: 5, sömn: 5, tankar: 5 },
     selectedNeed: null,
     selectedTool: null,
@@ -135,10 +135,10 @@ function render() {
 
   let content = '';
   if (flow.currentFlow) {
-    if (flow.step === FLOW_STEP.PRE) content = renderPreStep();
-    else if (flow.step === FLOW_STEP.FOCUS) content = renderFocusStep();
-    else if (flow.step === FLOW_STEP.REFLECTION) content = renderReflectionStep();
-    else if (flow.step === FLOW_STEP.TOOL) content = renderToolStep();
+    if (flow.step === STEPS.PRE) content = renderPreStep();
+    else if (flow.step === STEPS.FOCUS) content = renderFocusStep();
+    else if (flow.step === STEPS.REFLECTION) content = renderReflectionStep();
+    else if (flow.step === STEPS.TOOL) content = renderToolStep();
     else content = renderClosing();
   }
 
@@ -149,7 +149,7 @@ function render() {
 
 function showLengthSwitch() {
   if (!flow.currentFlow) return false;
-  return [FLOW_STEP.PRE, FLOW_STEP.FOCUS, FLOW_STEP.REFLECTION, FLOW_STEP.TOOL].includes(flow.step);
+  return [STEPS.PRE, STEPS.FOCUS, STEPS.REFLECTION, STEPS.TOOL].includes(flow.step);
 }
 
 
@@ -164,8 +164,8 @@ function getCurrentStepIndex() {
 }
 
 function transitionTo(nextStep) {
-  if (nextStep === FLOW_STEP.START) {
-    flow.step = FLOW_STEP.START;
+  if (nextStep === STEPS.START) {
+    flow.step = STEPS.START;
     return true;
   }
   const path = getFlowPath();
@@ -202,12 +202,14 @@ function persistPlanHistory(plan) {
 function refreshPlan({ persist = false } = {}) {
   if (!state.dailyLib || !state.dailyClosing || !flow.currentFlow) return;
   flow.plan = buildSessionPlan({
-    preValues: flow.preValues,
+    checkinValues: flow.preValues,
     selectedNeed: flow.selectedNeed,
     libraries: { library: state.dailyLib, closing: state.dailyClosing },
     rotationHistory: loadRotationHistory(),
+    userPrefs: state.settings || {},
     tools,
     flowMinutes: Number(flow.currentFlow),
+    now: new Date().toISOString(),
   });
   flow.selectedNeed = flow.plan?.primaryNeed || flow.selectedNeed;
   flow.selectedTool = flow.plan?.selectedTool || flow.selectedTool;
@@ -358,7 +360,7 @@ function startToolTimer(restart = false) {
 }
 
 function ensureToolAutoStart() {
-  if (flow.step !== FLOW_STEP.TOOL) return;
+  if (flow.step !== STEPS.TOOL) return;
   if (flow.toolReady || flow.timerRunning) return;
   startToolTimer(true);
 }
@@ -367,7 +369,7 @@ function resetFlow() {
   stopTimer();
   clearTimeout(saveToastTimer);
   flow.currentFlow = null;
-  flow.step = FLOW_STEP.START;
+  transitionTo(STEPS.START);
   flow.selectedNeed = null;
   flow.selectedTool = null;
   flow.plan = null;
@@ -380,7 +382,7 @@ function bind(root) {
   root.querySelectorAll('[data-action="start-flow"]').forEach((el) => el.addEventListener('click', () => {
     stopTimer();
     flow.currentFlow = el.dataset.flow;
-    transitionTo(FLOW_STEP.PRE);
+    transitionTo(STEPS.PRE);
     flow.timestamps.startedAt = new Date().toISOString();
     flow.selectedNeed = null;
     flow.selectedTool = null;
@@ -407,15 +409,15 @@ function bind(root) {
     render();
   }));
 
-  root.querySelector('[data-action="next-pre"]')?.addEventListener('click', () => { transitionTo(FLOW_STEP.FOCUS); render(); });
+  root.querySelector('[data-action="next-pre"]')?.addEventListener('click', () => { transitionTo(STEPS.FOCUS); render(); });
   root.querySelector('[data-action="next-need"]')?.addEventListener('click', () => {
     refreshPlan({ persist: true });
-    transitionTo(flow.currentFlow === '8' ? FLOW_STEP.REFLECTION : FLOW_STEP.TOOL);
+    transitionTo(flow.currentFlow === '8' ? STEPS.REFLECTION : STEPS.TOOL);
     if (flow.currentFlow === '3') ensureToolAutoStart();
     render();
   });
-  root.querySelector('[data-action="next-reflection"]')?.addEventListener('click', () => { transitionTo(FLOW_STEP.TOOL); ensureToolAutoStart(); render(); });
-  root.querySelector('[data-action="next-tool"]')?.addEventListener('click', () => { transitionTo(FLOW_STEP.CLOSING); render(); });
+  root.querySelector('[data-action="next-reflection"]')?.addEventListener('click', () => { transitionTo(STEPS.TOOL); ensureToolAutoStart(); render(); });
+  root.querySelector('[data-action="next-tool"]')?.addEventListener('click', () => { transitionTo(STEPS.CLOSING); render(); });
 
   root.querySelector('[data-action="guide-focus"]')?.addEventListener('click', () => openGuide({ need: flow.selectedNeed || flow.plan?.primaryNeed || 'stress', title: 'Snabb hjälp', source: 'checkin' }));
   root.querySelector('[data-action="guide-cbt"]')?.addEventListener('click', () => openGuide({ topic: 'cbt_light', title: 'Hur funkar detta?' }));
