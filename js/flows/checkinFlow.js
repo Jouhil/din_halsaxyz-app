@@ -96,7 +96,10 @@ let timer;
 let saveToastTimer;
 
 function buildPreAnswerSignature(values = {}) {
-  return JSON.stringify(NEED_KEYS.map((key) => [key, Number(values?.[key] ?? 5)]));
+  return JSON.stringify({
+    values: NEED_KEYS.map((key) => [key, Number(values?.[key] ?? 5)]),
+    lastChangedNeed: normalizeNeedKey(flow?.lastChangedNeed) || null,
+  });
 }
 
 function normalizeNeedKey(need) {
@@ -111,11 +114,20 @@ function syncAdaptiveStateWithPreAnswers({ force = false } = {}) {
   if (!hasChanged) return false;
 
   const needSignals = inferNeedPriorityFromAnswers(flow.preValues, { lastChangedNeed: flow.lastChangedNeed });
+  const previousNeed = flow.selectedNeed;
   flow.questionAnswers = {};
   flow.focusAnswerDraft = 5;
   flow.adaptiveDebug = null;
   flow.selectedNeed = needSignals.topNeed || null;
   flow.adaptiveSourceSignature = nextSignature;
+  if (previousNeed && previousNeed !== flow.selectedNeed) {
+    console.debug('[adaptive-question] focus need changed from pre answers', {
+      previousNeed,
+      selectedNeed: flow.selectedNeed,
+      lastChangedNeed: flow.lastChangedNeed,
+      topTiedNeeds: needSignals.topTiedNeeds,
+    });
+  }
   return true;
 }
 
@@ -134,6 +146,7 @@ function getAdaptiveSelection() {
     questions: DEFAULT_ADAPTIVE_QUESTIONS,
     answers,
     memory,
+    lastChangedNeed: flow.lastChangedNeed,
   });
   const nextQuestion = reachedAdaptiveLimit ? null : candidateQuestion;
   const needSignals = inferNeedPriorityFromAnswers(answers, { lastChangedNeed: flow.lastChangedNeed });
