@@ -482,12 +482,15 @@ function bind(root) {
 function saveLog() {
   const logs = loadJSON('dailyFlowLogs', []);
   const focusNeed = flow.selectedNeed || flow.plan?.primaryNeed || 'stress';
+  const timestamp = new Date().toISOString();
   const entry = {
-    dateISO: new Date().toISOString(),
-    date: new Date().toISOString().slice(0, 10),
+    timestamp,
+    dateISO: timestamp,
+    date: timestamp.slice(0, 10),
     sessionLengthMin: Number(flow.currentFlow),
     flowMinutes: Number(flow.currentFlow),
     pre: { ...flow.preValues, tankar: flow.preValues.tankar ?? null },
+    primaryNeed: focusNeed,
     focusNeed,
     toolId: flow.selectedTool?.id || null,
     reflection: flow.currentFlow === '8' ? {
@@ -505,7 +508,7 @@ function saveLog() {
       intensityAfter: flow.reflection.intensityAfter,
     } : undefined,
     stars: flow.after.stars,
-    completedAt: new Date().toISOString(),
+    completedAt: timestamp,
     counted: true,
   };
   logs.push(entry);

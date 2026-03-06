@@ -1,5 +1,6 @@
 import { getPrimaryNeed } from './matchingEngine.js';
 import { pickRotated } from './rotationEngine.js';
+import { getHabitMemory } from './habitMemoryEngine.js';
 
 const DEFAULT_NEED = 'stress';
 const DEFAULT_CLOSING = { lines: ['Du tog hand om dig i dag.', 'Små steg gör skillnad.'] };
@@ -46,7 +47,7 @@ function inferUiHints(primaryNeed, intensity) {
   };
 }
 
-function selectTool({ primaryNeed, checkinValues, userPrefs = {}, tools = [], rotationHistory = {}, flowMinutes = 3 }) {
+function selectTool({ primaryNeed, checkinValues, userPrefs = {}, tools = [], rotationHistory = {}, flowMinutes = 3, avoidToolIds = [] }) {
   const [minDur, maxDur] = flowMinutes === 8 ? [90, 150] : [60, 120];
   const intensity = normalizeIntensity(checkinValues, primaryNeed);
   const preferredMode = userPrefs?.mode;
@@ -60,7 +61,10 @@ function selectTool({ primaryNeed, checkinValues, userPrefs = {}, tools = [], ro
   });
 
   const source = candidates.length ? candidates : (modeFiltered.length ? modeFiltered : matchingNeed);
-  return pickWithRotation(source, { recent: rotationHistory[`tool:${primaryNeed}`], keyFn: (tool) => tool.id }) || matchingNeed[0] || tools[0] || null;
+  const avoidSet = new Set(Array.isArray(avoidToolIds) ? avoidToolIds : []);
+  const withoutAvoid = source.filter((tool) => !avoidSet.has(tool.id));
+  const eligible = withoutAvoid.length ? withoutAvoid : source;
+  return pickWithRotation(eligible, { recent: rotationHistory[`tool:${primaryNeed}`], keyFn: (tool) => tool.id }) || matchingNeed[0] || tools[0] || null;
 }
 
 function selectPrompt({ primaryNeed, selectedTool, library = {}, rotationHistory = {} }) {
@@ -89,9 +93,20 @@ export function buildSessionPlan(input = {}) {
     now = new Date().toISOString(),
   } = input;
 
-  const primaryNeed = selectedNeed || getPrimaryNeed(checkinValues) || DEFAULT_NEED;
+  const memory = getHabitMemory({ now });
+  const inferredNeed = getPrimaryNeed(checkinValues);
+  const hasCheckinValues = Object.keys(checkinValues || {}).length > 0;
+  const primaryNeed = selectedNeed || (hasCheckinValues ? inferredNeed : null) || memory.preferences.favoredNeed || inferredNeed || DEFAULT_NEED;
   const intensity = normalizeIntensity(checkinValues, primaryNeed);
-  const selectedTool = selectTool({ primaryNeed, checkinValues, userPrefs, tools, rotationHistory, flowMinutes });
+  const selectedTool = selectTool({
+    primaryNeed,
+    checkinValues,
+    userPrefs,
+    tools,
+    rotationHistory,
+    flowMinutes,
+    avoidToolIds: memory.preferences.avoidTools,
+  });
   const selectedPrompt = selectPrompt({ primaryNeed, selectedTool, library: libraries.library, rotationHistory });
   const closingMessage = selectClosing({ primaryNeed, closing: libraries.closing, rotationHistory });
 
@@ -107,6 +122,15 @@ export function buildSessionPlan(input = {}) {
       timestamp: now,
       intensity,
       preferredMode: userPrefs?.mode || 'default',
+      memory: {
+        windowDays: memory.windowDays,
+        favoredNeed: memory.preferences.favoredNeed,
+        favoredTools: memory.preferences.favoredTools,
+        avoidTools: memory.preferences.avoidTools,
+        lastNeed: memory.recent.lastNeed,
+        lastToolId: memory.recent.lastToolId,
+        notes: memory.notes,
+      },
     },
     uiHints: inferUiHints(primaryNeed, intensity),
   };
