@@ -77,9 +77,9 @@ function getNeedRankScore(need, needPriority = []) {
   return Math.max(0, needPriority.length - idx);
 }
 
-export function rankQuestions({ questions = [], answers = {}, memory = null } = {}) {
+export function rankQuestions({ questions = [], answers = {}, memory = null, lastChangedNeed = null } = {}) {
   const answeredIds = getAnsweredIds(answers);
-  const needSignals = inferNeedPriorityFromAnswers(answers);
+  const needSignals = inferNeedPriorityFromAnswers(answers, { lastChangedNeed });
   const memoryNeed = memory?.dominantNeed || null;
 
   return (Array.isArray(questions) ? questions : [])
@@ -104,11 +104,12 @@ export function getNextQuestion({
   questions = [],
   answers = {},
   memory = null,
+  lastChangedNeed = null,
 } = {}) {
-  const ranked = rankQuestions({ questions, answers, memory });
+  const ranked = rankQuestions({ questions, answers, memory, lastChangedNeed });
   if (!ranked.length) return null;
 
-  const needSignals = inferNeedPriorityFromAnswers(answers);
+  const needSignals = inferNeedPriorityFromAnswers(answers, { lastChangedNeed });
   if (!needSignals.hasStrongSignal) {
     return ranked
       .slice()
