@@ -99,12 +99,18 @@ function buildPreAnswerSignature(values = {}) {
   return JSON.stringify(NEED_KEYS.map((key) => [key, Number(values?.[key] ?? 5)]));
 }
 
+function normalizeNeedKey(need) {
+  if (need === 'somn' || need === 'sleep') return 'sömn';
+  if (need === 'energy') return 'energi';
+  return NEED_KEYS.includes(need) ? need : null;
+}
+
 function syncAdaptiveStateWithPreAnswers({ force = false } = {}) {
   const nextSignature = buildPreAnswerSignature(flow.preValues);
   const hasChanged = force || flow.adaptiveSourceSignature !== nextSignature;
   if (!hasChanged) return false;
 
-  const needSignals = inferNeedPriorityFromAnswers(flow.preValues);
+  const needSignals = inferNeedPriorityFromAnswers(flow.preValues, { lastChangedNeed: flow.lastChangedNeed });
   flow.questionAnswers = {};
   flow.focusAnswerDraft = 5;
   flow.adaptiveDebug = null;
@@ -130,7 +136,7 @@ function getAdaptiveSelection() {
     memory,
   });
   const nextQuestion = reachedAdaptiveLimit ? null : candidateQuestion;
-  const needSignals = inferNeedPriorityFromAnswers(answers);
+  const needSignals = inferNeedPriorityFromAnswers(answers, { lastChangedNeed: flow.lastChangedNeed });
   const fallbackUsed = !needSignals.hasStrongSignal;
   const remainingCount = reachedAdaptiveLimit
     ? 0
@@ -160,6 +166,7 @@ export function initCheckinFlow() {
     focusAnswerDraft: 5,
     adaptiveDebug: null,
     adaptiveSourceSignature: null,
+    lastChangedNeed: null,
     plan: null,
     reflection: { situation: '', situationOther: '', emotions: [], intensityBefore: 5, thought: '', thoughtOther: '', alternative: '', intensityAfter: 4 },
     after: { stars: 0 },
@@ -276,6 +283,41 @@ function refreshPlan({ persist = false } = {}) {
   flow.selectedTool = flow.plan?.selectedTool || flow.selectedTool;
   state.flowState = { ...(state.flowState || {}), plan: flow.plan };
   if (persist) persistPlanHistory(flow.plan);
+}
+
+function chooseAlternativeTool({ currentToolId, need }) {
+  const pool = tools.filter((tool) => (tool.needs || []).includes(need));
+  if (!pool.length) return null;
+  const alternatives = currentToolId ? pool.filter((tool) => tool.id !== currentToolId) : pool;
+  const source = alternatives.length ? alternatives : pool;
+  return pickRotated(source, {
+    keyFn: (tool) => tool.id,
+    historyKey: `rot_swap_tool_${need}`,
+    avoidLastN: 1,
+  }) || source[0] || null;
+}
+
+function swapToolSelection() {
+  const need = flow.selectedNeed || flow.plan?.primaryNeed || 'stress';
+  const currentTool = flow.selectedTool || flow.plan?.selectedTool || null;
+  const nextTool = chooseAlternativeTool({ currentToolId: currentTool?.id || null, need });
+
+  if (!nextTool) {
+    console.debug('[checkin-flow] no tool candidate available for swap', { need });
+    return;
+  }
+
+  if (currentTool?.id && nextTool.id === currentTool.id) {
+    console.debug('[checkin-flow] no alternative tool available', { need, toolId: currentTool.id });
+  }
+
+  flow.selectedTool = nextTool;
+  flow.plan = {
+    ...(flow.plan || {}),
+    primaryNeed: flow.plan?.primaryNeed || need,
+    selectedTool: nextTool,
+  };
+  state.flowState = { ...(state.flowState || {}), plan: flow.plan };
 }
 
 function renderStartTiles() {
@@ -456,6 +498,7 @@ function resetFlow() {
   flow.focusAnswerDraft = 5;
   flow.adaptiveDebug = null;
   flow.adaptiveSourceSignature = null;
+  flow.lastChangedNeed = null;
   flow.countdown = 0;
   flow.toolReady = false;
   flow.saveToast = false;
@@ -474,6 +517,7 @@ function bind(root) {
     flow.focusAnswerDraft = 5;
     flow.adaptiveDebug = null;
     flow.adaptiveSourceSignature = null;
+    flow.lastChangedNeed = null;
     flow.countdown = 0;
     flow.toolReady = false;
     flow.after = { stars: 0 };
@@ -486,12 +530,16 @@ function bind(root) {
   });
 
   root.querySelectorAll('[data-action="set-pre"]').forEach((el) => el.addEventListener('input', () => {
+    const needKey = normalizeNeedKey(el.dataset.key);
     flow.preValues[el.dataset.key] = Number(el.value);
+    if (needKey) flow.lastChangedNeed = needKey;
+    if (flow.step === STEPS.FOCUS) flow.adaptiveSourceSignature = null;
     render();
   }));
 
   root.querySelectorAll('[data-action="set-need"]').forEach((el) => el.addEventListener('click', () => {
     flow.selectedNeed = el.dataset.need;
+    flow.lastChangedNeed = normalizeNeedKey(el.dataset.need) || flow.lastChangedNeed;
     flow.questionAnswers[`focus-${el.dataset.need === 'sömn' ? 'somn' : el.dataset.need}`] = flow.focusAnswerDraft;
     saveJSON('flowRotationHistory', { ...loadRotationHistory(), lastSelectedNeed: flow.selectedNeed });
     render();
@@ -517,6 +565,7 @@ function bind(root) {
     if (!nextQuestion?.id) return;
     flow.questionAnswers[nextQuestion.id] = Number(flow.focusAnswerDraft);
     flow.selectedNeed = nextQuestion.need || flow.selectedNeed;
+    flow.lastChangedNeed = normalizeNeedKey(nextQuestion.need) || flow.lastChangedNeed;
     const { debug } = getAdaptiveSelection();
     flow.adaptiveDebug = debug;
     console.debug('[adaptive-question]', flow.adaptiveDebug);
@@ -580,7 +629,7 @@ function bind(root) {
 
   root.querySelector('[data-action="swap-tool"]')?.addEventListener('click', () => {
     stopTimer();
-    refreshPlan({ persist: true });
+    swapToolSelection();
     startToolTimer(true);
     render();
   });

@@ -27,7 +27,8 @@ function clampScore(value) {
   return Math.max(0, Math.min(10, value));
 }
 
-export function inferNeedPriorityFromAnswers(answers = {}) {
+export function inferNeedPriorityFromAnswers(answers = {}, options = {}) {
+  const { lastChangedNeed = null } = options;
   const stress = resolveNeedValue(answers, ['stress']);
   const sleep = resolveNeedValue(answers, ['sömn', 'somn', 'sleep']);
   const energy = resolveNeedValue(answers, ['energi', 'energy']);
@@ -38,8 +39,23 @@ export function inferNeedPriorityFromAnswers(answers = {}) {
     energi: energy === null ? 0 : clampScore(10 - energy),
   };
 
+  const topSignalValue = Math.max(...Object.values(signalScores));
+  const topTiedNeeds = Object.entries(signalScores)
+    .filter(([, score]) => score === topSignalValue)
+    .map(([need]) => need);
+
   const priority = Object.entries(signalScores)
-    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .sort((a, b) => {
+      if (b[1] !== a[1]) return b[1] - a[1];
+
+      const bothTopTied = a[1] === topSignalValue && b[1] === topSignalValue;
+      if (bothTopTied && lastChangedNeed) {
+        if (a[0] === lastChangedNeed) return -1;
+        if (b[0] === lastChangedNeed) return 1;
+      }
+
+      return a[0].localeCompare(b[0]);
+    })
     .map(([need]) => need);
 
   const topNeed = priority[0] || null;
@@ -51,6 +67,7 @@ export function inferNeedPriorityFromAnswers(answers = {}) {
     hasStrongSignal: topSignal >= DEFAULT_SIGNAL_THRESHOLD,
     topNeed,
     topSignal,
+    topTiedNeeds,
   };
 }
 
