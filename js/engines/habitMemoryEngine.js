@@ -21,6 +21,59 @@ function rankByCount(map = {}, limit = 1) {
     .map(([key]) => key);
 }
 
+function toLocalDayKey(timestampMs) {
+  if (typeof timestampMs !== 'number' || Number.isNaN(timestampMs)) return null;
+  const date = new Date(timestampMs);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function calculateStreakDays(items = []) {
+  const uniqueDays = [...new Set(items.map((item) => toLocalDayKey(item.timestampMs)).filter(Boolean))]
+    .sort((a, b) => Date.parse(b) - Date.parse(a));
+
+  if (!uniqueDays.length) return 0;
+
+  let streak = 1;
+  for (let i = 1; i < uniqueDays.length; i += 1) {
+    const prevMs = Date.parse(uniqueDays[i - 1]);
+    const nextMs = Date.parse(uniqueDays[i]);
+    const dayDiff = Math.round((prevMs - nextMs) / (24 * 60 * 60 * 1000));
+    if (dayDiff !== 1) break;
+    streak += 1;
+  }
+
+  return streak;
+}
+
+function pickDominantNeed(entries = []) {
+  const withNeed = entries.filter((entry) => entry.need);
+  if (!withNeed.length) return null;
+
+  const counts = withNeed.reduce((acc, entry) => {
+    acc[entry.need] = (acc[entry.need] || 0) + 1;
+    return acc;
+  }, {});
+
+  let bestNeed = null;
+  let bestCount = 0;
+  let bestTs = -1;
+
+  withNeed.forEach((entry) => {
+    const count = counts[entry.need] || 0;
+    const ts = typeof entry.timestampMs === 'number' ? entry.timestampMs : -1;
+    if (count > bestCount || (count === bestCount && ts > bestTs)) {
+      bestNeed = entry.need;
+      bestCount = count;
+      bestTs = ts;
+    }
+  });
+
+  return bestNeed;
+}
+
 export function getHabitMemory({ now = new Date(), days = 14 } = {}) {
   const notes = [];
   const windowDays = Number(days) > 0 ? Number(days) : 14;
@@ -50,6 +103,7 @@ export function getHabitMemory({ now = new Date(), days = 14 } = {}) {
 
   const withTs = normalized.filter((item) => typeof item.timestampMs === 'number' && !Number.isNaN(item.timestampMs));
   const withoutTs = normalized.filter((item) => item.timestampMs === null);
+  if (withoutTs.length) notes.push(`${withoutTs.length} logs missing parseable timestamp/date; kept for compatibility.`);
 
   let inWindow = withTs.filter((item) => item.timestampMs >= minTs && item.timestampMs <= nowTs);
   if (!inWindow.length && withoutTs.length) {
@@ -75,6 +129,13 @@ export function getHabitMemory({ now = new Date(), days = 14 } = {}) {
 
   const latest = sortedRecent[0] || null;
   const recentTools = sortedRecent.map((item) => item.toolId).filter(Boolean);
+  const streakDays = calculateStreakDays(withTs);
+  const dominantNeed = pickDominantNeed(inWindow);
+  const favoredToolIds = rankByCount(byToolId, 3);
+  const repeatedToolIds = rankByCount(
+    Object.fromEntries(Object.entries(byToolId).filter(([, count]) => count >= 2)),
+    10,
+  );
 
   return {
     windowDays,
@@ -90,8 +151,15 @@ export function getHabitMemory({ now = new Date(), days = 14 } = {}) {
     },
     preferences: {
       favoredNeed: rankByCount(byNeed, 1)[0] || null,
-      favoredTools: rankByCount(byToolId, 3),
+      favoredTools: favoredToolIds,
       avoidTools: recentTools.slice(0, 2),
+    },
+    streakDays,
+    dominantNeed,
+    toolSuccessHints: {
+      favoredToolIds,
+      repeatedToolIds,
+      notes: withoutTs.length ? ['Some logs had no valid timestamp.'] : [],
     },
     notes,
   };

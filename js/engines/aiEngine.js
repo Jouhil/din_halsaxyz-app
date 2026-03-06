@@ -47,7 +47,16 @@ function inferUiHints(primaryNeed, intensity) {
   };
 }
 
-function selectTool({ primaryNeed, checkinValues, userPrefs = {}, tools = [], rotationHistory = {}, flowMinutes = 3, avoidToolIds = [] }) {
+function selectTool({
+  primaryNeed,
+  checkinValues,
+  userPrefs = {},
+  tools = [],
+  rotationHistory = {},
+  flowMinutes = 3,
+  avoidToolIds = [],
+  favoredToolIds = [],
+}) {
   const [minDur, maxDur] = flowMinutes === 8 ? [90, 150] : [60, 120];
   const intensity = normalizeIntensity(checkinValues, primaryNeed);
   const preferredMode = userPrefs?.mode;
@@ -62,9 +71,12 @@ function selectTool({ primaryNeed, checkinValues, userPrefs = {}, tools = [], ro
 
   const source = candidates.length ? candidates : (modeFiltered.length ? modeFiltered : matchingNeed);
   const avoidSet = new Set(Array.isArray(avoidToolIds) ? avoidToolIds : []);
+  const favoredSet = new Set(Array.isArray(favoredToolIds) ? favoredToolIds : []);
   const withoutAvoid = source.filter((tool) => !avoidSet.has(tool.id));
   const eligible = withoutAvoid.length ? withoutAvoid : source;
-  return pickWithRotation(eligible, { recent: rotationHistory[`tool:${primaryNeed}`], keyFn: (tool) => tool.id }) || matchingNeed[0] || tools[0] || null;
+  const favoredEligible = eligible.filter((tool) => favoredSet.has(tool.id));
+  const selectionPool = favoredEligible.length ? favoredEligible : eligible;
+  return pickWithRotation(selectionPool, { recent: rotationHistory[`tool:${primaryNeed}`], keyFn: (tool) => tool.id }) || matchingNeed[0] || tools[0] || null;
 }
 
 function selectPrompt({ primaryNeed, selectedTool, library = {}, rotationHistory = {} }) {
@@ -96,7 +108,9 @@ export function buildSessionPlan(input = {}) {
   const memory = getHabitMemory({ now });
   const inferredNeed = getPrimaryNeed(checkinValues);
   const hasCheckinValues = Object.keys(checkinValues || {}).length > 0;
-  const primaryNeed = selectedNeed || (hasCheckinValues ? inferredNeed : null) || memory.preferences.favoredNeed || inferredNeed || DEFAULT_NEED;
+  const isWeakNeed = !inferredNeed || inferredNeed === DEFAULT_NEED;
+  const memoryNeed = memory.dominantNeed || memory.preferences.favoredNeed;
+  const primaryNeed = selectedNeed || (hasCheckinValues && !isWeakNeed ? inferredNeed : null) || memoryNeed || inferredNeed || DEFAULT_NEED;
   const intensity = normalizeIntensity(checkinValues, primaryNeed);
   const selectedTool = selectTool({
     primaryNeed,
@@ -106,6 +120,7 @@ export function buildSessionPlan(input = {}) {
     rotationHistory,
     flowMinutes,
     avoidToolIds: memory.preferences.avoidTools,
+    favoredToolIds: memory.toolSuccessHints?.favoredToolIds || memory.preferences.favoredTools,
   });
   const selectedPrompt = selectPrompt({ primaryNeed, selectedTool, library: libraries.library, rotationHistory });
   const closingMessage = selectClosing({ primaryNeed, closing: libraries.closing, rotationHistory });
@@ -126,9 +141,12 @@ export function buildSessionPlan(input = {}) {
         windowDays: memory.windowDays,
         favoredNeed: memory.preferences.favoredNeed,
         favoredTools: memory.preferences.favoredTools,
+        favoredToolIds: memory.toolSuccessHints?.favoredToolIds || [],
         avoidTools: memory.preferences.avoidTools,
         lastNeed: memory.recent.lastNeed,
         lastToolId: memory.recent.lastToolId,
+        streakDays: memory.streakDays || 0,
+        dominantNeed: memory.dominantNeed || null,
         notes: memory.notes,
       },
     },
