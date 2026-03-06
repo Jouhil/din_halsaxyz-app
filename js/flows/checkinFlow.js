@@ -3,7 +3,7 @@ import { loadJSON, saveJSON } from '../storage.js';
 import { pickRotated } from '../engines/rotationEngine.js';
 import { buildSessionPlan } from '../engines/aiEngine.js';
 import { getHabitMemory } from '../engines/habitMemoryEngine.js';
-import { DEFAULT_ADAPTIVE_QUESTIONS, getNextQuestion } from '../engines/questionEngine.js';
+import { DEFAULT_ADAPTIVE_QUESTIONS, getNextQuestion, inferNeedPriorityFromAnswers } from '../engines/questionEngine.js';
 import { openGuide } from '../ui/helpOverlay.js';
 
 const NEED_KEYS = ['stress', 'humör', 'energi', 'sömn', 'tankar'];
@@ -28,6 +28,7 @@ const FOCUS_META = {
   sömn: { label: 'Sömnkvalitet', subtitle: 'Förbättra din återhämtning', emoji: '🌙', dim: 'sleep' },
   tankar: { label: 'Tankar', subtitle: 'Klargör ditt sinne', emoji: '💭', dim: 'thoughts' },
 };
+const ADAPTIVE_QUESTION_TARGET = 3;
 const SLIDER_META = {
   stress: { left: 'Stressad', right: 'Lugn', emoji: '😰', dim: 'stress' },
   humör: { left: 'Nere', right: 'På topp', emoji: '🙂', dim: 'mood' },
@@ -102,18 +103,24 @@ function getAdaptiveAnswers() {
 
 function getAdaptiveSelection() {
   const memory = getHabitMemory();
+  const answers = getAdaptiveAnswers();
   const nextQuestion = getNextQuestion({
     questions: DEFAULT_ADAPTIVE_QUESTIONS,
-    answers: getAdaptiveAnswers(),
+    answers,
     memory,
   });
+  const needSignals = inferNeedPriorityFromAnswers(answers);
+  const fallbackUsed = !needSignals.hasStrongSignal;
 
   return {
     nextQuestion,
+    answeredCount: Object.keys(flow.questionAnswers || {}).length,
+    remainingCount: Math.max(0, DEFAULT_ADAPTIVE_QUESTIONS.length - Object.keys(flow.questionAnswers || {}).length),
     debug: {
       selectedQuestionId: nextQuestion?.id || null,
-      priorityNeed: nextQuestion?.need || null,
-      reason: nextQuestion ? 'signal-ranked' : 'no-unanswered-question',
+      priorityNeed: needSignals.topNeed || nextQuestion?.need || null,
+      fallbackUsed,
+      reason: nextQuestion ? (fallbackUsed ? 'fallback-order' : 'signal-ranked') : 'no-unanswered-question',
     },
   };
 }
@@ -126,6 +133,7 @@ export function initCheckinFlow() {
     selectedNeed: null,
     selectedTool: null,
     questionAnswers: {},
+    focusAnswerDraft: 5,
     adaptiveDebug: null,
     plan: null,
     reflection: { situation: '', situationOther: '', emotions: [], intensityBefore: 5, thought: '', thoughtOther: '', alternative: '', intensityAfter: 4 },
@@ -258,18 +266,28 @@ function renderPreStep() {
 }
 
 function renderFocusStep() {
-  const { nextQuestion, debug } = getAdaptiveSelection();
+  const { nextQuestion, debug, answeredCount, remainingCount } = getAdaptiveSelection();
   flow.adaptiveDebug = debug;
+  state.flowState = { ...(state.flowState || {}), adaptiveQuestion: flow.adaptiveDebug };
+
   const selected = flow.selectedNeed || nextQuestion?.need || flow.plan?.primaryNeed || 'stress';
   const orderedNeeds = nextQuestion?.need
     ? [nextQuestion.need, ...NEED_KEYS.filter((need) => need !== nextQuestion.need)]
     : NEED_KEYS;
   const ctaLabel = flow.currentFlow === '8' ? 'Nästa: Reflektion →' : 'Nästa: Mikro-verktyg →';
-  return `<div class="card"><div class="focus-list">${orderedNeeds.map((need) => {
-    const meta = FOCUS_META[need];
-    const isSelected = selected === need;
-    return `<button class="row-btn ${isSelected ? 'is-selected' : ''}" data-action="set-need" data-need="${need}" data-dim="${meta.dim}"><span class="row-emoji">${meta.emoji}</span><span class="row-main"><strong>${meta.label}</strong><span class="row-sub">${meta.subtitle}</span></span><span class="row-check" aria-hidden="true">✓</span></button>`;
-  }).join('')}</div><div class="flow-actions"><button class="neo-btn neo-btn--filled neo-btn--cta" data-action="next-need" ${selected ? '' : 'disabled'}>${ctaLabel}</button></div></div>`;
+  const canContinue = selected && (answeredCount >= ADAPTIVE_QUESTION_TARGET || !nextQuestion);
+  const answerValue = nextQuestion ? (flow.questionAnswers[nextQuestion.id] ?? flow.focusAnswerDraft ?? 5) : null;
+
+  return `<div class="card">
+    ${nextQuestion ? `<div class="ci-block"><div class="ci-label">Adaptiv fråga ${Math.min(answeredCount + 1, ADAPTIVE_QUESTION_TARGET)}/${ADAPTIVE_QUESTION_TARGET}</div><div class="flow-note">${nextQuestion.label}</div><div class="ci-row" data-dim="${FOCUS_META[nextQuestion.need]?.dim || 'stress'}"><div class="ci-row-main"><input type="range" min="0" max="10" value="${answerValue}" class="ci-slider" data-action="set-focus-answer"></div><small class="ci-val">${answerValue}</small></div><div class="ci-anchors"><span class="anchor">Lågt</span><span class="anchor">Högt</span></div><button class="neo-btn neo-btn--outline neo-btn--sm" data-action="answer-focus-question">Spara svar</button></div>` : '<div class="flow-note">Alla adaptiva frågor är besvarade.</div>'}
+    <div class="flow-note">Debug: fråga=${debug.selectedQuestionId || '—'} | behov=${debug.priorityNeed || '—'} | fallback=${debug.fallbackUsed ? 'ja' : 'nej'} | kvar=${remainingCount}</div>
+    <div class="focus-list">${orderedNeeds.map((need) => {
+      const meta = FOCUS_META[need];
+      const isSelected = selected === need;
+      return `<button class="row-btn ${isSelected ? 'is-selected' : ''}" data-action="set-need" data-need="${need}" data-dim="${meta.dim}"><span class="row-emoji">${meta.emoji}</span><span class="row-main"><strong>${meta.label}</strong><span class="row-sub">${meta.subtitle}</span></span><span class="row-check" aria-hidden="true">✓</span></button>`;
+    }).join('')}</div>
+    <div class="flow-actions"><button class="neo-btn neo-btn--filled neo-btn--cta" data-action="next-need" ${canContinue ? '' : 'disabled'}>${ctaLabel}</button></div>
+  </div>`;
 }
 
 function renderChipSet(field, selectedValue, options) {
@@ -407,6 +425,7 @@ function resetFlow() {
   flow.selectedTool = null;
   flow.plan = null;
   flow.questionAnswers = {};
+  flow.focusAnswerDraft = 5;
   flow.adaptiveDebug = null;
   flow.countdown = 0;
   flow.toolReady = false;
@@ -423,6 +442,7 @@ function bind(root) {
     flow.selectedTool = null;
     flow.plan = null;
     flow.questionAnswers = {};
+    flow.focusAnswerDraft = 5;
     flow.adaptiveDebug = null;
     flow.countdown = 0;
     flow.toolReady = false;
@@ -442,7 +462,7 @@ function bind(root) {
 
   root.querySelectorAll('[data-action="set-need"]').forEach((el) => el.addEventListener('click', () => {
     flow.selectedNeed = el.dataset.need;
-    flow.questionAnswers[`focus-${el.dataset.need === 'sömn' ? 'somn' : el.dataset.need}`] = el.dataset.need;
+    flow.questionAnswers[`focus-${el.dataset.need === 'sömn' ? 'somn' : el.dataset.need}`] = flow.focusAnswerDraft;
     saveJSON('flowRotationHistory', { ...loadRotationHistory(), lastSelectedNeed: flow.selectedNeed });
     render();
   }));
@@ -451,10 +471,28 @@ function bind(root) {
     const { nextQuestion, debug } = getAdaptiveSelection();
     flow.adaptiveDebug = debug;
     if (!flow.selectedNeed && nextQuestion?.need) flow.selectedNeed = nextQuestion.need;
+    console.log('[adaptive-question]', flow.adaptiveDebug);
     state.flowState = { ...(state.flowState || {}), adaptiveQuestion: flow.adaptiveDebug };
     transitionTo(STEPS.FOCUS);
     render();
   });
+  root.querySelector('[data-action="set-focus-answer"]')?.addEventListener('input', (event) => {
+    flow.focusAnswerDraft = Number(event.target.value);
+    render();
+  });
+
+  root.querySelector('[data-action="answer-focus-question"]')?.addEventListener('click', () => {
+    const { nextQuestion } = getAdaptiveSelection();
+    if (!nextQuestion?.id) return;
+    flow.questionAnswers[nextQuestion.id] = Number(flow.focusAnswerDraft);
+    flow.selectedNeed = nextQuestion.need || flow.selectedNeed;
+    const { debug } = getAdaptiveSelection();
+    flow.adaptiveDebug = debug;
+    console.log('[adaptive-question]', flow.adaptiveDebug);
+    state.flowState = { ...(state.flowState || {}), adaptiveQuestion: flow.adaptiveDebug };
+    render();
+  });
+
   root.querySelector('[data-action="next-need"]')?.addEventListener('click', () => {
     refreshPlan({ persist: true });
     transitionTo(flow.currentFlow === '8' ? STEPS.REFLECTION : STEPS.TOOL);

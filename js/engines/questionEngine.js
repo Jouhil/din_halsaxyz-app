@@ -104,7 +104,9 @@ export function getNextQuestion({
 
 export const DEFAULT_ADAPTIVE_QUESTIONS = Object.freeze([
   { id: 'focus-stress', need: 'stress', label: 'Hur är stressnivån just nu?', type: 'slider' },
+  { id: 'focus-stress-recovery', need: 'stress', label: 'Hur lätt är det att varva ned i kroppen?', type: 'slider' },
   { id: 'focus-somn', need: 'sömn', label: 'Hur har sömnen varit senaste dygnet?', type: 'slider' },
+  { id: 'focus-somn-recovery', need: 'sömn', label: 'Hur återhämtad känner du dig efter sömnen?', type: 'slider' },
   { id: 'focus-energi', need: 'energi', label: 'Hur är energin i kroppen just nu?', type: 'slider' },
   { id: 'focus-tankar', need: 'tankar', label: 'Hur påfrestande känns tankarna?', type: 'slider' },
   { id: 'focus-humor', need: 'humör', label: 'Hur känns humöret i stunden?', type: 'slider' },
