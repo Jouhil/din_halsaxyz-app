@@ -32,6 +32,30 @@ function normalizeIntensity(checkinValues = {}, need) {
   return Number(checkinValues?.[need] ?? 5);
 }
 
+export function rankToolsByHistory(tools = [], memory = null) {
+  if (!Array.isArray(tools) || !tools.length) return [];
+
+  const hints = memory?.toolSuccessHints;
+  if (!hints || typeof hints !== 'object') return tools;
+
+  const favoredSet = new Set(Array.isArray(hints.favoredToolIds) ? hints.favoredToolIds : []);
+  const repeatedSet = new Set(Array.isArray(hints.repeatedToolIds) ? hints.repeatedToolIds : []);
+
+  if (!favoredSet.size && !repeatedSet.size) return tools;
+
+  const scoreTool = (tool) => {
+    if (!tool?.id) return 0;
+    if (favoredSet.has(tool.id)) return 3;
+    if (repeatedSet.has(tool.id)) return 1;
+    return 0;
+  };
+
+  return tools
+    .map((tool, index) => ({ tool, index, score: scoreTool(tool) }))
+    .sort((a, b) => b.score - a.score || a.index - b.index)
+    .map((entry) => entry.tool);
+}
+
 function inferUiHints(primaryNeed, intensity) {
   const accentByNeed = {
     stress: 'calm',
@@ -52,10 +76,10 @@ function selectTool({
   checkinValues,
   userPrefs = {},
   tools = [],
+  memory = null,
   rotationHistory = {},
   flowMinutes = 3,
   avoidToolIds = [],
-  favoredToolIds = [],
 }) {
   const [minDur, maxDur] = flowMinutes === 8 ? [90, 150] : [60, 120];
   const intensity = normalizeIntensity(checkinValues, primaryNeed);
@@ -70,13 +94,11 @@ function selectTool({
   });
 
   const source = candidates.length ? candidates : (modeFiltered.length ? modeFiltered : matchingNeed);
+  const rankedSource = rankToolsByHistory(source, memory);
   const avoidSet = new Set(Array.isArray(avoidToolIds) ? avoidToolIds : []);
-  const favoredSet = new Set(Array.isArray(favoredToolIds) ? favoredToolIds : []);
-  const withoutAvoid = source.filter((tool) => !avoidSet.has(tool.id));
-  const eligible = withoutAvoid.length ? withoutAvoid : source;
-  const favoredEligible = eligible.filter((tool) => favoredSet.has(tool.id));
-  const selectionPool = favoredEligible.length ? favoredEligible : eligible;
-  return pickWithRotation(selectionPool, { recent: rotationHistory[`tool:${primaryNeed}`], keyFn: (tool) => tool.id }) || matchingNeed[0] || tools[0] || null;
+  const withoutAvoid = rankedSource.filter((tool) => !avoidSet.has(tool.id));
+  const eligible = withoutAvoid.length ? withoutAvoid : rankedSource;
+  return pickWithRotation(eligible, { recent: rotationHistory[`tool:${primaryNeed}`], keyFn: (tool) => tool.id }) || matchingNeed[0] || tools[0] || null;
 }
 
 function selectPrompt({ primaryNeed, selectedTool, library = {}, rotationHistory = {} }) {
@@ -120,7 +142,7 @@ export function buildSessionPlan(input = {}) {
     rotationHistory,
     flowMinutes,
     avoidToolIds: memory.preferences.avoidTools,
-    favoredToolIds: memory.toolSuccessHints?.favoredToolIds || memory.preferences.favoredTools,
+    memory,
   });
   const selectedPrompt = selectPrompt({ primaryNeed, selectedTool, library: libraries.library, rotationHistory });
   const closingMessage = selectClosing({ primaryNeed, closing: libraries.closing, rotationHistory });
@@ -142,6 +164,7 @@ export function buildSessionPlan(input = {}) {
         favoredNeed: memory.preferences.favoredNeed,
         favoredTools: memory.preferences.favoredTools,
         favoredToolIds: memory.toolSuccessHints?.favoredToolIds || [],
+        repeatedToolIds: memory.toolSuccessHints?.repeatedToolIds || [],
         avoidTools: memory.preferences.avoidTools,
         lastNeed: memory.recent.lastNeed,
         lastToolId: memory.recent.lastToolId,
