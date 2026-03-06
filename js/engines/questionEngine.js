@@ -32,11 +32,15 @@ export function inferNeedPriorityFromAnswers(answers = {}, options = {}) {
   const stress = resolveNeedValue(answers, ['stress']);
   const sleep = resolveNeedValue(answers, ['sömn', 'somn', 'sleep']);
   const energy = resolveNeedValue(answers, ['energi', 'energy']);
+  const mood = resolveNeedValue(answers, ['humör', 'humor', 'mood']);
+  const thoughts = resolveNeedValue(answers, ['tankar', 'thoughts', 'thought']);
 
   const signalScores = {
     stress: stress === null ? 0 : clampScore(10 - stress),
     sömn: sleep === null ? 0 : clampScore(10 - sleep),
     energi: energy === null ? 0 : clampScore(10 - energy),
+    humör: mood === null ? 0 : clampScore(10 - mood),
+    tankar: thoughts === null ? 0 : clampScore(10 - thoughts),
   };
 
   const topSignalValue = Math.max(...Object.values(signalScores));

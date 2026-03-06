@@ -105,6 +105,8 @@ function buildPreAnswerSignature(values = {}) {
 function normalizeNeedKey(need) {
   if (need === 'somn' || need === 'sleep') return 'sömn';
   if (need === 'energy') return 'energi';
+  if (need === 'humor' || need === 'mood') return 'humör';
+  if (need === 'thought' || need === 'thoughts') return 'tankar';
   return NEED_KEYS.includes(need) ? need : null;
 }
 
