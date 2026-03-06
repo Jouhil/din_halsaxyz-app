@@ -1,6 +1,7 @@
 import { getPrimaryNeed } from './matchingEngine.js';
 import { pickRotated } from './rotationEngine.js';
 import { getHabitMemory } from './habitMemoryEngine.js';
+import { inferNeedPriorityFromAnswers } from './questionEngine.js';
 
 const DEFAULT_NEED = 'stress';
 const DEFAULT_CLOSING = { lines: ['Du tog hand om dig i dag.', 'Små steg gör skillnad.'] };
@@ -129,8 +130,9 @@ export function buildSessionPlan(input = {}) {
 
   const memory = getHabitMemory({ now });
   const inferredNeed = getPrimaryNeed(checkinValues);
+  const needSignals = inferNeedPriorityFromAnswers(checkinValues);
   const hasCheckinValues = Object.keys(checkinValues || {}).length > 0;
-  const isWeakNeed = !inferredNeed || inferredNeed === DEFAULT_NEED;
+  const isWeakNeed = !needSignals.hasStrongSignal;
   const memoryNeed = memory.dominantNeed || memory.preferences.favoredNeed;
   const primaryNeed = selectedNeed || (hasCheckinValues && !isWeakNeed ? inferredNeed : null) || memoryNeed || inferredNeed || DEFAULT_NEED;
   const intensity = normalizeIntensity(checkinValues, primaryNeed);
