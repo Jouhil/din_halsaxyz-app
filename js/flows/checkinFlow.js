@@ -1,7 +1,7 @@
 import { state } from '../state.js';
 import { loadJSON, saveJSON } from '../storage.js';
 import { pickRotated } from '../engines/rotationEngine.js';
-import { buildSessionPlan } from '../engines/aiEngine.js';
+import { buildFocusSummary, buildSessionPlan } from '../engines/aiEngine.js';
 import { getHabitMemory } from '../engines/habitMemoryEngine.js';
 import { DEFAULT_ADAPTIVE_QUESTIONS, getNextQuestion, inferNeedPriorityFromAnswers } from '../engines/questionEngine.js';
 import { openGuide } from '../ui/helpOverlay.js';
@@ -402,6 +402,8 @@ function renderToolStep() {
   const tool = flow.selectedTool || flow.plan?.selectedTool || tools[0];
   const selectedNeed = flow.selectedNeed || flow.plan?.primaryNeed || 'stress';
   const selectedDim = FOCUS_META[selectedNeed]?.dim || 'stress';
+  const focusSummary = flow.plan?.focusSummary
+    || buildFocusSummary({ primaryNeed: selectedNeed, checkinValues: flow.preValues });
   flow.selectedTool = tool;
 
   const progress = tool.durationSec > 0 ? Math.round(((tool.durationSec - flow.countdown) / tool.durationSec) * 100) : 0;
@@ -409,6 +411,7 @@ function renderToolStep() {
   const isDone = flow.toolReady || flow.countdown === 0;
 
   return `<div class="card">
+    <div class="flow-note">${focusSummary}</div>
     <div class="neo-card micro-tool-card micro-card" data-dim="${selectedDim}">
       ${renderMicroTool(tool)}
       <div class="tool-progress"><div class="tool-progress-bar"><span style="width:${Math.max(0, Math.min(progress, 100))}%"></span></div><div class="tool-time">Tid kvar: <span>${remaining}</span></div></div>

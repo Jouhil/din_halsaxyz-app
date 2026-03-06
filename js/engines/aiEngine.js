@@ -14,6 +14,29 @@ const PROMPT_BY_NEED = {
   tankar: 'Notera tanken, släpp taget en stund och återvänd till nuet.',
 };
 
+const FOCUS_SUMMARY_BY_NEED = {
+  stress: {
+    default: 'Det verkar som att stress och oro tagit lite plats idag. Vi börjar med något som hjälper dig att varva ned.',
+    high: 'Det verkar som att stress och oro är extra tydligt just nu. Vi börjar med något som hjälper dig att landa lugnt.',
+  },
+  sömn: {
+    default: 'Det verkar som att återhämtningen behöver lite stöd idag. Vi börjar lugnt och enkelt.',
+    high: 'Det verkar som att sömn och återhämtning behöver lite extra stöd just nu. Vi börjar mjukt och lugnt.',
+  },
+  energi: {
+    default: 'Det verkar som att energin är låg just nu. Vi väljer något litet som hjälper dig att komma igång.',
+    high: 'Det verkar som att orken är låg just nu. Vi tar ett litet steg för att väcka lite energi.',
+  },
+  humör: {
+    default: 'Det verkar som att humöret behöver lite stöd idag. Vi börjar med något mjukt och enkelt.',
+    high: 'Det verkar som att humöret är extra tungt just nu. Vi börjar varsamt med något litet.',
+  },
+  tankar: {
+    default: 'Det verkar som att tankarna tar lite mycket plats just nu. Vi börjar med något som hjälper dig att landa.',
+    high: 'Det verkar som att tankarna snurrar mycket just nu. Vi börjar med något enkelt som hjälper dig att komma ned i varv.',
+  },
+};
+
 function pickFromHistory(items = [], recent = [], keyFn = (item) => item?.id) {
   if (!Array.isArray(items) || !items.length) return null;
   const recentSet = new Set(Array.isArray(recent) ? recent : []);
@@ -31,6 +54,15 @@ function pickWithRotation(items = [], { recent = [], keyFn = (item) => item?.id 
 
 function normalizeIntensity(checkinValues = {}, need) {
   return Number(checkinValues?.[need] ?? 5);
+}
+
+export function buildFocusSummary({ primaryNeed, checkinValues = {} } = {}) {
+  const need = primaryNeed || DEFAULT_NEED;
+  const intensity = normalizeIntensity(checkinValues, need);
+  const summarySet = FOCUS_SUMMARY_BY_NEED[need] || FOCUS_SUMMARY_BY_NEED[DEFAULT_NEED];
+  if (!summarySet) return 'Vi börjar med ett enkelt verktyg som kan hjälpa dig i stunden.';
+  if (intensity <= 3 && summarySet.high) return summarySet.high;
+  return summarySet.default || 'Vi börjar med ett enkelt verktyg som kan hjälpa dig i stunden.';
 }
 
 export function rankToolsByHistory(tools = [], memory = null) {
@@ -148,10 +180,12 @@ export function buildSessionPlan(input = {}) {
   });
   const selectedPrompt = selectPrompt({ primaryNeed, selectedTool, library: libraries.library, rotationHistory });
   const closingMessage = selectClosing({ primaryNeed, closing: libraries.closing, rotationHistory });
+  const focusSummary = buildFocusSummary({ primaryNeed, checkinValues });
 
   return {
     primaryNeed,
     selectedTool,
+    focusSummary,
     selectedPrompt,
     closingMessage,
     rationale: {
