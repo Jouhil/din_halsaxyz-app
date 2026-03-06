@@ -2,6 +2,8 @@ import { state } from '../state.js';
 import { loadJSON, saveJSON } from '../storage.js';
 import { pickRotated } from '../engines/rotationEngine.js';
 import { buildSessionPlan } from '../engines/aiEngine.js';
+import { getHabitMemory } from '../engines/habitMemoryEngine.js';
+import { DEFAULT_ADAPTIVE_QUESTIONS, getNextQuestion } from '../engines/questionEngine.js';
 import { openGuide } from '../ui/helpOverlay.js';
 
 const NEED_KEYS = ['stress', 'humör', 'energi', 'sömn', 'tankar'];
@@ -92,6 +94,30 @@ let flow;
 let timer;
 let saveToastTimer;
 
+function getAdaptiveAnswers() {
+  const answers = { ...flow.preValues, ...(flow.questionAnswers || {}) };
+  if (flow.selectedNeed) answers.selectedNeed = flow.selectedNeed;
+  return answers;
+}
+
+function getAdaptiveSelection() {
+  const memory = getHabitMemory();
+  const nextQuestion = getNextQuestion({
+    questions: DEFAULT_ADAPTIVE_QUESTIONS,
+    answers: getAdaptiveAnswers(),
+    memory,
+  });
+
+  return {
+    nextQuestion,
+    debug: {
+      selectedQuestionId: nextQuestion?.id || null,
+      priorityNeed: nextQuestion?.need || null,
+      reason: nextQuestion ? 'signal-ranked' : 'no-unanswered-question',
+    },
+  };
+}
+
 export function initCheckinFlow() {
   flow = {
     currentFlow: null,
@@ -99,6 +125,8 @@ export function initCheckinFlow() {
     preValues: { stress: 5, humör: 5, energi: 5, sömn: 5, tankar: 5 },
     selectedNeed: null,
     selectedTool: null,
+    questionAnswers: {},
+    adaptiveDebug: null,
     plan: null,
     reflection: { situation: '', situationOther: '', emotions: [], intensityBefore: 5, thought: '', thoughtOther: '', alternative: '', intensityAfter: 4 },
     after: { stars: 0 },
@@ -230,9 +258,14 @@ function renderPreStep() {
 }
 
 function renderFocusStep() {
-  const selected = flow.selectedNeed || flow.plan?.primaryNeed || 'stress';
+  const { nextQuestion, debug } = getAdaptiveSelection();
+  flow.adaptiveDebug = debug;
+  const selected = flow.selectedNeed || nextQuestion?.need || flow.plan?.primaryNeed || 'stress';
+  const orderedNeeds = nextQuestion?.need
+    ? [nextQuestion.need, ...NEED_KEYS.filter((need) => need !== nextQuestion.need)]
+    : NEED_KEYS;
   const ctaLabel = flow.currentFlow === '8' ? 'Nästa: Reflektion →' : 'Nästa: Mikro-verktyg →';
-  return `<div class="card"><div class="focus-list">${NEED_KEYS.map((need) => {
+  return `<div class="card"><div class="focus-list">${orderedNeeds.map((need) => {
     const meta = FOCUS_META[need];
     const isSelected = selected === need;
     return `<button class="row-btn ${isSelected ? 'is-selected' : ''}" data-action="set-need" data-need="${need}" data-dim="${meta.dim}"><span class="row-emoji">${meta.emoji}</span><span class="row-main"><strong>${meta.label}</strong><span class="row-sub">${meta.subtitle}</span></span><span class="row-check" aria-hidden="true">✓</span></button>`;
@@ -373,6 +406,8 @@ function resetFlow() {
   flow.selectedNeed = null;
   flow.selectedTool = null;
   flow.plan = null;
+  flow.questionAnswers = {};
+  flow.adaptiveDebug = null;
   flow.countdown = 0;
   flow.toolReady = false;
   flow.saveToast = false;
@@ -387,6 +422,8 @@ function bind(root) {
     flow.selectedNeed = null;
     flow.selectedTool = null;
     flow.plan = null;
+    flow.questionAnswers = {};
+    flow.adaptiveDebug = null;
     flow.countdown = 0;
     flow.toolReady = false;
     flow.after = { stars: 0 };
@@ -405,11 +442,19 @@ function bind(root) {
 
   root.querySelectorAll('[data-action="set-need"]').forEach((el) => el.addEventListener('click', () => {
     flow.selectedNeed = el.dataset.need;
+    flow.questionAnswers[`focus-${el.dataset.need === 'sömn' ? 'somn' : el.dataset.need}`] = el.dataset.need;
     saveJSON('flowRotationHistory', { ...loadRotationHistory(), lastSelectedNeed: flow.selectedNeed });
     render();
   }));
 
-  root.querySelector('[data-action="next-pre"]')?.addEventListener('click', () => { transitionTo(STEPS.FOCUS); render(); });
+  root.querySelector('[data-action="next-pre"]')?.addEventListener('click', () => {
+    const { nextQuestion, debug } = getAdaptiveSelection();
+    flow.adaptiveDebug = debug;
+    if (!flow.selectedNeed && nextQuestion?.need) flow.selectedNeed = nextQuestion.need;
+    state.flowState = { ...(state.flowState || {}), adaptiveQuestion: flow.adaptiveDebug };
+    transitionTo(STEPS.FOCUS);
+    render();
+  });
   root.querySelector('[data-action="next-need"]')?.addEventListener('click', () => {
     refreshPlan({ persist: true });
     transitionTo(flow.currentFlow === '8' ? STEPS.REFLECTION : STEPS.TOOL);
