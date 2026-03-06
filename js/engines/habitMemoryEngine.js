@@ -14,6 +14,10 @@ function inferToolId(log = {}) {
   return log.toolId || log.selectedTool?.id || log.plan?.selectedTool?.id || null;
 }
 
+function inferTimestamp(log = {}) {
+  return toIso(log.timestamp || log.createdAt || log.date || log.dateISO || log.completedAt);
+}
+
 function rankByCount(map = {}, limit = 1) {
   return Object.entries(map)
     .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
@@ -89,7 +93,7 @@ export function getHabitMemory({ now = new Date(), days = 14 } = {}) {
 
   const normalized = logs
     .map((log, index) => {
-      const timestamp = toIso(log?.timestamp || log?.dateISO || log?.completedAt);
+      const timestamp = inferTimestamp(log);
       return {
         index,
         log,
@@ -136,6 +140,9 @@ export function getHabitMemory({ now = new Date(), days = 14 } = {}) {
     Object.fromEntries(Object.entries(byToolId).filter(([, count]) => count >= 2)),
     10,
   );
+  const toolHintNotes = [];
+  if (favoredToolIds.length) toolHintNotes.push(`Favored tools in ${windowDays}d: ${favoredToolIds.join(', ')}.`);
+  if (withoutTs.length) toolHintNotes.push('Some logs had no valid timestamp.');
 
   return {
     windowDays,
@@ -159,7 +166,7 @@ export function getHabitMemory({ now = new Date(), days = 14 } = {}) {
     toolSuccessHints: {
       favoredToolIds,
       repeatedToolIds,
-      notes: withoutTs.length ? ['Some logs had no valid timestamp.'] : [],
+      notes: toolHintNotes,
     },
     notes,
   };

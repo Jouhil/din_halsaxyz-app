@@ -95,6 +95,24 @@ let flow;
 let timer;
 let saveToastTimer;
 
+function buildPreAnswerSignature(values = {}) {
+  return JSON.stringify(NEED_KEYS.map((key) => [key, Number(values?.[key] ?? 5)]));
+}
+
+function syncAdaptiveStateWithPreAnswers({ force = false } = {}) {
+  const nextSignature = buildPreAnswerSignature(flow.preValues);
+  const hasChanged = force || flow.adaptiveSourceSignature !== nextSignature;
+  if (!hasChanged) return false;
+
+  const needSignals = inferNeedPriorityFromAnswers(flow.preValues);
+  flow.questionAnswers = {};
+  flow.focusAnswerDraft = 5;
+  flow.adaptiveDebug = null;
+  flow.selectedNeed = needSignals.topNeed || null;
+  flow.adaptiveSourceSignature = nextSignature;
+  return true;
+}
+
 function getAdaptiveAnswers() {
   const answers = { ...flow.preValues, ...(flow.questionAnswers || {}) };
   if (flow.selectedNeed) answers.selectedNeed = flow.selectedNeed;
@@ -141,6 +159,7 @@ export function initCheckinFlow() {
     questionAnswers: {},
     focusAnswerDraft: 5,
     adaptiveDebug: null,
+    adaptiveSourceSignature: null,
     plan: null,
     reflection: { situation: '', situationOther: '', emotions: [], intensityBefore: 5, thought: '', thoughtOther: '', alternative: '', intensityAfter: 4 },
     after: { stars: 0 },
@@ -272,6 +291,7 @@ function renderPreStep() {
 }
 
 function renderFocusStep() {
+  syncAdaptiveStateWithPreAnswers();
   const { nextQuestion, debug, answeredCount, remainingCount } = getAdaptiveSelection();
   flow.adaptiveDebug = debug;
   state.flowState = { ...(state.flowState || {}), adaptiveQuestion: flow.adaptiveDebug };
@@ -435,6 +455,7 @@ function resetFlow() {
   flow.questionAnswers = {};
   flow.focusAnswerDraft = 5;
   flow.adaptiveDebug = null;
+  flow.adaptiveSourceSignature = null;
   flow.countdown = 0;
   flow.toolReady = false;
   flow.saveToast = false;
@@ -452,6 +473,7 @@ function bind(root) {
     flow.questionAnswers = {};
     flow.focusAnswerDraft = 5;
     flow.adaptiveDebug = null;
+    flow.adaptiveSourceSignature = null;
     flow.countdown = 0;
     flow.toolReady = false;
     flow.after = { stars: 0 };
@@ -476,6 +498,7 @@ function bind(root) {
   }));
 
   root.querySelector('[data-action="next-pre"]')?.addEventListener('click', () => {
+    syncAdaptiveStateWithPreAnswers({ force: true });
     const { nextQuestion, debug } = getAdaptiveSelection();
     flow.adaptiveDebug = debug;
     if (!flow.selectedNeed && nextQuestion?.need) flow.selectedNeed = nextQuestion.need;
