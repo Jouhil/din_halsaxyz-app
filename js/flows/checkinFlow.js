@@ -28,7 +28,7 @@ const FOCUS_META = {
   sömn: { label: 'Sömnkvalitet', subtitle: 'Förbättra din återhämtning', emoji: '🌙', dim: 'sleep' },
   tankar: { label: 'Tankar', subtitle: 'Klargör ditt sinne', emoji: '💭', dim: 'thoughts' },
 };
-const ADAPTIVE_QUESTION_TARGET = 3;
+const MAX_ADAPTIVE_QUESTIONS = 2;
 const SLIDER_META = {
   stress: { left: 'Stressad', right: 'Lugn', emoji: '😰', dim: 'stress' },
   humör: { left: 'Nere', right: 'På topp', emoji: '🙂', dim: 'mood' },
@@ -104,21 +104,27 @@ function getAdaptiveAnswers() {
 function getAdaptiveSelection() {
   const memory = getHabitMemory();
   const answers = getAdaptiveAnswers();
-  const nextQuestion = getNextQuestion({
+  const answeredCount = Object.keys(flow.questionAnswers || {}).length;
+  const reachedAdaptiveLimit = answeredCount >= MAX_ADAPTIVE_QUESTIONS;
+  const candidateQuestion = getNextQuestion({
     questions: DEFAULT_ADAPTIVE_QUESTIONS,
     answers,
     memory,
   });
+  const nextQuestion = reachedAdaptiveLimit ? null : candidateQuestion;
   const needSignals = inferNeedPriorityFromAnswers(answers);
   const fallbackUsed = !needSignals.hasStrongSignal;
+  const remainingCount = reachedAdaptiveLimit
+    ? 0
+    : Math.max(0, MAX_ADAPTIVE_QUESTIONS - answeredCount);
 
   return {
     nextQuestion,
-    answeredCount: Object.keys(flow.questionAnswers || {}).length,
-    remainingCount: Math.max(0, DEFAULT_ADAPTIVE_QUESTIONS.length - Object.keys(flow.questionAnswers || {}).length),
+    answeredCount,
+    remainingCount,
     debug: {
       selectedQuestionId: nextQuestion?.id || null,
-      priorityNeed: needSignals.topNeed || nextQuestion?.need || null,
+      priorityNeed: needSignals.topNeed || candidateQuestion?.need || null,
       fallbackUsed,
       reason: nextQuestion ? (fallbackUsed ? 'fallback-order' : 'signal-ranked') : 'no-unanswered-question',
     },
@@ -270,22 +276,23 @@ function renderFocusStep() {
   flow.adaptiveDebug = debug;
   state.flowState = { ...(state.flowState || {}), adaptiveQuestion: flow.adaptiveDebug };
 
+  const adaptiveQuestionsRemaining = remainingCount > 0 && !!nextQuestion;
   const selected = flow.selectedNeed || nextQuestion?.need || flow.plan?.primaryNeed || 'stress';
   const orderedNeeds = nextQuestion?.need
     ? [nextQuestion.need, ...NEED_KEYS.filter((need) => need !== nextQuestion.need)]
     : NEED_KEYS;
   const ctaLabel = flow.currentFlow === '8' ? 'Nästa: Reflektion →' : 'Nästa: Mikro-verktyg →';
-  const canContinue = selected && (answeredCount >= ADAPTIVE_QUESTION_TARGET || !nextQuestion);
+  const canContinue = selected && !adaptiveQuestionsRemaining;
   const answerValue = nextQuestion ? (flow.questionAnswers[nextQuestion.id] ?? flow.focusAnswerDraft ?? 5) : null;
 
   return `<div class="card">
-    ${nextQuestion ? `<div class="ci-block"><div class="ci-label">Adaptiv fråga ${Math.min(answeredCount + 1, ADAPTIVE_QUESTION_TARGET)}/${ADAPTIVE_QUESTION_TARGET}</div><div class="flow-note">${nextQuestion.label}</div><div class="ci-row" data-dim="${FOCUS_META[nextQuestion.need]?.dim || 'stress'}"><div class="ci-row-main"><input type="range" min="0" max="10" value="${answerValue}" class="ci-slider" data-action="set-focus-answer"></div><small class="ci-val">${answerValue}</small></div><div class="ci-anchors"><span class="anchor">Lågt</span><span class="anchor">Högt</span></div><button class="neo-btn neo-btn--outline neo-btn--sm" data-action="answer-focus-question">Spara svar</button></div>` : '<div class="flow-note">Alla adaptiva frågor är besvarade.</div>'}
-    <div class="flow-note">Debug: fråga=${debug.selectedQuestionId || '—'} | behov=${debug.priorityNeed || '—'} | fallback=${debug.fallbackUsed ? 'ja' : 'nej'} | kvar=${remainingCount}</div>
-    <div class="focus-list">${orderedNeeds.map((need) => {
+    ${adaptiveQuestionsRemaining ? `<div class="flow-note">Vi ställer två korta följdfrågor för att hitta rätt fokus för dig idag.</div>
+    <div class="ci-block"><div class="ci-label">Adaptiv fråga ${Math.min(answeredCount + 1, MAX_ADAPTIVE_QUESTIONS)}/${MAX_ADAPTIVE_QUESTIONS}</div><div class="flow-note">${nextQuestion.label}</div><div class="ci-row" data-dim="${FOCUS_META[nextQuestion.need]?.dim || 'stress'}"><div class="ci-row-main"><input type="range" min="0" max="10" value="${answerValue}" class="ci-slider" data-action="set-focus-answer"></div><small class="ci-val">${answerValue}</small></div><div class="ci-anchors"><span class="anchor">Lågt</span><span class="anchor">Högt</span></div><button class="neo-btn neo-btn--outline neo-btn--sm" data-action="answer-focus-question">Spara svar</button></div>` : '<div class="ci-label">Rekommenderat fokus för dig just nu</div>'}
+    ${adaptiveQuestionsRemaining ? '' : `<div class="focus-list">${orderedNeeds.map((need) => {
       const meta = FOCUS_META[need];
       const isSelected = selected === need;
       return `<button class="row-btn ${isSelected ? 'is-selected' : ''}" data-action="set-need" data-need="${need}" data-dim="${meta.dim}"><span class="row-emoji">${meta.emoji}</span><span class="row-main"><strong>${meta.label}</strong><span class="row-sub">${meta.subtitle}</span></span><span class="row-check" aria-hidden="true">✓</span></button>`;
-    }).join('')}</div>
+    }).join('')}</div>`}
     <div class="flow-actions"><button class="neo-btn neo-btn--filled neo-btn--cta" data-action="next-need" ${canContinue ? '' : 'disabled'}>${ctaLabel}</button></div>
   </div>`;
 }
@@ -471,7 +478,7 @@ function bind(root) {
     const { nextQuestion, debug } = getAdaptiveSelection();
     flow.adaptiveDebug = debug;
     if (!flow.selectedNeed && nextQuestion?.need) flow.selectedNeed = nextQuestion.need;
-    console.log('[adaptive-question]', flow.adaptiveDebug);
+    console.debug('[adaptive-question]', flow.adaptiveDebug);
     state.flowState = { ...(state.flowState || {}), adaptiveQuestion: flow.adaptiveDebug };
     transitionTo(STEPS.FOCUS);
     render();
@@ -488,7 +495,7 @@ function bind(root) {
     flow.selectedNeed = nextQuestion.need || flow.selectedNeed;
     const { debug } = getAdaptiveSelection();
     flow.adaptiveDebug = debug;
-    console.log('[adaptive-question]', flow.adaptiveDebug);
+    console.debug('[adaptive-question]', flow.adaptiveDebug);
     state.flowState = { ...(state.flowState || {}), adaptiveQuestion: flow.adaptiveDebug };
     render();
   });
