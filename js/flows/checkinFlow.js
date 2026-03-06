@@ -284,10 +284,11 @@ function renderFocusStep() {
   const ctaLabel = flow.currentFlow === '8' ? 'Nästa: Reflektion →' : 'Nästa: Mikro-verktyg →';
   const canContinue = selected && !adaptiveQuestionsRemaining;
   const answerValue = nextQuestion ? (flow.questionAnswers[nextQuestion.id] ?? flow.focusAnswerDraft ?? 5) : null;
+  const adaptiveSliderMeta = nextQuestion?.need ? SLIDER_META[nextQuestion.need] : null;
 
   return `<div class="card">
     ${adaptiveQuestionsRemaining ? `<div class="flow-note">Vi ställer två korta följdfrågor för att hitta rätt fokus för dig idag.</div>
-    <div class="ci-block"><div class="ci-label">Adaptiv fråga ${Math.min(answeredCount + 1, MAX_ADAPTIVE_QUESTIONS)}/${MAX_ADAPTIVE_QUESTIONS}</div><div class="flow-note">${nextQuestion.label}</div><div class="ci-row" data-dim="${FOCUS_META[nextQuestion.need]?.dim || 'stress'}"><div class="ci-row-main"><input type="range" min="0" max="10" value="${answerValue}" class="ci-slider" data-action="set-focus-answer"></div><small class="ci-val">${answerValue}</small></div><div class="ci-anchors"><span class="anchor">Lågt</span><span class="anchor">Högt</span></div><button class="neo-btn neo-btn--outline neo-btn--sm" data-action="answer-focus-question">Spara svar</button></div>` : '<div class="ci-label">Rekommenderat fokus för dig just nu</div>'}
+    <div class="ci-block"><div class="ci-label">Adaptiv fråga ${Math.min(answeredCount + 1, MAX_ADAPTIVE_QUESTIONS)}/${MAX_ADAPTIVE_QUESTIONS}</div><div class="flow-note">${nextQuestion.label}</div><div class="ci-row" data-dim="${FOCUS_META[nextQuestion.need]?.dim || 'stress'}"><div class="ci-row-main"><input type="range" min="0" max="10" value="${answerValue}" class="ci-slider" data-action="set-focus-answer"></div><small class="ci-val">${answerValue}</small></div><div class="ci-anchors"><span class="anchor">${adaptiveSliderMeta?.left || 'Lågt'}</span><span class="anchor">${adaptiveSliderMeta?.right || 'Högt'}</span></div><button class="neo-btn neo-btn--outline neo-btn--sm" data-action="answer-focus-question">Spara svar</button></div>` : '<div class="ci-label">Rekommenderat fokus för dig just nu</div>'}
     ${adaptiveQuestionsRemaining ? '' : `<div class="focus-list">${orderedNeeds.map((need) => {
       const meta = FOCUS_META[need];
       const isSelected = selected === need;
