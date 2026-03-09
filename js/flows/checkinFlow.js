@@ -53,7 +53,33 @@ const chips = {
 };
 
 const microFeedbackByNeed = Object.fromEntries(NEED_KEYS.map((need) => [need, Array.from({ length: 15 }, (_, i) => ({ id: `${need}-fb-${i + 1}`, text: `${NEED_LABELS[need]}: liten återställning ${i + 1} — ett lugnt andetag räcker för att börja.` }))]));
-const takeAwayByNeed = Object.fromEntries(NEED_KEYS.map((need) => [need, Array.from({ length: 10 }, (_, i) => ({ id: `${need}-tw-${i + 1}`, lines: [`${NEED_LABELS[need]} kan skifta med små steg.`, `Välj en mikropaus (${i + 1} minut) senare idag och upprepa.`] }))]));
+const takeAwayByNeed = {
+  stress: [
+    { id: 'stress-tw-1', lines: ['Börja med en långsam utandning när tempot ökar.', 'En kort paus kan hjälpa kroppen att varva ned.'] },
+    { id: 'stress-tw-2', lines: ['Du behöver inte lösa allt på en gång.', 'Välj en sak i taget och sänk tempot lite.'] },
+    { id: 'stress-tw-3', lines: ['Mjukna i axlar och käke när du märker stress.', 'Kroppen kan få en ny signal på 30 sekunder.'] },
+  ],
+  humör: [
+    { id: 'humor-tw-1', lines: ['Små vänliga handlingar kan lyfta känslan.', 'Gör en sak som känns snäll mot dig själv idag.'] },
+    { id: 'humor-tw-2', lines: ['Humör skiftar – det är okej att ta det stegvis.', 'Leta efter en liten ljuspunkt i nästa timme.'] },
+    { id: 'humor-tw-3', lines: ['Du tog hand om dig i dag, och det räknas.', 'Fortsätt med ett litet steg som ger ro.'] },
+  ],
+  energi: [
+    { id: 'energi-tw-1', lines: ['Energi byggs bäst i små doser.', 'Ta en kort rörelsepaus när du kan.'] },
+    { id: 'energi-tw-2', lines: ['Sänk kraven när energin är låg.', 'Ett litet genomförbart steg är tillräckligt nu.'] },
+    { id: 'energi-tw-3', lines: ['Kroppen svarar ofta på rytm och pauser.', 'Testa 1 minut rörelse + 1 lugn minut senare idag.'] },
+  ],
+  sömn: [
+    { id: 'somn-tw-1', lines: ['Kvällens tempo påverkar nattens återhämtning.', 'Avsluta dagen med en kort nedvarvning.'] },
+    { id: 'somn-tw-2', lines: ['Vila börjar innan du somnar.', 'Ge kroppen en lugn signal redan i kväll.'] },
+    { id: 'somn-tw-3', lines: ['Små kvällsrutiner gör skillnad över tid.', 'Välj en enkel vana att upprepa i natt.'] },
+  ],
+  tankar: [
+    { id: 'tankar-tw-1', lines: ['Tankar får finnas utan att styra allt.', 'Kom tillbaka till andning eller sinnen i stunden.'] },
+    { id: 'tankar-tw-2', lines: ['Du kan notera en tanke och släppa taget lite.', 'Prova: “det här är en tanke, inte ett faktum”.'] },
+    { id: 'tankar-tw-3', lines: ['När huvudet går fort hjälper små pauser.', 'Sänk tempot i 30 sekunder och börja om.'] },
+  ],
+};
 
 const tools = [
   ...['4-6 andning', 'Box breathing', 'Axelsläpp', '5-4-3-2-1 grounding', 'Långsam utandning', 'Tryck fötterna i golvet'].map((t, i) => mkTool(`stress-${i}`, t, 'stress', 70 + i * 10, ['Andas in mjukt genom näsan i 4 sekunder.', 'Andas ut långsamt i 6 sekunder och släpp axlarna.', 'Upprepa 6–10 andetag i jämn rytm.'])),
@@ -208,11 +234,23 @@ function getAdaptiveSelection() {
     ? 0
     : Math.max(0, MAX_ADAPTIVE_QUESTIONS - answeredCount);
 
+  const candidateIdsBeforeHistorySort = scopedQuestions.map((question) => question.id);
+  const candidateIdsAfterHistorySort = rotatedQuestions.map((question) => question.id);
+  const finalSelectedIds = rotatedQuestions
+    .filter((question) => Object.prototype.hasOwnProperty.call(flow.questionAnswers || {}, question.id))
+    .map((question) => question.id)
+    .slice(-MAX_ADAPTIVE_QUESTIONS);
+  if (nextQuestion?.id) finalSelectedIds.push(nextQuestion.id);
+
   return {
     nextQuestion,
     answeredCount,
     remainingCount,
     debug: {
+      selectedNeed: flow.selectedNeed,
+      candidateIdsBeforeHistorySort,
+      candidateIdsAfterHistorySort,
+      finalSelectedIds: Array.from(new Set(finalSelectedIds)).slice(-MAX_ADAPTIVE_QUESTIONS),
       selectedQuestionId: nextQuestion?.id || null,
       priorityNeed: needSignals.topNeed || candidateQuestion?.need || null,
       fallbackUsed,
@@ -242,6 +280,7 @@ export function initCheckinFlow() {
     toolReady: false,
     saveToast: false,
     dailyInsight: '',
+    takeAway: null,
   };
   render();
   return { render };
@@ -493,8 +532,8 @@ function normalizeToolSteps(tool) {
 
 function renderClosing() {
   const closing = flow.plan?.closingMessage || { lines: ['Du tog hand om dig i dag.', 'Små steg gör skillnad.'] };
-  const takeAway = pickTakeAway();
   const selectedNeed = flow.selectedNeed || flow.plan?.primaryNeed || 'stress';
+  const takeAway = flow.takeAway || pickTakeAway(selectedNeed);
   const selectedMeta = FOCUS_META[selectedNeed] || FOCUS_META.stress;
   const selectedDim = selectedMeta.dim || 'stress';
   const closingLines = sanitizeClosingLines((closing.lines || []).slice(0, 3));
@@ -519,9 +558,8 @@ function pickFeedback(need) {
   return pickRotated(microFeedbackByNeed[need] || microFeedbackByNeed.stress, { keyFn: (x) => x.id, historyKey: `rot_feedback_${need}`, avoidLastN: 2 }) || { text: 'Bra att du checkar in.' };
 }
 
-function pickTakeAway() {
-  const need = flow.selectedNeed || flow.plan?.primaryNeed || 'stress';
-  return pickRotated(takeAwayByNeed[need], { keyFn: (x) => x.id, historyKey: `rot_takeaway_${need}`, avoidLastN: 2 }) || { lines: ['Ta ett litet steg.', 'Du kan alltid börja om.'] };
+function pickTakeAway(need = 'stress') {
+  return pickRotated(takeAwayByNeed[need] || takeAwayByNeed.stress, { keyFn: (x) => x.id, historyKey: `rot_takeaway_${need}`, avoidLastN: 2 }) || { lines: ['Ta ett litet steg.', 'Du kan alltid börja om.'] };
 }
 
 
@@ -574,6 +612,7 @@ function resetFlow() {
   flow.toolReady = false;
   flow.saveToast = false;
   flow.dailyInsight = '';
+  flow.takeAway = null;
 }
 
 function bind(root) {
@@ -594,6 +633,7 @@ function bind(root) {
     flow.toolReady = false;
     flow.after = { stars: 0 };
     flow.dailyInsight = '';
+    flow.takeAway = null;
     render();
   }));
 
@@ -663,6 +703,7 @@ function bind(root) {
       answers: flow.preValues,
       toolId: flow.selectedTool?.id || flow.plan?.selectedTool?.id || null,
     });
+    flow.takeAway = pickTakeAway(primaryNeed);
     transitionTo(STEPS.CLOSING);
     render();
   });
