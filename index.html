@@ -422,6 +422,13 @@ body.surface--dark .row-check,body.dark .row-check{border:1.5px solid color-mix(
 .micro-card .tool-progress-bar span{display:block;height:100%;background:color-mix(in srgb,var(--dim) 88%, #ffffff 12%);transition:width .3s linear;}
 .tool-time{margin-top:8px;color:var(--text2);font-size:.86rem;}
 .tool-time span{font-variant-numeric:tabular-nums;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;display:inline-block;min-width:3.5em;text-align:right;}
+.grounding-card .ex-subtitle{margin-top:6px;color:var(--text2);font-size:.9rem;}
+.grounding-step{padding:14px 14px 2px;border-radius:14px;background:rgba(45,106,79,.08);}
+.grounding-step h5{font-size:1.05rem;margin-bottom:8px;}
+.grounding-step p{line-height:1.6;color:var(--text);}
+.grounding-note{margin-top:10px;color:var(--text2)!important;font-size:.9rem;}
+.grounding-actions{display:grid;gap:10px;}
+body.dark .grounding-step,body.surface--dark .grounding-step{background:rgba(255,255,255,.08);}
 .reward-pop{display:inline-flex;align-items:center;gap:8px;background:rgba(45,106,79,.14);border:1px solid rgba(45,106,79,.26);padding:8px 12px;border-radius:12px;margin-bottom:10px;}
 body.dark .reward-pop,body.surface--dark .reward-pop{background:rgba(100,180,130,.18);border-color:rgba(170,230,190,.28);color:rgba(240,255,244,.95);}
 body.dark .micro-card,body.surface--dark .micro-card{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.10);color:rgba(255,255,255,.90);box-shadow:0 8px 22px rgba(0,0,0,.25);}
@@ -526,8 +533,14 @@ body.guide-open #content{overflow:hidden;}
           <div class="quick-tools">
             <button class="quick-tool-btn" onclick="startBreath(120)">2 min andning</button>
             <button class="quick-tool-btn" onclick="startBreath(300)">5 min andning</button>
+            <button class="quick-tool-btn" onclick="document.getElementById('grounding-tool-section')?.scrollIntoView({behavior:'smooth',block:'start'})">Jordning 5-4-3-2-1</button>
             <button class="quick-tool-btn" onclick="openGuideTrigger('tools_intro')">Vägledning</button>
           </div>
+        </section>
+
+        <section class="tools-section" id="grounding-tool-section">
+          <h3>🌿 Jordning</h3>
+          <div id="grounding-tool-root"></div>
         </section>
 
         <section class="breath-card">
