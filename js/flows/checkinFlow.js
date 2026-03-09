@@ -2,6 +2,7 @@ import { state } from '../state.js';
 import { loadJSON, saveJSON } from '../storage.js';
 import { pickRotated } from '../engines/rotationEngine.js';
 import { buildFocusSummary, buildSessionPlan } from '../engines/aiEngine.js';
+import { buildDailyInsight } from '../engines/dailyInsightEngine.js';
 import { getHabitMemory } from '../engines/habitMemoryEngine.js';
 import { DEFAULT_ADAPTIVE_QUESTIONS, getNextQuestion, inferNeedPriorityFromAnswers } from '../engines/questionEngine.js';
 import { openGuide } from '../ui/helpOverlay.js';
@@ -190,6 +191,7 @@ export function initCheckinFlow() {
     timerRunning: false,
     toolReady: false,
     saveToast: false,
+    dailyInsight: '',
   };
   render();
   return { render };
@@ -453,6 +455,7 @@ function renderClosing() {
     ${flow.currentFlow === '8' ? `<div class="flow-note">Situation: ${r.situation || r.situationOther || '–'} · Känslor: ${(r.emotions || []).join(', ') || '–'} (${r.intensityBefore}/10) · Alternativ tanke: ${r.alternative || '–'} · Efter: ${r.intensityAfter}/10</div>` : ''}
     <div class="closing-rating"><div class="ci-label">Hur hjälpsam var checken?</div><div class="rating-accent" aria-hidden="true"></div><div class="star-row">${[1, 2, 3, 4, 5].map((n) => `<button class="chip ${flow.after.stars >= n ? 'active' : ''}" data-action="set-star" data-star="${n}">★</button>`).join('')}</div></div>
     <div class="neo-card neo-card--tinted"><div class="closing-card-head"><span>${selectedMeta.emoji}</span><span>Ta med dig</span></div><div class="flow-status">${takeAway.lines.join('<br>')}</div></div>
+    <div class="neo-card neo-card--tinted"><div class="closing-card-head"><span>💬</span><span>Reflektion idag</span></div><div class="flow-status">${flow.dailyInsight || buildDailyInsight({ primaryNeed: selectedNeed, answers: flow.preValues, toolId: flow.selectedTool?.id || flow.plan?.selectedTool?.id || null })}</div></div>
     <div class="flow-actions"><button class="neo-btn neo-btn--filled neo-btn--cta" data-action="save-log">💾 Spara check</button></div>
   </div>`;
 }
@@ -520,6 +523,7 @@ function resetFlow() {
   flow.countdown = 0;
   flow.toolReady = false;
   flow.saveToast = false;
+  flow.dailyInsight = '';
 }
 
 function bind(root) {
@@ -539,6 +543,7 @@ function bind(root) {
     flow.countdown = 0;
     flow.toolReady = false;
     flow.after = { stars: 0 };
+    flow.dailyInsight = '';
     render();
   }));
 
@@ -598,7 +603,16 @@ function bind(root) {
     render();
   });
   root.querySelector('[data-action="next-reflection"]')?.addEventListener('click', () => { transitionTo(STEPS.TOOL); ensureToolAutoStart(); render(); });
-  root.querySelector('[data-action="next-tool"]')?.addEventListener('click', () => { transitionTo(STEPS.CLOSING); render(); });
+  root.querySelector('[data-action="next-tool"]')?.addEventListener('click', () => {
+    const primaryNeed = flow.selectedNeed || flow.plan?.primaryNeed || 'stress';
+    flow.dailyInsight = buildDailyInsight({
+      primaryNeed,
+      answers: flow.preValues,
+      toolId: flow.selectedTool?.id || flow.plan?.selectedTool?.id || null,
+    });
+    transitionTo(STEPS.CLOSING);
+    render();
+  });
 
   root.querySelector('[data-action="guide-focus"]')?.addEventListener('click', () => openGuide({ need: flow.selectedNeed || flow.plan?.primaryNeed || 'stress', title: 'Snabb hjälp', source: 'checkin' }));
   root.querySelector('[data-action="guide-cbt"]')?.addEventListener('click', () => openGuide({ topic: 'cbt_light', title: 'Hur funkar detta?' }));

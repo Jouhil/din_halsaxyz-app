@@ -37,6 +37,25 @@ const FOCUS_SUMMARY_BY_NEED = {
   },
 };
 
+const SUMMARY_OPENERS = [
+  'Det verkar som att',
+  'Det ser ut som att',
+  'Just nu verkar det som att',
+  'Kroppen signalerar att',
+  'Dina svar tyder på att',
+  'Idag verkar det som att',
+  'Det finns tecken på att',
+  'Det verkar finnas lite extra',
+  'Just idag verkar',
+  'Det känns som att',
+];
+
+function withSummaryVariation(text = '') {
+  if (!text) return text;
+  const opener = SUMMARY_OPENERS[Math.floor(Math.random() * SUMMARY_OPENERS.length)];
+  return text.replace(/^Det verkar som att/i, opener);
+}
+
 function pickFromHistory(items = [], recent = [], keyFn = (item) => item?.id) {
   if (!Array.isArray(items) || !items.length) return null;
   const recentSet = new Set(Array.isArray(recent) ? recent : []);
@@ -61,8 +80,8 @@ export function buildFocusSummary({ primaryNeed, checkinValues = {} } = {}) {
   const intensity = normalizeIntensity(checkinValues, need);
   const summarySet = FOCUS_SUMMARY_BY_NEED[need] || FOCUS_SUMMARY_BY_NEED[DEFAULT_NEED];
   if (!summarySet) return 'Vi börjar med ett enkelt verktyg som kan hjälpa dig i stunden.';
-  if (intensity <= 3 && summarySet.high) return summarySet.high;
-  return summarySet.default || 'Vi börjar med ett enkelt verktyg som kan hjälpa dig i stunden.';
+  if (intensity <= 3 && summarySet.high) return withSummaryVariation(summarySet.high);
+  return withSummaryVariation(summarySet.default || 'Vi börjar med ett enkelt verktyg som kan hjälpa dig i stunden.');
 }
 
 export function rankToolsByHistory(tools = [], memory = null) {
