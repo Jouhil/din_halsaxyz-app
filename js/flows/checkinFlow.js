@@ -46,7 +46,7 @@ const chips = {
 };
 
 const microFeedbackByNeed = Object.fromEntries(NEED_KEYS.map((need) => [need, Array.from({ length: 15 }, (_, i) => ({ id: `${need}-fb-${i + 1}`, text: `${NEED_LABELS[need]}: liten återställning ${i + 1} — ett lugnt andetag räcker för att börja.` }))]));
-const takeAwayByNeed = Object.fromEntries(NEED_KEYS.map((need) => [need, Array.from({ length: 10 }, (_, i) => ({ id: `${need}-tw-${i + 1}`, lines: [`Ta med dig: ${NEED_LABELS[need]} kan skifta med små steg.`, `Välj en mikropaus (${i + 1} minut) senare idag och upprepa.`] }))]));
+const takeAwayByNeed = Object.fromEntries(NEED_KEYS.map((need) => [need, Array.from({ length: 10 }, (_, i) => ({ id: `${need}-tw-${i + 1}`, lines: [`${NEED_LABELS[need]} kan skifta med små steg.`, `Välj en mikropaus (${i + 1} minut) senare idag och upprepa.`] }))]));
 
 const tools = [
   ...['4-6 andning', 'Box breathing', 'Axelsläpp', '5-4-3-2-1 grounding', 'Långsam utandning', 'Tryck fötterna i golvet'].map((t, i) => mkTool(`stress-${i}`, t, 'stress', 70 + i * 10, ['Andas in mjukt genom näsan i 4 sekunder.', 'Andas ut långsamt i 6 sekunder och släpp axlarna.', 'Upprepa 6–10 andetag i jämn rytm.'])),
@@ -143,10 +143,12 @@ function getAdaptiveAnswers() {
 function getAdaptiveSelection() {
   const memory = getHabitMemory();
   const answers = getAdaptiveAnswers();
-  const answeredCount = Object.keys(flow.questionAnswers || {}).length;
+  const adaptivePool = DEFAULT_ADAPTIVE_QUESTIONS.filter((question) => question.need === flow.selectedNeed);
+  const scopedQuestions = adaptivePool.length ? adaptivePool : DEFAULT_ADAPTIVE_QUESTIONS;
+  const answeredCount = scopedQuestions.filter((question) => Object.prototype.hasOwnProperty.call(flow.questionAnswers || {}, question.id)).length;
   const reachedAdaptiveLimit = answeredCount >= MAX_ADAPTIVE_QUESTIONS;
   const candidateQuestion = getNextQuestion({
-    questions: DEFAULT_ADAPTIVE_QUESTIONS,
+    questions: scopedQuestions,
     answers,
     memory,
     lastChangedNeed: flow.lastChangedNeed,
@@ -588,7 +590,7 @@ function bind(root) {
     if (!nextQuestion?.id) return;
     flow.questionAnswers[nextQuestion.id] = Number(flow.focusAnswerDraft);
     flow.selectedNeed = nextQuestion.need || flow.selectedNeed;
-    flow.lastChangedNeed = normalizeNeedKey(nextQuestion.need) || flow.lastChangedNeed;
+    flow.focusAnswerDraft = 5;
     const { debug } = getAdaptiveSelection();
     flow.adaptiveDebug = debug;
     console.debug('[adaptive-question]', flow.adaptiveDebug);
