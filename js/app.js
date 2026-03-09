@@ -250,8 +250,20 @@ const breathPhases=[
 ];
 const breathState={active:false,left:0,phaseIndex:0,phaseRemaining:4};
 
+function updateBreathPresetButtons(mins){
+  document.querySelectorAll('.time-preset-btn').forEach((btn)=>{
+    const m=parseInt(btn.dataset.mins,10);
+    btn.classList.toggle('is-active',m===mins);
+  });
+}
+function setBreathMinutesPreset(mins){
+  const safeMins=Math.min(60,Math.max(1,parseInt(mins,10)||5));
+  const input=document.getElementById('custom-min');
+  if(input)input.value=String(safeMins);
+  syncBreathPreset();
+}
 function startCustom(){const mins=parseInt(document.getElementById('custom-min').value)||5;startBreath(mins*60);}
-function syncBreathPreset(){if(breathState.active)return;const mins=Math.max(1,parseInt(document.getElementById('custom-min')?.value)||5);updateTimerDisp(mins*60);setBreathReadyState();}
+function syncBreathPreset(){if(breathState.active)return;const mins=Math.max(1,parseInt(document.getElementById('custom-min')?.value)||5);updateBreathPresetButtons(mins);updateTimerDisp(mins*60);setBreathReadyState();}
 function setBreathReadyState(){
   const lbl=document.getElementById('breath-lbl');
   const phase=document.getElementById('breath-phase-sec');
@@ -736,7 +748,7 @@ function filterHelp(q){helpQuery=q;state.helpQuery=q;renderHelp();}
 function filterCat(cat,btn){helpCat=cat;state.helpCat=cat;document.querySelectorAll('.help-cat').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active');renderHelp();}
 
 Object.assign(window, {
-  ud, pp, pd, sp, spd, tryBio, showTab, renderGratitude, startCustom, startBreath, stopBreath, syncBreathPreset,
+  ud, pp, pd, sp, spd, tryBio, showTab, renderGratitude, startCustom, startBreath, stopBreath, syncBreathPreset, setBreathMinutesPreset,
   toggleSound, setVol, newQuote, filterCat, filterHelp, saveFocus, resetStats, setTheme, changePin,
   onBioToggle, onFreeTextToggle, importFile, exportAll, addGrat, addQuote, toggleHelpDetail, startFlow, startFlowAgain, renderFlow,
   lockAndStartFlow, updatePre, updateCbt, updatePost, submitFlow, viewFlowHistory,

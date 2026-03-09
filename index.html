@@ -110,6 +110,10 @@ body.dark .grat-line{color:#e8f0e8!important;}
 .time-ctrl-panel{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px 16px;margin-top:14px;}
 .time-ctrl-label{font-size:.83rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;text-align:center;color:var(--text2);}
 .time-ctrl-row{display:flex;align-items:center;gap:10px;justify-content:center;flex-wrap:wrap;}
+.time-presets{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
+.time-preset-btn{border:1px solid var(--border);background:var(--input-bg);color:var(--text);border-radius:999px;padding:6px 12px;font-weight:700;font-family:inherit;cursor:pointer;transition:.2s;}
+.time-preset-btn:hover{border-color:var(--accent);color:var(--accent);}
+.time-preset-btn.is-active{background:rgba(45,106,79,.14);border-color:var(--accent);color:var(--accent);}
 .time-input{width:86px;padding:10px 12px;border-radius:12px;border:1.5px solid var(--border);background:var(--input-bg);color:var(--text);font-size:1.1rem;font-family:inherit;font-weight:700;text-align:center;transition:.2s;}
 .time-input:focus{outline:none;border-color:var(--accent);}
 .time-start-btn,.time-stop-btn{white-space:nowrap;}
@@ -131,6 +135,9 @@ body.dark .grat-line{color:#e8f0e8!important;}
 .tools-back-btn{justify-self:start;}
 .support-card{padding:16px 18px;}
 .support-card p{color:var(--text2);font-size:.9rem;line-height:1.6;}
+.support-card--subtle{padding:14px 16px;}
+.support-card--subtle h3{font-size:.98rem;margin-bottom:8px;}
+.support-card--subtle .btn{margin-top:6px;}
 
 /* ── PEPP ── */
 .pepp-stars{display:flex;justify-content:center;gap:8px;margin-bottom:10px;}
@@ -437,6 +444,7 @@ body.surface--dark .row-check,body.dark .row-check{border:1.5px solid color-mix(
 .grounding-step{padding:14px 14px 2px;border-radius:14px;background:rgba(45,106,79,.08);}
 .grounding-step h5{font-size:1.05rem;margin-bottom:8px;}
 .grounding-step p{line-height:1.6;color:var(--text);}
+.grounding-support{margin-top:10px;color:var(--text2)!important;font-size:.9rem;font-weight:600;}
 .grounding-note{margin-top:10px;color:var(--text2)!important;font-size:.9rem;}
 .grounding-actions{display:grid;gap:10px;}
 body.dark .grounding-step,body.surface--dark .grounding-step{background:rgba(255,255,255,.08);}
@@ -549,6 +557,12 @@ body.guide-open #content{overflow:hidden;}
             <p>Vad ska jag välja just nu? Få snabb vägledning baserat på hur det känns.</p>
             <button class="flow-btn-ghost btn btn--outline btn--cta" onclick="openGuideTrigger('tools_intro')">Öppna guide</button>
           </section>
+
+          <section class="tools-section support-card support-card--subtle">
+            <h3>Hjälp &amp; självhjälp</h3>
+            <p>Om det känns mycket just nu kan du börja med ett enkelt verktyg här. Om du behöver mer stöd än appen kan ge, sök hjälp i din närhet.</p>
+            <button class="flow-btn-ghost btn btn--outline btn--sm btn--inline">Läs mer</button>
+          </section>
         </section>
 
         <section id="tools-breathing-view" class="tool-detail-view" hidden>
@@ -566,6 +580,12 @@ body.guide-open #content{overflow:hidden;}
             </div>
             <div class="time-ctrl-panel">
               <div class="time-ctrl-label">⏱ Sessionstid i minuter</div>
+              <div class="time-presets" role="group" aria-label="Snabbval för andningssession">
+                <button type="button" class="time-preset-btn" data-mins="1" onclick="setBreathMinutesPreset(1)">1 min</button>
+                <button type="button" class="time-preset-btn" data-mins="3" onclick="setBreathMinutesPreset(3)">3 min</button>
+                <button type="button" class="time-preset-btn is-active" data-mins="5" onclick="setBreathMinutesPreset(5)">5 min</button>
+                <button type="button" class="time-preset-btn" data-mins="10" onclick="setBreathMinutesPreset(10)">10 min</button>
+              </div>
               <div class="time-ctrl-row">
                 <input type="number" class="time-input" id="custom-min" value="5" min="1" max="60" oninput="syncBreathPreset()">
                 <button class="time-start-btn btn btn--filled" onclick="startCustom()">Starta box breathing</button>
