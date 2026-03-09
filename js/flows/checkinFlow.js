@@ -3,6 +3,7 @@ import { loadJSON, saveJSON } from '../storage.js';
 import { pickRotated } from '../engines/rotationEngine.js';
 import { buildFocusSummary, buildSessionPlan } from '../engines/aiEngine.js';
 import { buildDailyInsight } from '../engines/dailyInsightEngine.js';
+import { buildWeeklyPattern } from '../engines/weeklyPatternEngine.js';
 import { getHabitMemory } from '../engines/habitMemoryEngine.js';
 import {
   DEFAULT_ADAPTIVE_QUESTIONS,
@@ -280,6 +281,7 @@ export function initCheckinFlow() {
     toolReady: false,
     saveToast: false,
     dailyInsight: '',
+    weeklyPatternInsight: null,
     takeAway: null,
   };
   render();
@@ -541,13 +543,17 @@ function renderClosing() {
   const selectedDim = selectedMeta.dim || 'stress';
   const closingLines = sanitizeClosingLines((closing.lines || []).slice(0, 3));
   const r = flow.reflection;
+  const weeklyPatternBlock = flow.weeklyPatternInsight
+    ? `<div class="neo-card neo-card--tinted"><div class="closing-card-head"><span>📈</span><span>Mönster den här veckan</span></div><div class="flow-status">${flow.weeklyPatternInsight}</div></div>`
+    : '';
 
   return `<div class="card closing-layout" data-dim="${selectedDim}">
     <div class="neo-card neo-card--tinted"><div class="closing-card-head"><span>${selectedMeta.emoji}</span><span>Avslut</span></div>${closingLines.map((line) => `<div class="closing-line">${line}</div>`).join('')}</div>
     ${flow.currentFlow === '8' ? `<div class="flow-note">Situation: ${r.situation || r.situationOther || '–'} · Känslor: ${(r.emotions || []).join(', ') || '–'} (${r.intensityBefore}/10) · Alternativ tanke: ${r.alternative || '–'} · Efter: ${r.intensityAfter}/10</div>` : ''}
     <div class="closing-rating"><div class="ci-label">Hur hjälpsam var checken idag?</div><div class="flow-note">Ditt svar hjälper oss göra nästa check ännu bättre.</div><div class="rating-accent" aria-hidden="true"></div><div class="star-row">${[1, 2, 3, 4, 5].map((n) => `<button class="chip ${flow.after.stars >= n ? 'active' : ''}" data-action="set-star" data-star="${n}">★</button>`).join('')}</div></div>
-    <div class="neo-card neo-card--tinted"><div class="closing-card-head"><span>${selectedMeta.emoji}</span><span>Ta med dig</span></div><div class="flow-status">${takeAway.lines.join('<br>')}</div></div>
     <div class="neo-card neo-card--tinted"><div class="closing-card-head"><span>💬</span><span>Reflektion idag</span></div><div class="flow-status">${flow.dailyInsight || buildDailyInsight({ primaryNeed: selectedNeed, answers: flow.preValues, toolId: flow.selectedTool?.id || flow.plan?.selectedTool?.id || null })}</div></div>
+    ${weeklyPatternBlock}
+    <div class="neo-card neo-card--tinted"><div class="closing-card-head"><span>${selectedMeta.emoji}</span><span>Ta med dig</span></div><div class="flow-status">${takeAway.lines.join('<br>')}</div></div>
     <div class="flow-actions"><button class="neo-btn neo-btn--filled neo-btn--cta" data-action="save-log">💾 Spara check</button></div>
   </div>`;
 }
@@ -618,6 +624,7 @@ function resetFlow() {
   flow.toolReady = false;
   flow.saveToast = false;
   flow.dailyInsight = '';
+  flow.weeklyPatternInsight = null;
   flow.takeAway = null;
 }
 
@@ -641,6 +648,7 @@ function bind(root) {
     flow.toolReady = false;
     flow.after = { stars: 0 };
     flow.dailyInsight = '';
+    flow.weeklyPatternInsight = null;
     flow.takeAway = null;
     render();
   }));
@@ -705,11 +713,14 @@ function bind(root) {
   root.querySelector('[data-action="next-reflection"]')?.addEventListener('click', () => { transitionTo(STEPS.TOOL); ensureToolAutoStart(); render(); });
   root.querySelector('[data-action="next-tool"]')?.addEventListener('click', () => {
     const primaryNeed = flow.selectedNeed || flow.plan?.primaryNeed || 'stress';
+    const storedLogs = loadJSON('dailyFlowLogs', []);
+    const logs = Array.isArray(storedLogs) ? storedLogs : [];
     flow.dailyInsight = buildDailyInsight({
       primaryNeed,
       answers: flow.preValues,
       toolId: flow.selectedTool?.id || flow.plan?.selectedTool?.id || null,
     });
+    flow.weeklyPatternInsight = buildWeeklyPattern({ logs });
     flow.takeAway = pickTakeAway(primaryNeed);
     transitionTo(STEPS.CLOSING);
     render();
