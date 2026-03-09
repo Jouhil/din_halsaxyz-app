@@ -125,12 +125,13 @@ body.dark .grat-line{color:#e8f0e8!important;}
 .sound-row input[type=range]{width:100%;accent-color:#2D6A4F;height:6px;}
 
 .tool-card-grid{display:grid;gap:12px;}
-.tool-select-card{--tool-accent:#2D6A4F;--tool-tint:rgba(45,106,79,.10);--tool-tint-strong:rgba(45,106,79,.18);display:flex;align-items:flex-start;gap:12px;text-align:left;width:100%;padding:14px;border-radius:16px;border:1px solid color-mix(in srgb,var(--tool-accent) 20%, transparent);background:linear-gradient(135deg,var(--tool-tint),color-mix(in srgb,var(--tool-tint) 42%, #ffffff 58%));color:var(--text);cursor:pointer;font-family:inherit;transition:.2s;}
+.tool-select-card{--tool-accent:#2D6A4F;--tool-tint:rgba(45,106,79,.10);--tool-tint-strong:rgba(45,106,79,.18);display:flex;align-items:flex-start;gap:12px;text-align:left;width:100%;padding:14px;border-radius:16px;border:1px solid color-mix(in srgb,var(--tool-accent) 24%, transparent);background:linear-gradient(135deg,var(--tool-tint),color-mix(in srgb,var(--tool-tint) 40%, #ffffff 60%));color:var(--text);cursor:pointer;font-family:inherit;transition:.2s;}
 .tool-select-card:hover{border-color:color-mix(in srgb,var(--tool-accent) 40%, transparent);background:linear-gradient(135deg,var(--tool-tint-strong),color-mix(in srgb,var(--tool-tint-strong) 35%, #ffffff 65%));transform:translateY(-1px);}
+.tool-select-card:focus-visible{outline:2px solid color-mix(in srgb,var(--tool-accent) 50%, transparent);outline-offset:2px;}
 .tool-select-card.is-disabled{opacity:.6;cursor:not-allowed;transform:none;}
-.tool-select-card[data-tone="calm"]{--tool-accent:#2D6A4F;--tool-tint:rgba(45,106,79,.12);--tool-tint-strong:rgba(45,106,79,.2);}
-.tool-select-card[data-tone="earth"]{--tool-accent:#4C6B50;--tool-tint:rgba(76,107,80,.11);--tool-tint-strong:rgba(76,107,80,.19);}
-.tool-select-card[data-tone="thought"]{--tool-accent:#6A54A3;--tool-tint:rgba(106,84,163,.12);--tool-tint-strong:rgba(106,84,163,.2);}
+.tool-select-card[data-tone="calm"]{--tool-accent:#2F6F78;--tool-tint:rgba(47,111,120,.14);--tool-tint-strong:rgba(47,111,120,.22);}
+.tool-select-card[data-tone="earth"]{--tool-accent:#5D6F4B;--tool-tint:rgba(93,111,75,.14);--tool-tint-strong:rgba(93,111,75,.22);}
+.tool-select-card[data-tone="thought"]{--tool-accent:#6B5D9E;--tool-tint:rgba(107,93,158,.14);--tool-tint-strong:rgba(107,93,158,.22);}
 .tool-select-icon{font-size:1.35rem;line-height:1;}
 .tool-select-copy h3{font-size:1rem;margin-bottom:4px;color:var(--tool-accent);}
 .tool-select-copy p{font-size:.9rem;color:var(--text2);line-height:1.45;}
@@ -457,6 +458,7 @@ body.surface--dark .row-check,body.dark .row-check{border:1.5px solid color-mix(
 .thought-catcher-step{padding:14px;border-radius:14px;background:rgba(106,84,163,.09);}
 .thought-catcher-step h5{font-size:1.05rem;margin-bottom:8px;}
 .thought-catcher-step p{line-height:1.6;color:var(--text);}
+.thought-catcher-support{margin-top:8px;font-size:.9rem;color:var(--text2);}
 .thought-catcher-actions{display:grid;gap:10px;}
 .thought-slider{margin-top:10px;display:grid;gap:8px;}
 .thought-slider-labels{display:flex;justify-content:space-between;font-size:.82rem;color:var(--text2);}
@@ -575,13 +577,14 @@ body.guide-open #content{overflow:hidden;}
 
           <section class="tools-section support-card support-card--subtle">
             <h3>Självhjälp</h3>
-            <p>Om det känns mycket just nu kan du börja med ett enkelt verktyg här. Du kan ta det steg för steg i din egen takt.</p>
+            <p>Om det känns mycket just nu kan du börja med ett enkelt verktyg här. Om du behöver mer stöd än appen kan ge, finns hjälp att söka.</p>
             <button class="flow-btn-ghost btn btn--outline btn--sm btn--inline" type="button" data-tools-selfhelp-toggle aria-expanded="false" aria-controls="tools-selfhelp-detail">Läs mer</button>
             <div class="tools-selfhelp-detail" id="tools-selfhelp-detail" hidden>
               <ul>
-                <li>Börja med ett enkelt verktyg och håll det kort – ett litet steg räcker.</li>
-                <li>Ge dig själv en paus från krav och beslut när huvudet känns fullt.</li>
-                <li>Om appen inte räcker, sök stöd hos någon du litar på eller vård/stöd i din närhet.</li>
+                <li>Börja med ett enkelt verktyg om allt känns mycket – ett litet steg kan vara nog just nu.</li>
+                <li>Ta en paus från krav och beslut om huvudet känns fullt.</li>
+                <li>Prata med någon du litar på om du inte vill bära allt själv.</li>
+                <li>Om appen inte räcker, sök stöd i vården eller annan hjälp i din närhet.</li>
               </ul>
             </div>
           </section>

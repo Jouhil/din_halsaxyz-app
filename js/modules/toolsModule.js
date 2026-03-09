@@ -83,23 +83,31 @@ const GROUNDING_STEPS = [
 const THOUGHT_CATCHER_STEPS = [
   {
     key: 'notice',
-    title: 'Vilken tanke dyker upp?',
-    body: 'Välj den tanke som ligger närmast just nu, eller skriv en egen.',
+    title: 'Vilken tanke tar mest plats just nu?',
+    body: 'Välj den tanke som känns tydligast, eller skriv en egen.',
+    support: 'Börja med att lägga märke till tanken – du behöver inte lösa den direkt.',
+    cta: 'Det här stämmer',
   },
   {
     key: 'impact',
-    title: 'Hur hjälpsam känns tanken?',
-    body: 'Du behöver inte ändra tanken direkt. Börja med att se hur den påverkar dig.',
+    title: 'Hur tung känns den tanken?',
+    body: 'Känn efter hur mycket tanken påverkar dig just nu.',
+    support: 'Du behöver inte ändra tanken direkt.',
+    cta: 'Jag vill gå vidare',
   },
   {
     key: 'soften',
-    title: 'Vad skulle vara en mjukare tanke?',
-    body: 'Välj ett alternativ som känns lite mer hjälpsamt just nu.',
+    title: 'Finns en mjukare tanke att prova?',
+    body: 'Välj en tanke som känns lite vänligare eller mer hjälpsam att bära.',
+    support: 'Prova om det finns en tanke som känns lite mjukare att bära.',
+    cta: 'Prova en mjukare tanke',
   },
   {
     key: 'result',
-    title: 'Hur känns den nya tanken?',
-    body: 'Se om den känns lite lättare att bära just nu.',
+    title: 'Hur känns den nya tanken i kroppen?',
+    body: 'Känn efter om den ger lite mer utrymme just nu.',
+    support: 'Små skiften räknas.',
+    cta: 'Känn efter',
   },
 ];
 
@@ -292,7 +300,7 @@ function renderThoughtCatcherTool() {
             <div>
               <span class="ex-badge">📝 tankefångare</span>
               <h4 class="ex-title">Lite mer utrymme</h4>
-              <p class="ex-subtitle">Bra gjort. Du har gett tanken lite mindre makt och skapat mer utrymme.</p>
+              <p class="ex-subtitle">Bra gjort. Du har tagit ett steg från automatisk tanke till något mer medvetet.</p>
             </div>
           </div>
           <div class="thought-catcher-step">
@@ -360,10 +368,11 @@ function renderThoughtCatcherTool() {
         <div class="thought-catcher-step" aria-live="polite">
           <h5>${step.title}</h5>
           <p>${step.body}</p>
+          ${step.support ? `<p class="thought-catcher-support">${step.support}</p>` : ''}
           ${stepContent}
         </div>
         <div class="thought-catcher-actions">
-          <button class="neo-btn neo-btn--filled neo-btn--cta" type="button" data-thought-catcher-action="next">${state.stepIndex === THOUGHT_CATCHER_STEPS.length - 1 ? 'Klar' : 'Nästa'}</button>
+          <button class="neo-btn neo-btn--filled neo-btn--cta" type="button" data-thought-catcher-action="next">${state.stepIndex === THOUGHT_CATCHER_STEPS.length - 1 ? 'Klar' : step.cta || 'Nästa'}</button>
           ${(state.stepIndex > 0) ? '<button class="neo-btn neo-btn--outline neo-btn--cta" type="button" data-thought-catcher-action="back">Tillbaka</button>' : ''}
           ${(state.stepIndex > 0) ? '<button class="neo-btn neo-btn--outline neo-btn--cta" type="button" data-thought-catcher-action="restart">Börja om</button>' : ''}
         </div>
