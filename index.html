@@ -132,6 +132,7 @@ body.dark .grat-line{color:#e8f0e8!important;}
 .tool-select-card[data-tone="calm"]{--tool-accent:#2F6F78;--tool-tint:rgba(47,111,120,.14);--tool-tint-strong:rgba(47,111,120,.22);}
 .tool-select-card[data-tone="earth"]{--tool-accent:#5D6F4B;--tool-tint:rgba(93,111,75,.14);--tool-tint-strong:rgba(93,111,75,.22);}
 .tool-select-card[data-tone="thought"]{--tool-accent:#6B5D9E;--tool-tint:rgba(107,93,158,.14);--tool-tint-strong:rgba(107,93,158,.22);}
+.tool-select-card[data-tone="present"]{--tool-accent:#7A6C57;--tool-tint:rgba(186,164,131,.20);--tool-tint-strong:rgba(186,164,131,.28);}
 .tool-select-icon{font-size:1.35rem;line-height:1;}
 .tool-select-copy h3{font-size:1rem;margin-bottom:4px;color:var(--tool-accent);}
 .tool-select-copy p{font-size:.9rem;color:var(--text2);line-height:1.45;}
@@ -277,6 +278,7 @@ body.dark .closing-card-head,body.surface--dark .closing-card-head{color:rgba(25
 .micro-card[data-dim="energy"]{--dim:#C47820;--dim-rgb:196,120,32;}
 .micro-card[data-dim="sleep"]{--dim:#6B3EB8;--dim-rgb:107,62,184;}
 .micro-card[data-dim="thoughts"]{--dim:#2A7A6A;--dim-rgb:42,122,106;}
+.micro-card[data-dim="present"]{--dim:#8A7458;--dim-rgb:138,116,88;}
 .micro-tool-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
 .ex-card{background:linear-gradient(145deg,#0d2210,#1a3820);border:1px solid rgba(140,230,80,.15);border-radius:22px;padding:clamp(18px,4vw,28px);color:#d4f5d0;position:relative;overflow:hidden;}
 .ex-card::before{content:'';position:absolute;top:-40px;right:-40px;width:130px;height:130px;border-radius:50%;background:rgba(255,255,255,.03);}
@@ -460,11 +462,16 @@ body.surface--dark .row-check,body.dark .row-check{border:1.5px solid color-mix(
 .thought-catcher-step p{line-height:1.6;color:var(--text);}
 .thought-catcher-support{margin-top:8px;font-size:.9rem;color:var(--text2);}
 .thought-catcher-actions{display:grid;gap:10px;}
+.return-to-now-step{background:rgba(138,116,88,.10);}
+.return-now-checklist{display:grid;gap:8px;margin-top:10px;}
+.return-now-item{padding:10px 12px;border-radius:12px;background:rgba(138,116,88,.14);border:1px solid rgba(138,116,88,.24);font-size:.92rem;color:var(--text);}
 .thought-slider{margin-top:10px;display:grid;gap:8px;}
 .thought-slider-labels{display:flex;justify-content:space-between;font-size:.82rem;color:var(--text2);}
 .thought-slider input[type=range]{width:100%;accent-color:#6A54A3;}
 body.dark .thought-catcher-step,body.surface--dark .thought-catcher-step{background:rgba(255,255,255,.08);}
 body.dark .grounding-step,body.surface--dark .grounding-step{background:rgba(255,255,255,.08);}
+body.dark .return-to-now-step,body.surface--dark .return-to-now-step{background:rgba(255,255,255,.08);}
+body.dark .return-now-item,body.surface--dark .return-now-item{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.14);}
 .reward-pop{display:inline-flex;align-items:center;gap:8px;background:rgba(45,106,79,.14);border:1px solid rgba(45,106,79,.26);padding:8px 12px;border-radius:12px;margin-bottom:10px;}
 body.dark .reward-pop,body.surface--dark .reward-pop{background:rgba(100,180,130,.18);border-color:rgba(170,230,190,.28);color:rgba(240,255,244,.95);}
 body.dark .micro-card,body.surface--dark .micro-card{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.10);color:rgba(255,255,255,.90);box-shadow:0 8px 22px rgba(0,0,0,.25);}
@@ -639,6 +646,14 @@ body.guide-open #content{overflow:hidden;}
           <section class="tools-section" id="thought-catcher-tool-section">
             <h3>📝 Tankefångare</h3>
             <div id="thought-catcher-tool-root"></div>
+          </section>
+        </section>
+
+        <section id="tools-return-to-now-view" class="tool-detail-view" hidden>
+          <button class="tools-back-btn btn btn--outline btn--sm" type="button" data-tools-back>← Tillbaka till verktyg</button>
+          <section class="tools-section" id="return-to-now-tool-section">
+            <h3>🧭 Tillbaka till nuet</h3>
+            <div id="return-to-now-tool-root"></div>
           </section>
         </section>
 

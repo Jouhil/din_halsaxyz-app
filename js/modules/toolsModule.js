@@ -26,6 +26,14 @@ const TOOL_DEFINITIONS = [
     icon: '📝',
     tone: 'thought',
   },
+  {
+    id: 'return-to-now',
+    view: 'return-to-now',
+    title: 'Tillbaka till nuet',
+    description: 'Landa i det som finns här just nu när tankarna drar iväg.',
+    icon: '🧭',
+    tone: 'present',
+  },
 ];
 
 const GROUNDING_STEPS = [
@@ -130,6 +138,31 @@ const SOFT_THOUGHT_OPTIONS = [
   'Egen tanke',
 ];
 
+const RETURN_PULL_OPTIONS = [
+  'Det som varit',
+  'Det som kan hända',
+  'Både och',
+  'Egen tanke',
+];
+
+const RETURN_ACTION_OPTIONS = ['Ja', 'Nej', 'Vet inte'];
+
+const RETURN_PARK_OPTIONS = [
+  'Inte nu',
+  'Jag tar det senare',
+  'Tanke, inte uppgift',
+  'Jag behöver inte lösa det nu',
+  'Egen tanke',
+];
+
+const RETURN_NEXT_STEP_OPTIONS = [
+  'Skriv ner det',
+  'Ta det senare idag',
+  'Prata med någon',
+  'Gör en liten sak nu',
+  'Egen tanke',
+];
+
 const toolsState = {
   activeView: 'home',
   stepIndex: 0,
@@ -142,6 +175,14 @@ const toolsState = {
     selectedAlternative: '',
     customAlternative: '',
     reliefValue: 50,
+  },
+  returnToNow: {
+    stepIndex: 0,
+    selectedPull: '',
+    customPull: '',
+    selectedActionability: '',
+    selectedStepChoice: '',
+    customStepChoice: '',
   },
 };
 
@@ -176,8 +217,29 @@ function getProgress() {
   };
 }
 
+function resetReturnToNow() {
+  toolsState.returnToNow = {
+    stepIndex: 0,
+    selectedPull: '',
+    customPull: '',
+    selectedActionability: '',
+    selectedStepChoice: '',
+    customStepChoice: '',
+  };
+}
+
+function getReturnToNowProgress() {
+  const state = toolsState.returnToNow;
+  const capped = Math.min(state.stepIndex + 1, 4);
+  const percentage = Math.round((capped / 4) * 100);
+  return {
+    stepLabel: `Steg ${capped} av 4`,
+    percentage,
+  };
+}
+
 function setToolsView(view) {
-  const nextView = ['home', 'breathing', 'grounding', 'thought-catcher'].includes(view) ? view : 'home';
+  const nextView = ['home', 'breathing', 'grounding', 'thought-catcher', 'return-to-now'].includes(view) ? view : 'home';
   toolsState.activeView = nextView;
 
   const sections = [
@@ -185,6 +247,7 @@ function setToolsView(view) {
     { element: document.getElementById('tools-breathing-view'), id: 'breathing' },
     { element: document.getElementById('tools-grounding-view'), id: 'grounding' },
     { element: document.getElementById('tools-thought-catcher-view'), id: 'thought-catcher' },
+    { element: document.getElementById('tools-return-to-now-view'), id: 'return-to-now' },
   ];
 
   sections.forEach(({ element, id }) => {
@@ -193,6 +256,141 @@ function setToolsView(view) {
     element.hidden = !isActive;
     element.setAttribute('aria-hidden', String(!isActive));
   });
+}
+
+function renderReturnToNowTool() {
+  const container = document.getElementById('return-to-now-tool-root');
+  if (!container) return;
+
+  const state = toolsState.returnToNow;
+  const isDone = state.stepIndex >= 4;
+
+  if (isDone) {
+    container.innerHTML = `
+      <article class="micro-card" data-dim="present">
+        <div class="micro-tool-card">
+          <div class="micro-tool-head">
+            <div>
+              <span class="ex-badge">🧭 tillbaka till nuet</span>
+              <h4 class="ex-title">Lite mer här och nu</h4>
+              <p class="ex-subtitle">Bra gjort. Du har tagit ett steg tillbaka till det som finns här just nu.</p>
+            </div>
+          </div>
+          <div class="thought-catcher-step return-to-now-step">
+            <p>Du kan återvända till övningen när tankarna drar iväg igen.</p>
+          </div>
+          <div class="thought-catcher-actions">
+            <button class="neo-btn neo-btn--filled neo-btn--cta" type="button" data-return-action="restart">Börja om</button>
+          </div>
+        </div>
+      </article>
+    `;
+    return;
+  }
+
+  const { stepLabel, percentage } = getReturnToNowProgress();
+  const isActionable = state.selectedActionability === 'Ja';
+  let title = '';
+  let body = '';
+  let support = '';
+  let cta = '';
+  let stepContent = '';
+
+  if (state.stepIndex === 0) {
+    title = 'Vad drar dig bort från nuet?';
+    body = 'Välj det som passar bäst just nu.';
+    support = 'Det räcker att bara lägga märke till vad som drar iväg dig.';
+    cta = 'Det här stämmer';
+    stepContent = `
+      ${renderThoughtOptionChips(RETURN_PULL_OPTIONS, state.selectedPull, 'return-pull')}
+      ${state.selectedPull === 'Egen tanke' ? `<input class="txt-in txt-in-sm" type="text" placeholder="Skriv din tanke" value="${state.customPull || ''}" data-return-custom-input="pull">` : ''}
+    `;
+  }
+
+  if (state.stepIndex === 1) {
+    title = 'Går det att göra något åt det just nu?';
+    body = 'Du behöver inte lösa allt nu. Börja med att se om det här är något du faktiskt kan agera på i denna stund.';
+    support = 'Det här handlar inte om rätt svar, bara om vad som är sant just nu.';
+    cta = 'Jag vill gå vidare';
+    stepContent = renderThoughtOptionChips(RETURN_ACTION_OPTIONS, state.selectedActionability, 'return-actionability');
+  }
+
+  if (state.stepIndex === 2) {
+    title = isActionable ? 'Ett litet nästa steg' : 'Tankeparkering';
+    body = isActionable
+      ? 'Om det går att göra något åt det nu, välj ett litet steg — inte hela lösningen.'
+      : 'Du behöver inte bära den här tanken hela tiden. Låt den få vänta en stund.';
+    support = isActionable
+      ? 'Det räcker med ett litet steg.'
+      : 'Att parkera en tanke är inte att ignorera den. Det är att välja när du vill möta den.';
+    cta = 'Tillbaka till nuet';
+    stepContent = `
+      ${renderThoughtOptionChips(isActionable ? RETURN_NEXT_STEP_OPTIONS : RETURN_PARK_OPTIONS, state.selectedStepChoice, 'return-step-choice')}
+      ${state.selectedStepChoice === 'Egen tanke' ? `<input class="txt-in txt-in-sm" type="text" placeholder="Skriv din formulering" value="${state.customStepChoice || ''}" data-return-custom-input="step-choice">` : ''}
+    `;
+  }
+
+  if (state.stepIndex === 3) {
+    title = 'Landning i nuet';
+    body = 'Nu hjälper vi kroppen och uppmärksamheten tillbaka till det som finns här.';
+    support = 'Du behöver inte göra det perfekt. Bara kom tillbaka lite grann.';
+    cta = 'Jag är här nu';
+    stepContent = `
+      <div class="return-now-checklist">
+        <div class="return-now-item">Se 3 saker omkring dig</div>
+        <div class="return-now-item">Känn 2 saker i eller mot kroppen</div>
+        <div class="return-now-item">Ta 1 lugn utandning</div>
+      </div>
+    `;
+  }
+
+  container.innerHTML = `
+    <article class="micro-card" data-dim="present">
+      <div class="micro-tool-card">
+        <div class="micro-tool-head">
+          <div>
+            <span class="ex-badge">🧭 tillbaka till nuet</span>
+            <h4 class="ex-title">Tillbaka till nuet</h4>
+            <p class="ex-subtitle">Landa i det som finns här just nu när tankarna drar iväg.</p>
+          </div>
+        </div>
+        <div class="tool-progress" aria-live="polite">
+          <div class="tool-progress-bar"><span style="width:${percentage}%;"></span></div>
+          <div class="tool-time">${stepLabel}</div>
+        </div>
+        <div class="thought-catcher-step return-to-now-step" aria-live="polite">
+          <h5>${title}</h5>
+          <p>${body}</p>
+          ${support ? `<p class="thought-catcher-support">${support}</p>` : ''}
+          ${stepContent}
+        </div>
+        <div class="thought-catcher-actions">
+          <button class="neo-btn neo-btn--filled neo-btn--cta" type="button" data-return-action="next">${cta}</button>
+          ${(state.stepIndex > 0) ? '<button class="neo-btn neo-btn--outline neo-btn--cta" type="button" data-return-action="back">Tillbaka</button>' : ''}
+          ${(state.stepIndex > 0) ? '<button class="neo-btn neo-btn--outline neo-btn--cta" type="button" data-return-action="restart">Börja om</button>' : ''}
+        </div>
+      </div>
+    </article>
+  `;
+}
+
+function canAdvanceReturnToNowStep() {
+  const state = toolsState.returnToNow;
+  if (state.stepIndex === 0) {
+    if (!state.selectedPull) return false;
+    if (state.selectedPull === 'Egen tanke') return Boolean(state.customPull.trim());
+  }
+
+  if (state.stepIndex === 1) {
+    return Boolean(state.selectedActionability);
+  }
+
+  if (state.stepIndex === 2) {
+    if (!state.selectedStepChoice) return false;
+    if (state.selectedStepChoice === 'Egen tanke') return Boolean(state.customStepChoice.trim());
+  }
+
+  return true;
 }
 
 function openTool(toolId) {
@@ -458,32 +656,69 @@ function bindToolsEvents() {
       const value = thoughtChip.dataset.thoughtChipValue || '';
       if (stepKey === 'notice') {
         toolsState.thoughtCatcher.selectedThought = value;
+        renderThoughtCatcherTool();
+        return;
       }
       if (stepKey === 'soften') {
         toolsState.thoughtCatcher.selectedAlternative = value;
+        renderThoughtCatcherTool();
+        return;
       }
-      renderThoughtCatcherTool();
-      return;
+      if (stepKey === 'return-pull') {
+        toolsState.returnToNow.selectedPull = value;
+        renderReturnToNowTool();
+        return;
+      }
+      if (stepKey === 'return-actionability') {
+        toolsState.returnToNow.selectedActionability = value;
+        renderReturnToNowTool();
+        return;
+      }
+      if (stepKey === 'return-step-choice') {
+        toolsState.returnToNow.selectedStepChoice = value;
+        renderReturnToNowTool();
+        return;
+      }
     }
 
     const thoughtAction = target.dataset.thoughtCatcherAction;
-    if (!thoughtAction) return;
+    if (thoughtAction) {
+      if (thoughtAction === 'restart') {
+        resetThoughtCatcher();
+        renderThoughtCatcherTool();
+        return;
+      }
 
-    if (thoughtAction === 'restart') {
-      resetThoughtCatcher();
+      if (thoughtAction === 'back') {
+        toolsState.thoughtCatcher.stepIndex = Math.max(0, toolsState.thoughtCatcher.stepIndex - 1);
+        renderThoughtCatcherTool();
+        return;
+      }
+
+      if (!canAdvanceThoughtCatcherStep()) return;
+      toolsState.thoughtCatcher.stepIndex += 1;
       renderThoughtCatcherTool();
       return;
     }
 
-    if (thoughtAction === 'back') {
-      toolsState.thoughtCatcher.stepIndex = Math.max(0, toolsState.thoughtCatcher.stepIndex - 1);
-      renderThoughtCatcherTool();
+    const returnAction = target.dataset.returnAction;
+    if (!returnAction) return;
+
+    if (returnAction === 'restart') {
+      resetReturnToNow();
+      renderReturnToNowTool();
       return;
     }
 
-    if (!canAdvanceThoughtCatcherStep()) return;
-    toolsState.thoughtCatcher.stepIndex += 1;
-    renderThoughtCatcherTool();
+    if (returnAction === 'back') {
+      toolsState.returnToNow.stepIndex = Math.max(0, toolsState.returnToNow.stepIndex - 1);
+      renderReturnToNowTool();
+      return;
+    }
+
+    if (!canAdvanceReturnToNowStep()) return;
+    toolsState.returnToNow.stepIndex += 1;
+    renderReturnToNowTool();
   });
 
   toolsTab.addEventListener('input', (event) => {
@@ -507,6 +742,16 @@ function bindToolsEvents() {
 
     if (target.matches('[data-thought-slider="result"]')) {
       toolsState.thoughtCatcher.reliefValue = Number(target.value);
+      return;
+    }
+
+    if (target.matches('[data-return-custom-input="pull"]')) {
+      toolsState.returnToNow.customPull = target.value;
+      return;
+    }
+
+    if (target.matches('[data-return-custom-input="step-choice"]')) {
+      toolsState.returnToNow.customStepChoice = target.value;
     }
   });
 }
@@ -520,6 +765,7 @@ export function init() {
   renderToolsHomeCards();
   renderGroundingTool();
   renderThoughtCatcherTool();
+  renderReturnToNowTool();
   setSelfHelpExpanded(false);
   setToolsView('home');
 }
