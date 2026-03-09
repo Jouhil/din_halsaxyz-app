@@ -552,8 +552,8 @@ function renderClosing() {
     ${flow.currentFlow === '8' ? `<div class="flow-note">Situation: ${r.situation || r.situationOther || '–'} · Känslor: ${(r.emotions || []).join(', ') || '–'} (${r.intensityBefore}/10) · Alternativ tanke: ${r.alternative || '–'} · Efter: ${r.intensityAfter}/10</div>` : ''}
     <div class="closing-rating"><div class="ci-label">Hur hjälpsam var checken idag?</div><div class="flow-note">Ditt svar hjälper oss göra nästa check ännu bättre.</div><div class="rating-accent" aria-hidden="true"></div><div class="star-row">${[1, 2, 3, 4, 5].map((n) => `<button class="chip ${flow.after.stars >= n ? 'active' : ''}" data-action="set-star" data-star="${n}">★</button>`).join('')}</div></div>
     <div class="neo-card neo-card--tinted"><div class="closing-card-head"><span>💬</span><span>Reflektion idag</span></div><div class="flow-status">${flow.dailyInsight || buildDailyInsight({ primaryNeed: selectedNeed, answers: flow.preValues, toolId: flow.selectedTool?.id || flow.plan?.selectedTool?.id || null })}</div></div>
-    ${weeklyPatternBlock}
     <div class="neo-card neo-card--tinted"><div class="closing-card-head"><span>${selectedMeta.emoji}</span><span>Ta med dig</span></div><div class="flow-status">${takeAway.lines.join('<br>')}</div></div>
+    ${weeklyPatternBlock}
     <div class="flow-actions"><button class="neo-btn neo-btn--filled neo-btn--cta" data-action="save-log">💾 Spara check</button></div>
   </div>`;
 }
