@@ -55,29 +55,29 @@ const chips = {
 const microFeedbackByNeed = Object.fromEntries(NEED_KEYS.map((need) => [need, Array.from({ length: 15 }, (_, i) => ({ id: `${need}-fb-${i + 1}`, text: `${NEED_LABELS[need]}: liten återställning ${i + 1} — ett lugnt andetag räcker för att börja.` }))]));
 const takeAwayByNeed = {
   stress: [
-    { id: 'stress-tw-1', lines: ['Börja med en långsam utandning när tempot ökar.', 'En kort paus kan hjälpa kroppen att varva ned.'] },
-    { id: 'stress-tw-2', lines: ['Du behöver inte lösa allt på en gång.', 'Välj en sak i taget och sänk tempot lite.'] },
-    { id: 'stress-tw-3', lines: ['Mjukna i axlar och käke när du märker stress.', 'Kroppen kan få en ny signal på 30 sekunder.'] },
+    { id: 'stress-tw-1', lines: ['När tempot ökar, börja med en långsam utandning.', 'En kort paus hjälper ofta kroppen att varva ned.'] },
+    { id: 'stress-tw-2', lines: ['Allt behöver inte lösas på en gång.', 'Välj en sak i taget och låt tempot sjunka.'] },
+    { id: 'stress-tw-3', lines: ['Mjukna i axlar och käke när du märker stressen.', 'Redan 30 sekunder kan ge kroppen en ny signal.'] },
   ],
   humör: [
-    { id: 'humor-tw-1', lines: ['Små vänliga handlingar kan lyfta känslan.', 'Gör en sak som känns snäll mot dig själv idag.'] },
-    { id: 'humor-tw-2', lines: ['Humör skiftar – det är okej att ta det stegvis.', 'Leta efter en liten ljuspunkt i nästa timme.'] },
-    { id: 'humor-tw-3', lines: ['Du tog hand om dig i dag, och det räknas.', 'Fortsätt med ett litet steg som ger ro.'] },
+    { id: 'humor-tw-1', lines: ['Små vänliga handlingar kan lätta känslan.', 'Gör en sak idag som känns snäll mot dig själv.'] },
+    { id: 'humor-tw-2', lines: ['Humör får skifta, och du får ta det stegvis.', 'Sikta på en liten ljuspunkt den kommande timmen.'] },
+    { id: 'humor-tw-3', lines: ['Du tog hand om dig idag, och det spelar roll.', 'Fortsätt med ett litet steg som ger mer ro.'] },
   ],
   energi: [
-    { id: 'energi-tw-1', lines: ['Energi byggs bäst i små doser.', 'Ta en kort rörelsepaus när du kan.'] },
-    { id: 'energi-tw-2', lines: ['Sänk kraven när energin är låg.', 'Ett litet genomförbart steg är tillräckligt nu.'] },
-    { id: 'energi-tw-3', lines: ['Kroppen svarar ofta på rytm och pauser.', 'Testa 1 minut rörelse + 1 lugn minut senare idag.'] },
+    { id: 'energi-tw-1', lines: ['Energi byggs bäst i små doser.', 'Ta en kort rörelsepaus när det passar.'] },
+    { id: 'energi-tw-2', lines: ['Sänk kraven när energin är låg.', 'Ett litet steg som går att göra räcker nu.'] },
+    { id: 'energi-tw-3', lines: ['Kroppen svarar ofta bra på rytm och pauser.', 'Testa 1 minut rörelse och 1 lugn minut senare idag.'] },
   ],
   sömn: [
     { id: 'somn-tw-1', lines: ['Kvällens tempo påverkar nattens återhämtning.', 'Avsluta dagen med en kort nedvarvning.'] },
-    { id: 'somn-tw-2', lines: ['Vila börjar innan du somnar.', 'Ge kroppen en lugn signal redan i kväll.'] },
+    { id: 'somn-tw-2', lines: ['Vila börjar redan innan du somnar.', 'Ge kroppen en lugn signal ikväll.'] },
     { id: 'somn-tw-3', lines: ['Små kvällsrutiner gör skillnad över tid.', 'Välj en enkel vana att upprepa i natt.'] },
   ],
   tankar: [
-    { id: 'tankar-tw-1', lines: ['Tankar får finnas utan att styra allt.', 'Kom tillbaka till andning eller sinnen i stunden.'] },
-    { id: 'tankar-tw-2', lines: ['Du kan notera en tanke och släppa taget lite.', 'Prova: “det här är en tanke, inte ett faktum”.'] },
-    { id: 'tankar-tw-3', lines: ['När huvudet går fort hjälper små pauser.', 'Sänk tempot i 30 sekunder och börja om.'] },
+    { id: 'tankar-tw-1', lines: ['Tankar får finnas utan att styra allt.', 'Kom tillbaka till andningen eller dina sinnen i stunden.'] },
+    { id: 'tankar-tw-2', lines: ['Notera tanken och släpp taget lite.', 'Prova: ”Det här är en tanke, inte ett faktum.”'] },
+    { id: 'tankar-tw-3', lines: ['När huvudet går fort hjälper små pauser.', 'Sänk tempot i 30 sekunder och börja om lugnt.'] },
   ],
 };
 
@@ -458,8 +458,8 @@ function renderFocusStep() {
   const adaptiveSliderMeta = nextQuestion?.need ? SLIDER_META[nextQuestion.need] : null;
 
   return `<div class="card">
-    ${adaptiveQuestionsRemaining ? `<div class="flow-note">Vi ställer två korta följdfrågor för att hitta rätt fokus för dig idag.</div>
-    <div class="ci-block"><div class="ci-label">Adaptiv fråga ${Math.min(answeredCount + 1, MAX_ADAPTIVE_QUESTIONS)}/${MAX_ADAPTIVE_QUESTIONS}</div><div class="flow-note">${nextQuestion.label}</div><div class="ci-row" data-dim="${FOCUS_META[nextQuestion.need]?.dim || 'stress'}"><div class="ci-row-main"><input type="range" min="0" max="10" value="${answerValue}" class="ci-slider" data-action="set-focus-answer"></div><small class="ci-val">${answerValue}</small></div><div class="ci-anchors"><span class="anchor">${adaptiveSliderMeta?.left || 'Lågt'}</span><span class="anchor">${adaptiveSliderMeta?.right || 'Högt'}</span></div><button class="neo-btn neo-btn--outline neo-btn--sm" data-action="answer-focus-question">Spara svar</button></div>` : '<div class="ci-label">Rekommenderat fokus för dig just nu</div>'}
+    ${adaptiveQuestionsRemaining ? `<div class="flow-note">Två snabba följdfrågor hjälper oss att hitta rätt fokus för dig just nu.</div>
+    <div class="ci-block"><div class="ci-label">Fråga ${Math.min(answeredCount + 1, MAX_ADAPTIVE_QUESTIONS)} av ${MAX_ADAPTIVE_QUESTIONS}</div><div class="flow-note">${nextQuestion.label}</div><div class="ci-row" data-dim="${FOCUS_META[nextQuestion.need]?.dim || 'stress'}"><div class="ci-row-main"><input type="range" min="0" max="10" value="${answerValue}" class="ci-slider" data-action="set-focus-answer"></div><small class="ci-val">${answerValue}</small></div><div class="ci-anchors"><span class="anchor">${adaptiveSliderMeta?.left || 'Lågt'}</span><span class="anchor">${adaptiveSliderMeta?.right || 'Högt'}</span></div><button class="neo-btn neo-btn--outline neo-btn--sm" data-action="answer-focus-question">Nästa fråga</button></div>` : '<div class="ci-label">Rekommenderat fokus för dig just nu</div><div class="flow-note">Klart – här är fokusområdet som passar bäst idag.</div>'}
     ${adaptiveQuestionsRemaining ? '' : `<div class="focus-list">${orderedNeeds.map((need) => {
       const meta = FOCUS_META[need];
       const isSelected = selected === need;
@@ -545,7 +545,7 @@ function renderClosing() {
   return `<div class="card closing-layout" data-dim="${selectedDim}">
     <div class="neo-card neo-card--tinted"><div class="closing-card-head"><span>${selectedMeta.emoji}</span><span>Avslut</span></div>${closingLines.map((line) => `<div class="closing-line">${line}</div>`).join('')}</div>
     ${flow.currentFlow === '8' ? `<div class="flow-note">Situation: ${r.situation || r.situationOther || '–'} · Känslor: ${(r.emotions || []).join(', ') || '–'} (${r.intensityBefore}/10) · Alternativ tanke: ${r.alternative || '–'} · Efter: ${r.intensityAfter}/10</div>` : ''}
-    <div class="closing-rating"><div class="ci-label">Hur hjälpsam var checken?</div><div class="rating-accent" aria-hidden="true"></div><div class="star-row">${[1, 2, 3, 4, 5].map((n) => `<button class="chip ${flow.after.stars >= n ? 'active' : ''}" data-action="set-star" data-star="${n}">★</button>`).join('')}</div></div>
+    <div class="closing-rating"><div class="ci-label">Hur hjälpsam var checken idag?</div><div class="flow-note">Ditt svar hjälper oss göra nästa check ännu bättre.</div><div class="rating-accent" aria-hidden="true"></div><div class="star-row">${[1, 2, 3, 4, 5].map((n) => `<button class="chip ${flow.after.stars >= n ? 'active' : ''}" data-action="set-star" data-star="${n}">★</button>`).join('')}</div></div>
     <div class="neo-card neo-card--tinted"><div class="closing-card-head"><span>${selectedMeta.emoji}</span><span>Ta med dig</span></div><div class="flow-status">${takeAway.lines.join('<br>')}</div></div>
     <div class="neo-card neo-card--tinted"><div class="closing-card-head"><span>💬</span><span>Reflektion idag</span></div><div class="flow-status">${flow.dailyInsight || buildDailyInsight({ primaryNeed: selectedNeed, answers: flow.preValues, toolId: flow.selectedTool?.id || flow.plan?.selectedTool?.id || null })}</div></div>
     <div class="flow-actions"><button class="neo-btn neo-btn--filled neo-btn--cta" data-action="save-log">💾 Spara check</button></div>
