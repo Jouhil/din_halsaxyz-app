@@ -354,7 +354,8 @@ function transitionTo(nextStep) {
 }
 
 function loadRotationHistory() {
-  return loadJSON('flowRotationHistory', {});
+  const history = loadJSON('flowRotationHistory', {});
+  return history && typeof history === 'object' && !Array.isArray(history) ? history : {};
 }
 
 function pushHistoryKey(history, key, value, max = 12) {
@@ -410,11 +411,12 @@ function swapToolSelection() {
 
   if (!nextTool) {
     console.debug('[checkin-flow] no tool candidate available for swap', { need });
-    return;
+    return false;
   }
 
   if (currentTool?.id && nextTool.id === currentTool.id) {
     console.debug('[checkin-flow] no alternative tool available', { need, toolId: currentTool.id });
+    return false;
   }
 
   flow.selectedTool = nextTool;
@@ -424,6 +426,7 @@ function swapToolSelection() {
     selectedTool: nextTool,
   };
   state.flowState = { ...(state.flowState || {}), plan: flow.plan };
+  return true;
 }
 
 function renderStartTiles() {
@@ -600,6 +603,7 @@ function resetFlow() {
   clearTimeout(saveToastTimer);
   flow.currentFlow = null;
   transitionTo(STEPS.START);
+  flow.preValues = { stress: 5, humör: 5, energi: 5, sömn: 5, tankar: 5 };
   flow.selectedNeed = null;
   flow.selectedTool = null;
   flow.plan = null;
@@ -608,6 +612,8 @@ function resetFlow() {
   flow.adaptiveDebug = null;
   flow.adaptiveSourceSignature = null;
   flow.lastChangedNeed = null;
+  flow.reflection = { situation: '', situationOther: '', emotions: [], intensityBefore: 5, thought: '', thoughtOther: '', alternative: '', intensityAfter: 4 };
+  flow.after = { stars: 0 };
   flow.countdown = 0;
   flow.toolReady = false;
   flow.saveToast = false;
@@ -621,6 +627,7 @@ function bind(root) {
     flow.currentFlow = el.dataset.flow;
     transitionTo(STEPS.PRE);
     flow.timestamps.startedAt = new Date().toISOString();
+    flow.preValues = { stress: 5, humör: 5, energi: 5, sömn: 5, tankar: 5 };
     flow.selectedNeed = null;
     flow.selectedTool = null;
     flow.plan = null;
@@ -629,6 +636,7 @@ function bind(root) {
     flow.adaptiveDebug = null;
     flow.adaptiveSourceSignature = null;
     flow.lastChangedNeed = null;
+    flow.reflection = { situation: '', situationOther: '', emotions: [], intensityBefore: 5, thought: '', thoughtOther: '', alternative: '', intensityAfter: 4 };
     flow.countdown = 0;
     flow.toolReady = false;
     flow.after = { stars: 0 };
@@ -653,7 +661,6 @@ function bind(root) {
   root.querySelectorAll('[data-action="set-need"]').forEach((el) => el.addEventListener('click', () => {
     flow.selectedNeed = el.dataset.need;
     flow.lastChangedNeed = normalizeNeedKey(el.dataset.need) || flow.lastChangedNeed;
-    flow.questionAnswers[`focus-${el.dataset.need === 'sömn' ? 'somn' : el.dataset.need}`] = flow.focusAnswerDraft;
     saveJSON('flowRotationHistory', { ...loadRotationHistory(), lastSelectedNeed: flow.selectedNeed });
     render();
   }));
@@ -755,8 +762,8 @@ function bind(root) {
 
   root.querySelector('[data-action="swap-tool"]')?.addEventListener('click', () => {
     stopTimer();
-    swapToolSelection();
-    startToolTimer(true);
+    const didSwap = swapToolSelection();
+    if (didSwap) startToolTimer(true);
     render();
   });
 
@@ -769,7 +776,8 @@ function bind(root) {
 }
 
 function saveLog() {
-  const logs = loadJSON('dailyFlowLogs', []);
+  const storedLogs = loadJSON('dailyFlowLogs', []);
+  const logs = Array.isArray(storedLogs) ? storedLogs : [];
   const focusNeed = flow.selectedNeed || flow.plan?.primaryNeed || 'stress';
   const timestamp = new Date().toISOString();
   const entry = {
@@ -781,7 +789,7 @@ function saveLog() {
     pre: { ...flow.preValues, tankar: flow.preValues.tankar ?? null },
     primaryNeed: focusNeed,
     focusNeed,
-    toolId: flow.selectedTool?.id || null,
+    toolId: flow.selectedTool?.id || flow.plan?.selectedTool?.id || null,
     reflection: flow.currentFlow === '8' ? {
       trigger: flow.reflection.situation,
       triggerText: flow.reflection.situationOther,
