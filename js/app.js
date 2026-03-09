@@ -172,7 +172,7 @@ setInterval(()=>{if(currentTheme==='auto')applyTheme();},60000);
   initToolsModule();initPerspectiveModule();initStatsModule();initSettingsModule();
   checkinFlowApi = initCheckinFlow({});
   await loadLibraries();
-  renderGratitude();newQuote();renderHelp();
+  renderGratitude();newQuote();renderHelp();syncBreathPreset();
   // om check-infliken är aktiv redan – rendera
   if(document.getElementById('tab-checkin').classList.contains('active')) checkinFlowApi?.render?.();
 })();
@@ -242,11 +242,80 @@ function renderGratitude(){
 //  LUGN / ANDNING
 // ══════════════════════════════════════════
 let timerInt,breathInt;
+const breathPhases=[
+  {key:'inhale',label:'🌬️ Andas in',short:'In',anim:'bIn'},
+  {key:'hold1',label:'⏸️ Håll',short:'Håll',anim:'bHold'},
+  {key:'exhale',label:'💨 Andas ut',short:'Ut',anim:'bOut'},
+  {key:'hold2',label:'⏸️ Håll',short:'Håll',anim:'bHold'}
+];
+const breathState={active:false,left:0,phaseIndex:0,phaseRemaining:4};
+
 function startCustom(){const mins=parseInt(document.getElementById('custom-min').value)||5;startBreath(mins*60);}
-function startBreath(secs){stopBreath();document.getElementById('bwrap').classList.add('show');let left=secs;updateTimerDisp(left);runCycle();breathInt=setInterval(runCycle,12000);timerInt=setInterval(()=>{left--;updateTimerDisp(left);incStat('breath_sec');if(left<=0){stopBreath();alert('Bra jobbat! 🌿');}},1000);}
-function runCycle(){animB('in');setTimeout(()=>animB('hold'),4000);setTimeout(()=>animB('out'),8000);}
-function animB(phase){const ring=document.getElementById('bring'),lbl=document.getElementById('breath-lbl'),txt=document.getElementById('btxt');ring.style.animation='none';void ring.offsetWidth;if(phase==='in'){lbl.innerText='🌬️ Andas in...';lbl.style.color='#a5f3fc';txt.innerText='In\n4s';ring.style.animation='bIn 4s ease-in-out forwards';}else if(phase==='hold'){lbl.innerText='⏸️ Håll andan...';lbl.style.color='#fde68a';txt.innerText='Håll\n4s';ring.style.animation='bHold 4s ease-in-out forwards';}else{lbl.innerText='💨 Andas ut...';lbl.style.color='#bbf7d0';txt.innerText='Ut\n4s';ring.style.animation='bOut 4s ease-in-out forwards';}}
-function stopBreath(){clearInterval(timerInt);clearInterval(breathInt);document.getElementById('timer-disp').innerText='00:00';document.getElementById('breath-lbl').innerText='Välj tid och starta';document.getElementById('btxt').innerText='';document.getElementById('bwrap').classList.remove('show');document.getElementById('bring').style.animation='none';stopAllSounds();}
+function syncBreathPreset(){if(breathState.active)return;const mins=Math.max(1,parseInt(document.getElementById('custom-min')?.value)||5);updateTimerDisp(mins*60);setBreathReadyState();}
+function setBreathReadyState(){
+  const lbl=document.getElementById('breath-lbl');
+  const phase=document.getElementById('breath-phase-sec');
+  const txt=document.getElementById('btxt');
+  if(lbl)lbl.innerText='Redo att starta';
+  if(phase)phase.innerText='Nästa: Andas in i 4 sek';
+  if(txt)txt.innerText='';
+}
+function startBreath(secs){
+  stopBreath(false);
+  breathState.active=true;
+  breathState.left=secs;
+  breathState.phaseIndex=0;
+  breathState.phaseRemaining=4;
+  document.getElementById('bwrap').classList.add('show');
+  updateTimerDisp(breathState.left);
+  renderBreathPhase();
+  timerInt=setInterval(tickBreathing,1000);
+}
+function tickBreathing(){
+  if(!breathState.active)return;
+  breathState.left--;
+  breathState.phaseRemaining--;
+  incStat('breath_sec');
+
+  if(breathState.phaseRemaining<=0){
+    breathState.phaseIndex=(breathState.phaseIndex+1)%breathPhases.length;
+    breathState.phaseRemaining=4;
+    renderBreathPhase();
+  }else{
+    updatePhaseText();
+  }
+
+  updateTimerDisp(Math.max(0,breathState.left));
+  if(breathState.left<=0){
+    stopBreath(false);
+    alert('Bra jobbat! 🌿');
+  }
+}
+function renderBreathPhase(){
+  const phase=breathPhases[breathState.phaseIndex];
+  const ring=document.getElementById('bring');
+  if(ring){ring.style.animation='none';void ring.offsetWidth;ring.style.animation=`${phase.anim} 4s ease-in-out forwards`;}
+  updatePhaseText();
+}
+function updatePhaseText(){
+  const phase=breathPhases[breathState.phaseIndex];
+  const lbl=document.getElementById('breath-lbl');
+  const phaseSec=document.getElementById('breath-phase-sec');
+  const txt=document.getElementById('btxt');
+  if(lbl)lbl.innerText=phase.label;
+  if(phaseSec)phaseSec.innerText=`${phase.short} · ${Math.max(1,breathState.phaseRemaining)}s`;
+  if(txt)txt.innerText=`${phase.short}
+${Math.max(1,breathState.phaseRemaining)}s`;
+}
+function stopBreath(resetSounds=true){
+  clearInterval(timerInt);
+  clearInterval(breathInt);
+  breathState.active=false;
+  document.getElementById('bwrap').classList.remove('show');
+  document.getElementById('bring').style.animation='none';
+  syncBreathPreset();
+  if(resetSounds)stopAllSounds();
+}
 function updateTimerDisp(s){const m=Math.floor(s/60),sec=s%60;document.getElementById('timer-disp').innerText=String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');}
 
 // ══════════════════════════════════════════
@@ -667,7 +736,7 @@ function filterHelp(q){helpQuery=q;state.helpQuery=q;renderHelp();}
 function filterCat(cat,btn){helpCat=cat;state.helpCat=cat;document.querySelectorAll('.help-cat').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active');renderHelp();}
 
 Object.assign(window, {
-  ud, pp, pd, sp, spd, tryBio, showTab, renderGratitude, startCustom, stopBreath,
+  ud, pp, pd, sp, spd, tryBio, showTab, renderGratitude, startCustom, startBreath, stopBreath, syncBreathPreset,
   toggleSound, setVol, newQuote, filterCat, filterHelp, saveFocus, resetStats, setTheme, changePin,
   onBioToggle, onFreeTextToggle, importFile, exportAll, addGrat, addQuote, toggleHelpDetail, startFlow, startFlowAgain, renderFlow,
   lockAndStartFlow, updatePre, updateCbt, updatePost, submitFlow, viewFlowHistory,
