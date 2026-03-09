@@ -97,15 +97,21 @@ function getProgress() {
 }
 
 function setToolsView(view) {
-  toolsState.activeView = view;
+  const nextView = ['home', 'breathing', 'grounding'].includes(view) ? view : 'home';
+  toolsState.activeView = nextView;
 
-  const home = document.getElementById('tools-home-view');
-  const breathing = document.getElementById('tools-breathing-view');
-  const grounding = document.getElementById('tools-grounding-view');
+  const sections = [
+    { element: document.getElementById('tools-home-view'), id: 'home' },
+    { element: document.getElementById('tools-breathing-view'), id: 'breathing' },
+    { element: document.getElementById('tools-grounding-view'), id: 'grounding' },
+  ];
 
-  if (home) home.hidden = view !== 'home';
-  if (breathing) breathing.hidden = view !== 'breathing';
-  if (grounding) grounding.hidden = view !== 'grounding';
+  sections.forEach(({ element, id }) => {
+    if (!element) return;
+    const isActive = id === nextView;
+    element.hidden = !isActive;
+    element.setAttribute('aria-hidden', String(!isActive));
+  });
 }
 
 function openTool(toolId) {
