@@ -136,3 +136,26 @@ export const DEFAULT_ADAPTIVE_QUESTIONS = Object.freeze([
   { id: 'focus-humor-positive', need: 'humör', label: 'Hur lätt är det att känna något positivt just nu?', type: 'slider' },
   { id: 'focus-humor-heavy', need: 'humör', label: 'Hur tung känns känslan i kroppen?', type: 'slider' },
 ]);
+
+export function prioritizeAdaptiveQuestionsByHistory(questions = [], recentQuestionIds = []) {
+  const recentOrder = new Map();
+  const recentList = Array.isArray(recentQuestionIds) ? recentQuestionIds : [];
+  recentList.forEach((id, index) => {
+    if (!recentOrder.has(id)) recentOrder.set(id, index);
+  });
+
+  return (Array.isArray(questions) ? questions : [])
+    .map((question, index) => {
+      const historyIndex = recentOrder.has(question?.id) ? recentOrder.get(question.id) : -1;
+      return { question, index, historyIndex };
+    })
+    .sort((a, b) => {
+      const aSeen = a.historyIndex >= 0;
+      const bSeen = b.historyIndex >= 0;
+      if (aSeen !== bSeen) return aSeen ? 1 : -1;
+      if (aSeen && bSeen && a.historyIndex !== b.historyIndex) return a.historyIndex - b.historyIndex;
+      return a.index - b.index;
+    })
+    .map((entry) => entry.question)
+    .filter(Boolean);
+}

@@ -4,7 +4,12 @@ import { pickRotated } from '../engines/rotationEngine.js';
 import { buildFocusSummary, buildSessionPlan } from '../engines/aiEngine.js';
 import { buildDailyInsight } from '../engines/dailyInsightEngine.js';
 import { getHabitMemory } from '../engines/habitMemoryEngine.js';
-import { DEFAULT_ADAPTIVE_QUESTIONS, getNextQuestion, inferNeedPriorityFromAnswers } from '../engines/questionEngine.js';
+import {
+  DEFAULT_ADAPTIVE_QUESTIONS,
+  getNextQuestion,
+  inferNeedPriorityFromAnswers,
+  prioritizeAdaptiveQuestionsByHistory,
+} from '../engines/questionEngine.js';
 import { openGuide } from '../ui/helpOverlay.js';
 
 const NEED_KEYS = ['stress', 'humör', 'energi', 'sömn', 'tankar'];
@@ -30,6 +35,8 @@ const FOCUS_META = {
   tankar: { label: 'Tankar', subtitle: 'Klargör ditt sinne', emoji: '💭', dim: 'thoughts' },
 };
 const MAX_ADAPTIVE_QUESTIONS = 2;
+const ADAPTIVE_HISTORY_KEY = 'adaptiveQuestionHistory';
+const ADAPTIVE_HISTORY_PER_NEED = 4;
 const SLIDER_META = {
   stress: { left: 'Stressad', right: 'Lugn', emoji: '😰', dim: 'stress' },
   humör: { left: 'Nere', right: 'På topp', emoji: '🙂', dim: 'mood' },
@@ -134,6 +141,45 @@ function syncAdaptiveStateWithPreAnswers({ force = false } = {}) {
   return true;
 }
 
+
+function loadAdaptiveQuestionHistory() {
+  const history = loadJSON(ADAPTIVE_HISTORY_KEY, {});
+  return history && typeof history === 'object' ? history : {};
+}
+
+function saveAdaptiveQuestionHistory(history = {}) {
+  saveJSON(ADAPTIVE_HISTORY_KEY, history);
+}
+
+function getRecentAdaptiveQuestionIdsForNeed(need) {
+  const history = loadAdaptiveQuestionHistory();
+  return Array.isArray(history?.[need]) ? history[need] : [];
+}
+
+function saveAdaptiveQuestionsForNeed(need, questionIds = []) {
+  if (!need) return;
+  const history = loadAdaptiveQuestionHistory();
+  const existing = Array.isArray(history[need]) ? history[need].filter(Boolean) : [];
+  const merged = existing.slice();
+  (Array.isArray(questionIds) ? questionIds : []).forEach((id) => {
+    if (!id) return;
+    const previousIndex = merged.indexOf(id);
+    if (previousIndex !== -1) merged.splice(previousIndex, 1);
+    merged.push(id);
+  });
+  history[need] = merged.slice(-ADAPTIVE_HISTORY_PER_NEED);
+  saveAdaptiveQuestionHistory(history);
+}
+
+function getAnsweredAdaptiveQuestionIds({ need, scopedQuestions }) {
+  const answeredSet = new Set((Array.isArray(scopedQuestions) ? scopedQuestions : [])
+    .filter((question) => Object.prototype.hasOwnProperty.call(flow.questionAnswers || {}, question.id))
+    .map((question) => question.id));
+
+  return Object.keys(flow.questionAnswers || {})
+    .filter((id) => answeredSet.has(id) && DEFAULT_ADAPTIVE_QUESTIONS.some((question) => question.need === need && question.id === id));
+}
+
 function getAdaptiveAnswers() {
   const answers = { ...flow.preValues, ...(flow.questionAnswers || {}) };
   if (flow.selectedNeed) answers.selectedNeed = flow.selectedNeed;
@@ -145,10 +191,12 @@ function getAdaptiveSelection() {
   const answers = getAdaptiveAnswers();
   const adaptivePool = DEFAULT_ADAPTIVE_QUESTIONS.filter((question) => question.need === flow.selectedNeed);
   const scopedQuestions = adaptivePool.length ? adaptivePool : DEFAULT_ADAPTIVE_QUESTIONS;
+  const recentQuestionIds = getRecentAdaptiveQuestionIdsForNeed(flow.selectedNeed);
+  const rotatedQuestions = prioritizeAdaptiveQuestionsByHistory(scopedQuestions, recentQuestionIds);
   const answeredCount = scopedQuestions.filter((question) => Object.prototype.hasOwnProperty.call(flow.questionAnswers || {}, question.id)).length;
   const reachedAdaptiveLimit = answeredCount >= MAX_ADAPTIVE_QUESTIONS;
   const candidateQuestion = getNextQuestion({
-    questions: scopedQuestions,
+    questions: rotatedQuestions,
     answers,
     memory,
     lastChangedNeed: flow.lastChangedNeed,
@@ -599,6 +647,9 @@ function bind(root) {
   });
 
   root.querySelector('[data-action="next-need"]')?.addEventListener('click', () => {
+    const scopedQuestions = DEFAULT_ADAPTIVE_QUESTIONS.filter((question) => question.need === flow.selectedNeed);
+    const usedQuestionIds = getAnsweredAdaptiveQuestionIds({ need: flow.selectedNeed, scopedQuestions });
+    saveAdaptiveQuestionsForNeed(flow.selectedNeed, usedQuestionIds);
     refreshPlan({ persist: true });
     transitionTo(flow.currentFlow === '8' ? STEPS.REFLECTION : STEPS.TOOL);
     if (flow.currentFlow === '3') ensureToolAutoStart();
