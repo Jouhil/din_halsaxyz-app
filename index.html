@@ -80,36 +80,46 @@ body.dark .grat-line{color:#e8f0e8!important;}
 .btn3d{background:linear-gradient(145deg,var(--accent2),var(--accent));color:#fff;border:none;border-radius:14px;padding:11px 18px;font-size:clamp(.8rem,2vw,.95rem);font-weight:700;font-family:inherit;cursor:pointer;box-shadow:0 5px 0 #1a3a17,0 8px 16px rgba(0,0,0,.25);transform:translateY(0);transition:transform .1s,box-shadow .1s;}
 .btn3d:active{transform:translateY(4px);box-shadow:0 1px 0 #1a3a17,0 4px 8px rgba(0,0,0,.2);}
 
-/* ── CALM ── */
-#tab-tools{background:#0d1f0d url('https://picsum.photos/id/15/1200/800') center/cover;border-radius:var(--radius);padding:clamp(14px,3vw,24px);min-height:calc(100vh - 160px);position:relative;overflow:hidden;}
-#tab-tools::before{content:'';position:absolute;inset:0;background:rgba(5,20,5,.62);border-radius:var(--radius);pointer-events:none;}
+/* ── CALM / TOOLS ── */
+#tab-tools{background:var(--bg2);border-radius:var(--radius);padding:clamp(14px,3vw,24px);min-height:calc(100vh - 160px);}
 @media(max-width:768px){#tab-tools{min-height:auto;}}
-.calm-title{color:#c8f0a0;font-size:clamp(1.2rem,3.5vw,1.8rem);font-weight:700;text-align:center;margin-bottom:6px;position:relative;}
-#timer-disp{font-size:clamp(2.2rem,8vw,4rem);font-weight:700;color:#a8e87c;text-align:center;letter-spacing:2px;text-shadow:0 0 30px rgba(140,230,80,.5);margin:4px 0;position:relative;}
-#breath-lbl{font-size:clamp(.95rem,2.8vw,1.2rem);font-weight:600;color:#b8e89c;text-align:center;min-height:26px;margin:4px 0;transition:color .5s;position:relative;}
-.breath-wrap{position:relative;margin:10px auto;width:clamp(140px,30vw,210px);height:clamp(140px,30vw,210px);display:none;align-items:center;justify-content:center;}
+.tools-stack{display:grid;gap:14px;}
+.tools-intro{background:linear-gradient(145deg,rgba(45,106,79,.1),rgba(45,106,79,.03));border:1px solid var(--border);border-radius:20px;padding:18px 20px;}
+.tools-intro h2{font-size:1.45rem;margin-bottom:6px;}
+.tools-intro p{color:var(--text2);font-size:.95rem;}
+.tools-section{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:16px;box-shadow:var(--shadow);}
+.tools-section h3{font-size:1rem;color:var(--accent);margin-bottom:10px;}
+.quick-tools{display:flex;gap:10px;flex-wrap:wrap;}
+.quick-tool-btn{padding:8px 12px;border-radius:999px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-weight:600;cursor:pointer;font-family:inherit;}
+.quick-tool-btn:hover{border-color:var(--accent);color:var(--accent);}
+.breath-card{background:linear-gradient(155deg,rgba(45,106,79,.12),rgba(45,106,79,.04));border:1px solid var(--border);border-radius:22px;padding:clamp(16px,3vw,24px);}
+.calm-title{font-size:clamp(1.25rem,3vw,1.6rem);font-weight:700;text-align:center;margin-bottom:6px;}
+.breath-sub{color:var(--text2);text-align:center;font-size:.9rem;margin-bottom:10px;}
+#timer-disp{font-size:clamp(2.1rem,8vw,3.3rem);font-weight:700;color:var(--accent);text-align:center;letter-spacing:1px;margin:2px 0;}
+#breath-lbl{font-size:clamp(1rem,2.6vw,1.18rem);font-weight:700;text-align:center;min-height:28px;margin-top:6px;}
+#breath-phase-sec{color:var(--text2);font-size:.85rem;font-weight:600;text-align:center;min-height:20px;}
+.breath-wrap{position:relative;margin:12px auto;width:clamp(140px,30vw,210px);height:clamp(140px,30vw,210px);display:none;align-items:center;justify-content:center;}
 .breath-wrap.show{display:flex;}
-.b-ring{position:absolute;border-radius:50%;width:100%;height:100%;background:radial-gradient(circle at 33% 33%,#c8f5a0,#3a8020 55%,#1a4010);box-shadow:0 0 50px rgba(140,230,80,.4),0 0 100px rgba(100,180,50,.15),inset 0 -10px 25px rgba(0,0,0,.35),inset 0 10px 25px rgba(255,255,255,.12);}
+.b-ring{position:absolute;border-radius:50%;width:100%;height:100%;background:radial-gradient(circle at 33% 33%,#d5f3c1,#4f8a6e 55%,#2D6A4F);box-shadow:0 0 40px rgba(45,106,79,.25),inset 0 -10px 25px rgba(0,0,0,.2),inset 0 10px 25px rgba(255,255,255,.12);}
 .b-shine{position:absolute;border-radius:50%;width:58%;height:58%;background:radial-gradient(circle at 33% 33%,rgba(255,255,255,.28),transparent 65%);}
-.b-txt{position:relative;z-index:2;color:#fff;font-weight:700;font-size:clamp(.8rem,2.2vw,1rem);text-align:center;text-shadow:0 2px 6px rgba(0,0,0,.5);white-space:pre-line;font-family:inherit;}
-@keyframes bIn{from{transform:scale(.55);box-shadow:0 0 20px rgba(140,230,80,.2),inset 0 -10px 25px rgba(0,0,0,.35);}to{transform:scale(1);box-shadow:0 0 70px rgba(140,230,80,.7),0 0 120px rgba(100,180,50,.2),inset 0 -10px 25px rgba(0,0,0,.35);}}
-@keyframes bHold{0%,100%{transform:scale(1);box-shadow:0 0 70px rgba(140,230,80,.7),inset 0 -10px 25px rgba(0,0,0,.35);}}
-@keyframes bOut{from{transform:scale(1);box-shadow:0 0 70px rgba(140,230,80,.7),inset 0 -10px 25px rgba(0,0,0,.35);}to{transform:scale(.55);box-shadow:0 0 20px rgba(140,230,80,.2),inset 0 -10px 25px rgba(0,0,0,.35);}}
-.time-ctrl-panel{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:16px;padding:14px 16px;margin:12px 0;position:relative;}
-.time-ctrl-label{color:#c8f0a0;font-size:.85rem;font-weight:600;text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;text-align:center;}
-.time-ctrl-row{display:flex;align-items:center;gap:10px;justify-content:center;}
-.time-input{width:80px;padding:10px 12px;border-radius:12px;border:2px solid rgba(255,255,255,.3);background:rgba(255,255,255,.12);color:#fff;font-size:1.3rem;font-family:inherit;font-weight:700;text-align:center;transition:.2s;}
-.time-input:focus{outline:none;border-color:#a8e87c;background:rgba(255,255,255,.18);}
-.time-start-btn{padding:11px 20px;border-radius:14px;border:none;background:linear-gradient(145deg,#5aaa3a,#3a8020);color:#fff;font-family:inherit;font-weight:700;font-size:1rem;cursor:pointer;box-shadow:0 4px 0 #1a5010,0 6px 12px rgba(0,0,0,.3);transition:.1s;white-space:nowrap;}
-.time-start-btn:active{transform:translateY(3px);box-shadow:0 1px 0 #1a5010;}
-.time-stop-btn{padding:11px 16px;border-radius:14px;border:1.5px solid rgba(255,120,120,.5);background:rgba(255,80,80,.12);color:#fca5a5;font-family:inherit;font-weight:700;font-size:1rem;cursor:pointer;transition:.2s;white-space:nowrap;}
-.sound-panel{background:rgba(255,255,255,.07);border-radius:14px;padding:12px 14px;margin:10px 0;position:relative;}
-.sound-row{display:flex;align-items:center;gap:10px;padding:6px 0;}
-.sound-row:not(:last-child){border-bottom:1px solid rgba(255,255,255,.06);}
-.snd-label{color:#b8e89c;font-size:.9rem;width:100px;flex-shrink:0;}
-.snd-toggle{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);color:#fff;padding:4px 14px;border-radius:20px;cursor:pointer;font-size:.82rem;font-family:inherit;white-space:nowrap;transition:.2s;}
-.snd-toggle.on{background:rgba(140,230,80,.25);border-color:rgba(140,230,80,.4);color:#a8e87c;}
-input[type=range]{flex:1;accent-color:#a8e87c;height:4px;}
+.b-txt{position:relative;z-index:2;color:#fff;font-weight:700;font-size:clamp(.82rem,2.2vw,1rem);text-align:center;text-shadow:0 2px 6px rgba(0,0,0,.5);white-space:pre-line;font-family:inherit;}
+@keyframes bIn{from{transform:scale(.58);}to{transform:scale(1);}}
+@keyframes bHold{0%,100%{transform:scale(1);}}
+@keyframes bOut{from{transform:scale(1);}to{transform:scale(.58);}}
+.time-ctrl-panel{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px 16px;margin-top:14px;}
+.time-ctrl-label{font-size:.83rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;text-align:center;color:var(--text2);}
+.time-ctrl-row{display:flex;align-items:center;gap:10px;justify-content:center;flex-wrap:wrap;}
+.time-input{width:86px;padding:10px 12px;border-radius:12px;border:1.5px solid var(--border);background:var(--input-bg);color:var(--text);font-size:1.1rem;font-family:inherit;font-weight:700;text-align:center;transition:.2s;}
+.time-input:focus{outline:none;border-color:var(--accent);}
+.time-start-btn,.time-stop-btn{white-space:nowrap;}
+.sound-panel{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px;margin-top:12px;}
+.sound-row{display:grid;grid-template-columns:minmax(90px,1fr) auto 1fr;align-items:center;gap:10px;padding:8px 0;}
+.sound-row:not(:last-child){border-bottom:1px solid var(--border);}
+.snd-label{font-size:.9rem;font-weight:600;color:var(--text);}
+.snd-toggle.on{background:rgba(45,106,79,.12)!important;border-color:var(--accent)!important;color:var(--accent)!important;}
+.sound-row input[type=range]{width:100%;accent-color:#2D6A4F;height:6px;}
+.support-card{padding:16px 18px;}
+.support-card p{color:var(--text2);font-size:.9rem;line-height:1.6;}
 
 /* ── PEPP ── */
 .pepp-stars{display:flex;justify-content:center;gap:8px;margin-bottom:10px;}
@@ -138,12 +148,12 @@ input[type=range]{flex:1;accent-color:#a8e87c;height:4px;}
 .help-cats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
 .help-cat{padding:6px 14px;border-radius:20px;border:1.5px solid var(--border);background:var(--card);color:var(--text2);font-family:inherit;font-size:.82rem;font-weight:600;cursor:pointer;transition:.2s;}
 .help-cat.active{background:var(--accent);color:#fff;border-color:var(--accent);}
-.help-section-title{font-size:1rem;font-weight:700;color:var(--accent);padding:14px 18px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
-.help-item{padding:12px 18px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .2s;}
+.help-section-title{font-size:1rem;font-weight:700;color:var(--accent);padding:14px 18px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;background:linear-gradient(145deg,rgba(45,106,79,.08),transparent);}
+.help-item{padding:14px 18px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .2s;}
 .help-item:hover{background:var(--input-bg);}
 .help-item:last-child{border-bottom:none;}
 .help-item-title{font-weight:600;font-size:.95rem;margin-bottom:4px;color:var(--text);}
-.help-item-preview{font-size:.82rem;color:var(--text2);line-height:1.5;}
+.help-item-preview{font-size:.85rem;color:var(--text2);line-height:1.55;}
 .help-detail{display:none;padding:16px 18px;background:var(--input-bg);border-radius:0 0 16px 16px;}
 .help-detail.open{display:block;animation:fadeIn .3s ease;}
 .help-detail-text{font-size:.9rem;line-height:1.7;color:var(--text);}
@@ -505,51 +515,71 @@ body.guide-open #content{overflow:hidden;}
 
     <!-- VERKTYG -->
     <div id="tab-tools" class="tab">
-      <div class="calm-title">🌊 Lugn & Ro</div>
-      <div id="timer-disp">00:00</div>
-      <div id="breath-lbl">Välj tid och starta</div>
-      <div class="breath-wrap" id="bwrap">
-        <div class="b-ring" id="bring"></div>
-        <div class="b-shine"></div>
-        <div class="b-txt" id="btxt"></div>
-      </div>
-      <div class="time-ctrl-panel">
-        <div class="time-ctrl-label">⏱ Antal minuter</div>
-        <div class="time-ctrl-row">
-          <input type="number" class="time-input" id="custom-min" value="5" min="1" max="60">
-          <button class="time-start-btn btn btn--filled" onclick="startCustom()">▶ Starta</button>
-          <button class="time-stop-btn btn btn--outline" onclick="stopBreath()">⏹ Stopp</button>
-        </div>
-      </div>
-      <div class="sound-panel">
-        <div class="sound-row"><span class="snd-label">🌧️ Regn</span><button class="snd-toggle btn btn--outline btn--sm" id="rain-btn" onclick="toggleSound('rain')">AV</button><input type="range" id="rain-vol" min="0" max="1" step="0.05" value="0.35" oninput="setVol('rain',this.value)"></div>
-        <div class="sound-row"><span class="snd-label">🌊 Hav</span><button class="snd-toggle btn btn--outline btn--sm" id="ocean-btn" onclick="toggleSound('ocean')">AV</button><input type="range" id="ocean-vol" min="0" max="1" step="0.05" value="0.35" oninput="setVol('ocean',this.value)"></div>
-        <div class="sound-row"><span class="snd-label">🌲 Skog</span><button class="snd-toggle btn btn--outline btn--sm" id="forest-btn" onclick="toggleSound('forest')">AV</button><input type="range" id="forest-vol" min="0" max="1" step="0.05" value="0.35" oninput="setVol('forest',this.value)"></div>
-        <div class="sound-row"><span class="snd-label">🟤 Brunt brus</span><button class="snd-toggle btn btn--outline btn--sm" id="brown-btn" onclick="toggleSound('brown')">AV</button><input type="range" id="brown-vol" min="0" max="1" step="0.05" value="0.35" oninput="setVol('brown',this.value)"></div>
-      </div>
+      <div class="tools-stack">
+        <section class="tools-intro">
+          <h2>Verktyg</h2>
+          <p>Välj ett verktyg som passar det du behöver just nu.</p>
+        </section>
 
-      <div class="card" style="margin-top:14px;">
-        <strong>🧭 Guide: Vad ska jag välja?</strong>
-        <p style="margin-top:6px;color:var(--text2);font-size:.9rem;line-height:1.5;">Få snabb vägledning baserat på hur det känns just nu.</p>
-        <button class="flow-btn-ghost btn btn--outline btn--cta" onclick="openGuideTrigger('tools_intro')">Lär mer</button>
-      </div>
+        <section class="tools-section">
+          <h3>Snabbstart</h3>
+          <div class="quick-tools">
+            <button class="quick-tool-btn" onclick="startBreath(120)">2 min andning</button>
+            <button class="quick-tool-btn" onclick="startBreath(300)">5 min andning</button>
+            <button class="quick-tool-btn" onclick="openGuideTrigger('tools_intro')">Vägledning</button>
+          </div>
+        </section>
 
-      <details class="card" data-hidden-tab="help" style="margin-top:14px;">
-        <summary style="cursor:pointer;font-weight:600;">🧠 Hjälp & Självhjälp</summary>
-        <div style="margin-top:12px;">
-          <div class="help-search-wrap">
-            <span class="help-search-icon">🔍</span>
-            <input type="search" class="help-search" id="help-search" placeholder="Sök t.ex. negativa tankar, ångest..." oninput="filterHelp(this.value)">
+        <section class="breath-card">
+          <div class="calm-title">🌊 Box breathing 4-4-4-4</div>
+          <div class="breath-sub">Andas in 4 sek · håll 4 sek · andas ut 4 sek · håll 4 sek</div>
+          <div id="timer-disp">05:00</div>
+          <div id="breath-lbl">Redo att starta</div>
+          <div id="breath-phase-sec">Nästa: Andas in i 4 sek</div>
+          <div class="breath-wrap" id="bwrap">
+            <div class="b-ring" id="bring"></div>
+            <div class="b-shine"></div>
+            <div class="b-txt" id="btxt"></div>
           </div>
-          <div class="help-cats">
-            <button class="help-cat active" onclick="filterCat('all',this)">Allt</button>
-            <button class="help-cat" onclick="filterCat('tankar',this)">Tankar</button>
-            <button class="help-cat" onclick="filterCat('tankefallor',this)">Tankefällor</button>
-            <button class="help-cat" onclick="filterCat('verktyg',this)">Verktyg</button>
+          <div class="time-ctrl-panel">
+            <div class="time-ctrl-label">⏱ Sessionstid i minuter</div>
+            <div class="time-ctrl-row">
+              <input type="number" class="time-input" id="custom-min" value="5" min="1" max="60" oninput="syncBreathPreset()">
+              <button class="time-start-btn btn btn--filled" onclick="startCustom()">Starta box breathing</button>
+              <button class="time-stop-btn btn btn--outline" onclick="stopBreath()">Avsluta</button>
+            </div>
           </div>
-          <div id="help-results"></div>
-        </div>
-      </details>
+          <div class="sound-panel">
+            <div class="sound-row"><span class="snd-label">🌧️ Regn</span><button class="snd-toggle btn btn--outline btn--sm" id="rain-btn" onclick="toggleSound('rain')">AV</button><input type="range" id="rain-vol" min="0" max="1" step="0.05" value="0.35" oninput="setVol('rain',this.value)"></div>
+            <div class="sound-row"><span class="snd-label">🌊 Hav</span><button class="snd-toggle btn btn--outline btn--sm" id="ocean-btn" onclick="toggleSound('ocean')">AV</button><input type="range" id="ocean-vol" min="0" max="1" step="0.05" value="0.35" oninput="setVol('ocean',this.value)"></div>
+            <div class="sound-row"><span class="snd-label">🌲 Skog</span><button class="snd-toggle btn btn--outline btn--sm" id="forest-btn" onclick="toggleSound('forest')">AV</button><input type="range" id="forest-vol" min="0" max="1" step="0.05" value="0.35" oninput="setVol('forest',this.value)"></div>
+            <div class="sound-row"><span class="snd-label">🟤 Brunt brus</span><button class="snd-toggle btn btn--outline btn--sm" id="brown-btn" onclick="toggleSound('brown')">AV</button><input type="range" id="brown-vol" min="0" max="1" step="0.05" value="0.35" oninput="setVol('brown',this.value)"></div>
+          </div>
+        </section>
+
+        <section class="tools-section support-card">
+          <h3>🧭 Guide</h3>
+          <p>Vad ska jag välja just nu? Få snabb vägledning baserat på hur det känns.</p>
+          <button class="flow-btn-ghost btn btn--outline btn--cta" onclick="openGuideTrigger('tools_intro')">Öppna guide</button>
+        </section>
+
+        <details class="tools-section support-card" data-hidden-tab="help">
+          <summary style="cursor:pointer;font-weight:600;">🧠 Hjälp & Självhjälp</summary>
+          <div style="margin-top:12px;">
+            <div class="help-search-wrap">
+              <span class="help-search-icon">🔍</span>
+              <input type="search" class="help-search" id="help-search" placeholder="Sök t.ex. negativa tankar, ångest..." oninput="filterHelp(this.value)">
+            </div>
+            <div class="help-cats">
+              <button class="help-cat active" onclick="filterCat('all',this)">Allt</button>
+              <button class="help-cat" onclick="filterCat('tankar',this)">Tankar</button>
+              <button class="help-cat" onclick="filterCat('tankefallor',this)">Tankefällor</button>
+              <button class="help-cat" onclick="filterCat('verktyg',this)">Verktyg</button>
+            </div>
+            <div id="help-results"></div>
+          </div>
+        </details>
+      </div>
     </div>
 
     <!-- PERSPEKTIV -->
