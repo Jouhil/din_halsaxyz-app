@@ -16,24 +16,24 @@ const PROMPT_BY_NEED = {
 
 const FOCUS_SUMMARY_BY_NEED = {
   stress: {
-    default: 'Det verkar som att stress och oro tagit lite plats idag. Vi börjar med något som hjälper dig att varva ned.',
-    high: 'Det verkar som att stress och oro är extra tydligt just nu. Vi börjar med något som hjälper dig att landa lugnt.',
+    default: 'stress och oro tagit lite plats idag. Vi börjar med något som hjälper dig att varva ned.',
+    high: 'stress och oro är extra tydligt just nu. Vi börjar med något som hjälper dig att landa lugnt.',
   },
   sömn: {
-    default: 'Det verkar som att återhämtningen behöver lite stöd idag. Vi börjar lugnt och enkelt.',
-    high: 'Det verkar som att sömn och återhämtning behöver lite extra stöd just nu. Vi börjar mjukt och lugnt.',
+    default: 'återhämtningen behöver lite stöd idag. Vi börjar lugnt och enkelt.',
+    high: 'sömn och återhämtning behöver lite extra stöd just nu. Vi börjar mjukt och lugnt.',
   },
   energi: {
-    default: 'Det verkar som att energin är låg just nu. Vi väljer något litet som hjälper dig att komma igång.',
-    high: 'Det verkar som att orken är låg just nu. Vi tar ett litet steg för att väcka lite energi.',
+    default: 'energin är låg just nu. Vi väljer något litet som hjälper dig att komma igång.',
+    high: 'orken är låg just nu. Vi tar ett litet steg för att väcka lite energi.',
   },
   humör: {
-    default: 'Det verkar som att humöret behöver lite stöd idag. Vi börjar med något mjukt och enkelt.',
-    high: 'Det verkar som att humöret är extra tungt just nu. Vi börjar varsamt med något litet.',
+    default: 'humöret behöver lite stöd idag. Vi börjar med något mjukt och enkelt.',
+    high: 'humöret är extra tungt just nu. Vi börjar varsamt med något litet.',
   },
   tankar: {
-    default: 'Det verkar som att tankarna tar lite mycket plats just nu. Vi börjar med något som hjälper dig att landa.',
-    high: 'Det verkar som att tankarna snurrar mycket just nu. Vi börjar med något enkelt som hjälper dig att komma ned i varv.',
+    default: 'tankarna tar lite mycket plats just nu. Vi börjar med något som hjälper dig att landa.',
+    high: 'tankarna snurrar mycket just nu. Vi börjar med något enkelt som hjälper dig att komma ned i varv.',
   },
 };
 
@@ -50,10 +50,10 @@ const SUMMARY_OPENERS = [
   'Det känns som att',
 ];
 
-function withSummaryVariation(text = '') {
-  if (!text) return text;
+function withSummaryVariation(body = '') {
+  if (!body) return body;
   const opener = SUMMARY_OPENERS[Math.floor(Math.random() * SUMMARY_OPENERS.length)];
-  return text.replace(/^Det verkar som att/i, opener);
+  return `${opener} ${body}`;
 }
 
 function pickFromHistory(items = [], recent = [], keyFn = (item) => item?.id) {
