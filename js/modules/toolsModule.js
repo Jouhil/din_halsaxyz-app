@@ -30,43 +30,49 @@ const GROUNDING_STEPS = [
   {
     key: 'intro',
     title: 'Jordning 5-4-3-2-1',
-    body: 'En kort övning för att hjälpa dig landa i nuet med hjälp av dina sinnen.',
-    cta: 'Starta',
+    body: 'Vi tar det lugnt tillsammans, steg för steg, för att hjälpa kroppen att landa i nuet.',
+    support: 'Det finns inget rätt eller fel här.',
+    cta: 'Jag är redo',
   },
   {
     key: 'see',
     title: '5 saker du kan se',
-    body: 'Se dig omkring och lägg märke till fem saker du kan se.',
-    cta: 'Nästa',
+    body: 'Låt blicken vandra långsamt. Lägg märke till fem saker du kan se omkring dig.',
+    support: 'Du behöver inte stressa fram svaren.',
+    cta: 'Jag har sett 5 saker',
   },
   {
     key: 'feel',
     title: '4 saker du kan känna',
-    body: 'Lägg märke till fyra saker du kan känna i eller mot kroppen.',
-    cta: 'Nästa',
+    body: 'Ta en liten stund och lägg märke till fyra saker du kan känna i eller mot kroppen.',
+    support: 'Ta några sekunder här innan du går vidare.',
+    cta: 'Jag har känt efter',
   },
   {
     key: 'hear',
     title: '3 saker du kan höra',
-    body: 'Lyssna efter tre ljud omkring dig.',
-    cta: 'Nästa',
+    body: 'Lyssna efter tre ljud omkring dig, nära eller längre bort.',
+    support: 'Det räcker att bara lägga märke till det som finns.',
+    cta: 'Jag har lyssnat',
   },
   {
     key: 'smell',
     title: '2 saker du kan känna doften av',
     body: 'Lägg märke till två dofter omkring dig, eller tänk på två dofter du minns.',
-    cta: 'Nästa',
+    support: 'Om det är svårt går det bra att föreställa sig en doft.',
+    cta: 'Jag är redo',
   },
   {
     key: 'taste',
     title: '1 sak du kan smaka',
     body: 'Lägg märke till en smak i munnen, eller föreställ dig en trygg smak.',
+    support: 'Mjukna i axlarna medan du tar in det du känner.',
     cta: 'Klar',
   },
   {
     key: 'done',
     title: 'Tillbaka i nuet',
-    body: 'Bra gjort. Du har tagit ett steg tillbaka till nuet.',
+    body: 'Bra gjort. Du har hjälpt kroppen att landa lite mer i det som finns här omkring dig.',
     note: 'Du kan återvända till övningen när det känns mycket.',
     cta: 'Börja om',
   },
@@ -166,6 +172,7 @@ function renderGroundingTool() {
         <div class="grounding-step" aria-live="polite">
           <h5>${currentStep.title}</h5>
           <p>${currentStep.body}</p>
+          ${currentStep.support ? `<p class="grounding-support">${currentStep.support}</p>` : ''}
           ${currentStep.note ? `<p class="grounding-note">${currentStep.note}</p>` : ''}
         </div>
         <div class="grounding-actions">
