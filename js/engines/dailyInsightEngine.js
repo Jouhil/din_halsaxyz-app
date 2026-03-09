@@ -1,4 +1,7 @@
+import { loadJSON, saveJSON } from '../storage.js';
+
 const DEFAULT_INSIGHT = 'Du tog en stund för dig själv idag. Det är viktigt.';
+const INSIGHT_ROTATION_KEY = 'dailyInsightRotation';
 
 const INSIGHTS_BY_NEED = {
   stress: [
@@ -36,5 +39,19 @@ export function buildDailyInsight({
   void answers;
   void toolId;
   const list = INSIGHTS_BY_NEED[primaryNeed] || [DEFAULT_INSIGHT];
-  return list[Math.floor(Math.random() * list.length)];
+  if (list.length <= 1) return list[0];
+
+  const history = loadJSON(INSIGHT_ROTATION_KEY, {});
+  const needKey = typeof primaryNeed === 'string' && primaryNeed ? primaryNeed : 'default';
+  const currentIndex = Number(history?.[needKey]);
+  const nextIndex = Number.isInteger(currentIndex) && currentIndex >= 0
+    ? (currentIndex + 1) % list.length
+    : 0;
+
+  saveJSON(INSIGHT_ROTATION_KEY, {
+    ...(history || {}),
+    [needKey]: nextIndex,
+  });
+
+  return list[nextIndex];
 }
