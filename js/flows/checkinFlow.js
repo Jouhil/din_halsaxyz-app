@@ -129,6 +129,7 @@ function mkTool(id, title, need, durationSec, steps, mode = 'lugn') {
 let flow;
 let timer;
 let saveToastTimer;
+let pendingReflectionFocusField = null;
 
 function buildPreAnswerSignature(values = {}) {
   return JSON.stringify({
@@ -321,6 +322,17 @@ function render() {
   const successToast = flow.saveToast ? '<div class="reward-pop">✅ Bra jobbat!</div>' : '';
   root.innerHTML = `<div class="checkin-flow-wrap">${startTiles}${successToast}${topHeader}${content}</div>`;
   bind(root);
+
+  if (flow.step === STEPS.REFLECTION && pendingReflectionFocusField) {
+    const fieldToFocus = pendingReflectionFocusField;
+    pendingReflectionFocusField = null;
+    const input = root.querySelector(`[data-action="field"][data-field="${fieldToFocus}"]`);
+    if (input) {
+      input.focus();
+      const valueLength = typeof input.value === 'string' ? input.value.length : 0;
+      input.setSelectionRange?.(valueLength, valueLength);
+    }
+  }
 }
 
 function showLengthSwitch() {
@@ -732,11 +744,14 @@ function bind(root) {
   root.querySelectorAll('[data-action="field"]').forEach((el) => el.addEventListener('input', () => {
     const key = el.dataset.field;
     flow.reflection[key] = el.type === 'range' ? Number(el.value) : el.value;
-    render();
+    if (el.type === 'range') render();
   }));
 
   root.querySelectorAll('[data-action="field-chip"]').forEach((el) => el.addEventListener('click', () => {
     flow.reflection[el.dataset.field] = el.dataset.value;
+    if (el.dataset.field === 'thought') {
+      pendingReflectionFocusField = el.dataset.value === 'Egen tanke' ? 'thoughtOther' : null;
+    }
     render();
   }));
 
