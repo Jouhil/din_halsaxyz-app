@@ -118,6 +118,16 @@ body.dark .grat-line{color:#e8f0e8!important;}
 .snd-label{font-size:.9rem;font-weight:600;color:var(--text);}
 .snd-toggle.on{background:rgba(45,106,79,.12)!important;border-color:var(--accent)!important;color:var(--accent)!important;}
 .sound-row input[type=range]{width:100%;accent-color:#2D6A4F;height:6px;}
+
+.tool-card-grid{display:grid;gap:12px;}
+.tool-select-card{display:flex;align-items:flex-start;gap:12px;text-align:left;width:100%;padding:14px;border-radius:16px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);cursor:pointer;font-family:inherit;transition:.2s;}
+.tool-select-card:hover{border-color:var(--accent);transform:translateY(-1px);}
+.tool-select-card.is-disabled{opacity:.6;cursor:not-allowed;transform:none;}
+.tool-select-icon{font-size:1.35rem;line-height:1;}
+.tool-select-copy h3{font-size:1rem;margin-bottom:4px;color:var(--accent);}
+.tool-select-copy p{font-size:.9rem;color:var(--text2);line-height:1.45;}
+.tool-detail-view{display:grid;gap:12px;}
+.tools-back-btn{justify-self:start;}
 .support-card{padding:16px 18px;}
 .support-card p{color:var(--text2);font-size:.9rem;line-height:1.6;}
 
@@ -524,74 +534,60 @@ body.guide-open #content{overflow:hidden;}
     <div id="tab-tools" class="tab">
       <div class="tools-stack">
         <section class="tools-intro">
-          <h2>Verktyg</h2>
-          <p>Välj ett verktyg som passar det du behöver just nu.</p>
+          <h2>Välj verktyg</h2>
+          <p>Välj det verktyg som passar dig bäst just nu.</p>
         </section>
 
-        <section class="tools-section">
-          <h3>Snabbstart</h3>
-          <div class="quick-tools">
-            <button class="quick-tool-btn" onclick="startBreath(120)">2 min andning</button>
-            <button class="quick-tool-btn" onclick="startBreath(300)">5 min andning</button>
-            <button class="quick-tool-btn" onclick="document.getElementById('grounding-tool-section')?.scrollIntoView({behavior:'smooth',block:'start'})">Jordning 5-4-3-2-1</button>
-            <button class="quick-tool-btn" onclick="openGuideTrigger('tools_intro')">Vägledning</button>
-          </div>
+        <section id="tools-home-view">
+          <section class="tools-section">
+            <div class="tool-card-grid" id="tools-home-cards"></div>
+          </section>
+
+          <section class="tools-section support-card">
+            <h3>🧭 Guide</h3>
+            <p>Vad ska jag välja just nu? Få snabb vägledning baserat på hur det känns.</p>
+            <button class="flow-btn-ghost btn btn--outline btn--cta" onclick="openGuideTrigger('tools_intro')">Öppna guide</button>
+          </section>
         </section>
 
-        <section class="tools-section" id="grounding-tool-section">
-          <h3>🌿 Jordning</h3>
-          <div id="grounding-tool-root"></div>
-        </section>
-
-        <section class="breath-card">
-          <div class="calm-title">🌊 Box breathing 4-4-4-4</div>
-          <div class="breath-sub">Andas in 4 sek · håll 4 sek · andas ut 4 sek · håll 4 sek</div>
-          <div id="timer-disp">05:00</div>
-          <div id="breath-lbl">Redo att starta</div>
-          <div id="breath-phase-sec">Nästa: Andas in i 4 sek</div>
-          <div class="breath-wrap" id="bwrap">
-            <div class="b-ring" id="bring"></div>
-            <div class="b-shine"></div>
-            <div class="b-txt" id="btxt"></div>
-          </div>
-          <div class="time-ctrl-panel">
-            <div class="time-ctrl-label">⏱ Sessionstid i minuter</div>
-            <div class="time-ctrl-row">
-              <input type="number" class="time-input" id="custom-min" value="5" min="1" max="60" oninput="syncBreathPreset()">
-              <button class="time-start-btn btn btn--filled" onclick="startCustom()">Starta box breathing</button>
-              <button class="time-stop-btn btn btn--outline" onclick="stopBreath()">Avsluta</button>
+        <section id="tools-breathing-view" class="tool-detail-view" hidden>
+          <button class="tools-back-btn btn btn--outline btn--sm" type="button" data-tools-back>← Tillbaka till verktyg</button>
+          <section class="breath-card">
+            <div class="calm-title">🌊 Box breathing 4-4-4-4</div>
+            <div class="breath-sub">Andas in 4 sek · håll 4 sek · andas ut 4 sek · håll 4 sek</div>
+            <div id="timer-disp">05:00</div>
+            <div id="breath-lbl">Redo att starta</div>
+            <div id="breath-phase-sec">Nästa: Andas in i 4 sek</div>
+            <div class="breath-wrap" id="bwrap">
+              <div class="b-ring" id="bring"></div>
+              <div class="b-shine"></div>
+              <div class="b-txt" id="btxt"></div>
             </div>
-          </div>
-          <div class="sound-panel">
-            <div class="sound-row"><span class="snd-label">🌧️ Regn</span><button class="snd-toggle btn btn--outline btn--sm" id="rain-btn" onclick="toggleSound('rain')">AV</button><input type="range" id="rain-vol" min="0" max="1" step="0.05" value="0.35" oninput="setVol('rain',this.value)"></div>
-            <div class="sound-row"><span class="snd-label">🌊 Hav</span><button class="snd-toggle btn btn--outline btn--sm" id="ocean-btn" onclick="toggleSound('ocean')">AV</button><input type="range" id="ocean-vol" min="0" max="1" step="0.05" value="0.35" oninput="setVol('ocean',this.value)"></div>
-            <div class="sound-row"><span class="snd-label">🌲 Skog</span><button class="snd-toggle btn btn--outline btn--sm" id="forest-btn" onclick="toggleSound('forest')">AV</button><input type="range" id="forest-vol" min="0" max="1" step="0.05" value="0.35" oninput="setVol('forest',this.value)"></div>
-            <div class="sound-row"><span class="snd-label">🟤 Brunt brus</span><button class="snd-toggle btn btn--outline btn--sm" id="brown-btn" onclick="toggleSound('brown')">AV</button><input type="range" id="brown-vol" min="0" max="1" step="0.05" value="0.35" oninput="setVol('brown',this.value)"></div>
-          </div>
+            <div class="time-ctrl-panel">
+              <div class="time-ctrl-label">⏱ Sessionstid i minuter</div>
+              <div class="time-ctrl-row">
+                <input type="number" class="time-input" id="custom-min" value="5" min="1" max="60" oninput="syncBreathPreset()">
+                <button class="time-start-btn btn btn--filled" onclick="startCustom()">Starta box breathing</button>
+                <button class="time-stop-btn btn btn--outline" onclick="stopBreath()">Avsluta</button>
+              </div>
+            </div>
+            <div class="sound-panel">
+              <div class="sound-row"><span class="snd-label">🌧️ Regn</span><button class="snd-toggle btn btn--outline btn--sm" id="rain-btn" onclick="toggleSound('rain')">AV</button><input type="range" id="rain-vol" min="0" max="1" step="0.05" value="0.35" oninput="setVol('rain',this.value)"></div>
+              <div class="sound-row"><span class="snd-label">🌊 Hav</span><button class="snd-toggle btn btn--outline btn--sm" id="ocean-btn" onclick="toggleSound('ocean')">AV</button><input type="range" id="ocean-vol" min="0" max="1" step="0.05" value="0.35" oninput="setVol('ocean',this.value)"></div>
+              <div class="sound-row"><span class="snd-label">🌲 Skog</span><button class="snd-toggle btn btn--outline btn--sm" id="forest-btn" onclick="toggleSound('forest')">AV</button><input type="range" id="forest-vol" min="0" max="1" step="0.05" value="0.35" oninput="setVol('forest',this.value)"></div>
+              <div class="sound-row"><span class="snd-label">🟤 Brunt brus</span><button class="snd-toggle btn btn--outline btn--sm" id="brown-btn" onclick="toggleSound('brown')">AV</button><input type="range" id="brown-vol" min="0" max="1" step="0.05" value="0.35" oninput="setVol('brown',this.value)"></div>
+            </div>
+          </section>
         </section>
 
-        <section class="tools-section support-card">
-          <h3>🧭 Guide</h3>
-          <p>Vad ska jag välja just nu? Få snabb vägledning baserat på hur det känns.</p>
-          <button class="flow-btn-ghost btn btn--outline btn--cta" onclick="openGuideTrigger('tools_intro')">Öppna guide</button>
+        <section id="tools-grounding-view" class="tool-detail-view" hidden>
+          <button class="tools-back-btn btn btn--outline btn--sm" type="button" data-tools-back>← Tillbaka till verktyg</button>
+          <section class="tools-section" id="grounding-tool-section">
+            <h3>🌿 Jordning 5-4-3-2-1</h3>
+            <div id="grounding-tool-root"></div>
+          </section>
         </section>
 
-        <details class="tools-section support-card" data-hidden-tab="help">
-          <summary style="cursor:pointer;font-weight:600;">🧠 Hjälp & Självhjälp</summary>
-          <div style="margin-top:12px;">
-            <div class="help-search-wrap">
-              <span class="help-search-icon">🔍</span>
-              <input type="search" class="help-search" id="help-search" placeholder="Sök t.ex. negativa tankar, ångest..." oninput="filterHelp(this.value)">
-            </div>
-            <div class="help-cats">
-              <button class="help-cat active" onclick="filterCat('all',this)">Allt</button>
-              <button class="help-cat" onclick="filterCat('tankar',this)">Tankar</button>
-              <button class="help-cat" onclick="filterCat('tankefallor',this)">Tankefällor</button>
-              <button class="help-cat" onclick="filterCat('verktyg',this)">Verktyg</button>
-            </div>
-            <div id="help-results"></div>
-          </div>
-        </details>
       </div>
     </div>
 

@@ -3,11 +3,26 @@ import { init as initHelpModule } from './helpModule.js';
 
 const TOOL_DEFINITIONS = [
   {
+    id: 'breathing-4444',
+    view: 'breathing',
+    title: 'Box breathing 4-4-4-4',
+    description: 'Lugn andning i fyra faser för stress, fokus och återhämtning.',
+    icon: '🌊',
+  },
+  {
     id: 'grounding-54321',
+    view: 'grounding',
     title: 'Jordning 5-4-3-2-1',
-    subtitle: 'Landa i nuet med dina sinnen',
-    category: 'grounding',
+    description: 'En övning som hjälper dig tillbaka till nuet med hjälp av dina sinnen.',
     icon: '🌿',
+  },
+  {
+    id: 'thought-catcher',
+    view: 'thought-catcher',
+    title: 'Tankefångare',
+    description: 'Kommer snart – fånga tankar och skapa lugnare perspektiv.',
+    icon: '📝',
+    disabled: true,
   },
 ];
 
@@ -57,27 +72,23 @@ const GROUNDING_STEPS = [
   },
 ];
 
-const groundingState = {
-  activeToolId: TOOL_DEFINITIONS[0].id,
+const toolsState = {
+  activeView: 'home',
   stepIndex: 0,
 };
 
 let initialized = false;
 
-function getActiveTool() {
-  return TOOL_DEFINITIONS.find((tool) => tool.id === groundingState.activeToolId) || TOOL_DEFINITIONS[0];
-}
-
 function resetGrounding() {
-  groundingState.stepIndex = 0;
+  toolsState.stepIndex = 0;
 }
 
 function nextGroundingStep() {
-  groundingState.stepIndex = Math.min(groundingState.stepIndex + 1, GROUNDING_STEPS.length - 1);
+  toolsState.stepIndex = Math.min(toolsState.stepIndex + 1, GROUNDING_STEPS.length - 1);
 }
 
 function getProgress() {
-  const progressStepIndex = Math.min(Math.max(groundingState.stepIndex - 1, 0), 5);
+  const progressStepIndex = Math.min(Math.max(toolsState.stepIndex - 1, 0), 5);
   const percentage = Math.round((progressStepIndex / 5) * 100);
   return {
     progressStepIndex,
@@ -85,15 +96,51 @@ function getProgress() {
   };
 }
 
+function setToolsView(view) {
+  toolsState.activeView = view;
+
+  const home = document.getElementById('tools-home-view');
+  const breathing = document.getElementById('tools-breathing-view');
+  const grounding = document.getElementById('tools-grounding-view');
+
+  if (home) home.hidden = view !== 'home';
+  if (breathing) breathing.hidden = view !== 'breathing';
+  if (grounding) grounding.hidden = view !== 'grounding';
+}
+
+function openTool(toolId) {
+  const tool = TOOL_DEFINITIONS.find((item) => item.id === toolId);
+  if (!tool || tool.disabled) return;
+  setToolsView(tool.view);
+}
+
+function renderToolsHomeCards() {
+  const container = document.getElementById('tools-home-cards');
+  if (!container) return;
+
+  container.innerHTML = TOOL_DEFINITIONS.map((tool) => `
+    <button
+      class="tool-select-card ${tool.disabled ? 'is-disabled' : ''}"
+      type="button"
+      data-tool-target="${tool.id}"
+      ${tool.disabled ? 'disabled aria-disabled="true"' : ''}
+    >
+      <div class="tool-select-icon">${tool.icon}</div>
+      <div class="tool-select-copy">
+        <h3>${tool.title}</h3>
+        <p>${tool.description}</p>
+      </div>
+    </button>
+  `).join('');
+}
+
 function renderGroundingTool() {
   const container = document.getElementById('grounding-tool-root');
   if (!container) return;
 
-  const tool = getActiveTool();
-  const currentStep = GROUNDING_STEPS[groundingState.stepIndex] || GROUNDING_STEPS[0];
+  const currentStep = GROUNDING_STEPS[toolsState.stepIndex] || GROUNDING_STEPS[0];
   const isDone = currentStep.key === 'done';
   const { progressStepIndex, percentage } = getProgress();
-
   const progressLabel = isDone ? 'Steg 5 av 5' : `Steg ${Math.max(progressStepIndex, 1)} av 5`;
 
   container.innerHTML = `
@@ -101,9 +148,9 @@ function renderGroundingTool() {
       <div class="micro-tool-card">
         <div class="micro-tool-head">
           <div>
-            <span class="ex-badge">${tool.icon} ${tool.category}</span>
-            <h4 class="ex-title">${tool.title}</h4>
-            <p class="ex-subtitle">${tool.subtitle}</p>
+            <span class="ex-badge">🌿 grounding</span>
+            <h4 class="ex-title">Jordning 5-4-3-2-1</h4>
+            <p class="ex-subtitle">Landa i nuet med dina sinnen</p>
           </div>
         </div>
         <div class="tool-progress grounding-progress" aria-live="polite">
@@ -117,30 +164,42 @@ function renderGroundingTool() {
         </div>
         <div class="grounding-actions">
           <button class="neo-btn neo-btn--filled neo-btn--cta" type="button" data-grounding-action="next">${currentStep.cta}</button>
-          ${groundingState.stepIndex > 0 && !isDone ? '<button class="neo-btn neo-btn--outline neo-btn--cta" type="button" data-grounding-action="restart">Börja om</button>' : ''}
+          ${toolsState.stepIndex > 0 && !isDone ? '<button class="neo-btn neo-btn--outline neo-btn--cta" type="button" data-grounding-action="restart">Börja om</button>' : ''}
         </div>
       </div>
     </article>
   `;
 }
 
-function bindGroundingEvents() {
-  const section = document.getElementById('grounding-tool-section');
-  if (!section) return;
+function bindToolsEvents() {
+  const toolsTab = document.getElementById('tab-tools');
+  if (!toolsTab) return;
 
-  section.addEventListener('click', (event) => {
+  toolsTab.addEventListener('click', (event) => {
     const target = event.target;
     if (!(target instanceof HTMLElement)) return;
-    const action = target.dataset.groundingAction;
-    if (!action) return;
 
-    if (action === 'restart') {
+    const toolButton = target.closest('[data-tool-target]');
+    if (toolButton instanceof HTMLElement) {
+      openTool(toolButton.dataset.toolTarget || '');
+      return;
+    }
+
+    if (target.closest('[data-tools-back]')) {
+      setToolsView('home');
+      return;
+    }
+
+    const groundingAction = target.dataset.groundingAction;
+    if (!groundingAction) return;
+
+    if (groundingAction === 'restart') {
       resetGrounding();
       renderGroundingTool();
       return;
     }
 
-    if (groundingState.stepIndex >= GROUNDING_STEPS.length - 1) {
+    if (toolsState.stepIndex >= GROUNDING_STEPS.length - 1) {
       resetGrounding();
     } else {
       nextGroundingStep();
@@ -155,6 +214,8 @@ export function init() {
   initialized = true;
   initCalmModule();
   initHelpModule();
-  bindGroundingEvents();
+  bindToolsEvents();
+  renderToolsHomeCards();
   renderGroundingTool();
+  setToolsView('home');
 }
