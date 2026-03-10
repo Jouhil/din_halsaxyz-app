@@ -39,44 +39,44 @@ const TOOL_DEFINITIONS = [
 const GROUNDING_STEPS = [
   {
     key: 'intro',
-    title: 'Jordning 5-4-3-2-1',
-    body: 'Vi tar det lugnt tillsammans, steg för steg, för att hjälpa kroppen att landa i nuet.',
-    support: 'Det finns inget rätt eller fel här.',
+    title: 'Vi landar tillsammans',
+    body: 'Ta en lugn andning. Vi går igenom fem sinnesankare, ett i taget.',
+    support: 'Det räcker att lägga märke till det som redan finns omkring dig.',
     cta: 'Jag är redo',
   },
   {
     key: 'see',
-    title: '5 saker du kan se',
-    body: 'Låt blicken vandra långsamt. Lägg märke till fem saker du kan se omkring dig.',
-    support: 'Du behöver inte stressa fram svaren.',
+    title: '5 saker du kan se omkring dig',
+    body: 'Låt blicken vandra långsamt i rummet och hitta fem saker du ser.',
+    support: 'Ta en liten stund här. Inget behöver vara särskilt.',
     cta: 'Jag har sett 5 saker',
   },
   {
     key: 'feel',
     title: '4 saker du kan känna',
-    body: 'Ta en liten stund och lägg märke till fyra saker du kan känna i eller mot kroppen.',
-    support: 'Ta några sekunder här innan du går vidare.',
+    body: 'Känn efter i kroppen och mot underlaget. Hitta fyra saker du kan känna just nu.',
+    support: 'Kanske tyg mot huden, fötter mot golvet eller luft mot ansiktet.',
     cta: 'Jag har känt efter',
   },
   {
     key: 'hear',
     title: '3 saker du kan höra',
-    body: 'Lyssna efter tre ljud omkring dig, nära eller längre bort.',
-    support: 'Det räcker att bara lägga märke till det som finns.',
+    body: 'Lyssna utan att leta för mycket. Lägg märke till tre ljud, nära eller längre bort.',
+    support: 'Det räcker att ta in det som redan hörs.',
     cta: 'Jag har lyssnat',
   },
   {
     key: 'smell',
     title: '2 saker du kan känna doften av',
-    body: 'Lägg märke till två dofter omkring dig, eller tänk på två dofter du minns.',
-    support: 'Om det är svårt går det bra att föreställa sig en doft.',
-    cta: 'Jag är redo',
+    body: 'Känn efter om du märker två dofter i luften, eller minns två dofter som känns trygga.',
+    support: 'Du kan vara här en stund även om dofterna är svaga.',
+    cta: 'Jag har känt doft',
   },
   {
     key: 'taste',
     title: '1 sak du kan smaka',
-    body: 'Lägg märke till en smak i munnen, eller föreställ dig en trygg smak.',
-    support: 'Mjukna i axlarna medan du tar in det du känner.',
+    body: 'Lägg märke till en smak i munnen, eller föreställ dig en smak som känns bekant.',
+    support: 'Mjukna i axlarna och ge kroppen en sista lugn stund.',
     cta: 'Klar',
   },
   {
@@ -513,7 +513,8 @@ function renderGroundingTool() {
   const currentStep = GROUNDING_STEPS[toolsState.stepIndex] || GROUNDING_STEPS[0];
   const isDone = currentStep.key === 'done';
   const { progressStepIndex, percentage } = getProgress();
-  const progressLabel = isDone ? 'Steg 5 av 5' : `Steg ${Math.max(progressStepIndex, 1)} av 5`;
+  const currentProgress = Math.max(progressStepIndex, 1);
+  const progressLabel = isDone ? 'Steg 5 av 5 · Landning klar' : `Steg ${currentProgress} av 5 · Sinnesankare ${currentProgress}`;
 
   container.innerHTML = `
     <article class="micro-card grounding-card" data-dim="stress">
@@ -530,6 +531,7 @@ function renderGroundingTool() {
           <div class="tool-time">${progressLabel}</div>
         </div>
         <div class="grounding-step" aria-live="polite">
+          ${!isDone ? `<p class="grounding-step-kicker">Sinnesankare ${currentProgress}</p>` : ''}
           <h5>${currentStep.title}</h5>
           <p>${currentStep.body}</p>
           ${currentStep.support ? `<p class="grounding-support">${currentStep.support}</p>` : ''}
