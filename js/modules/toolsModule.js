@@ -796,7 +796,15 @@ function bindToolsEvents() {
 
     const trackCard = target.closest('[data-return-track]');
     if (trackCard instanceof HTMLElement) {
-      toolsState.returnToNow.selectedTrack = trackCard.dataset.returnTrack || '';
+      const selectedTrack = trackCard.dataset.returnTrack || '';
+      toolsState.returnToNow.selectedTrack = selectedTrack;
+
+      if (selectedTrack === 'acute') {
+        goToReturnToNowStep('acute-1');
+      } else if (selectedTrack === 'preventive') {
+        goToReturnToNowStep('preventive-menu');
+      }
+
       renderReturnToNowTool();
       return;
     }
