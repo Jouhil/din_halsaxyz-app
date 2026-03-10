@@ -148,17 +148,17 @@ const RETURN_PULL_OPTIONS = [
 const RETURN_ACTION_OPTIONS = ['Ja', 'Nej', 'Vet inte'];
 
 const RETURN_PARK_OPTIONS = [
-  'Inte nu',
-  'Jag tar det senare',
-  'Tanke, inte uppgift',
-  'Jag behöver inte lösa det nu',
+  'Den får vänta en stund',
+  'Jag återkommer senare',
+  'En tanke, inte en akut uppgift',
+  'Jag behöver inte lösa det just nu',
   'Egen tanke',
 ];
 
 const RETURN_NEXT_STEP_OPTIONS = [
-  'Skriv ner det',
-  'Ta det senare idag',
-  'Prata med någon',
+  'Skriv en kort notis',
+  'Välj en tid senare idag',
+  'Skicka ett kort meddelande',
   'Gör en liten sak nu',
   'Egen tanke',
 ];
@@ -166,8 +166,8 @@ const RETURN_NEXT_STEP_OPTIONS = [
 const RETURN_LANDING_VARIANTS = [
   {
     title: 'Här och nu',
-    body: 'Börja med det som finns nära dig.',
-    support: 'Det räcker att komma tillbaka lite grann.',
+    body: 'Vi börjar med det som finns nära dig.',
+    support: 'Kom tillbaka lite grann, inte allt på en gång.',
     prompts: [
       'Låt blicken vila på 3 saker',
       'Känn 2 kontaktpunkter mot kroppen',
@@ -176,8 +176,8 @@ const RETURN_LANDING_VARIANTS = [
   },
   {
     title: 'Tillbaka till nuet',
-    body: 'Låt kroppen hinna ikapp tankarna en stund.',
-    support: 'Du behöver inte göra något mer än detta just nu.',
+    body: 'Låt kroppen hinna ikapp tankarna en liten stund.',
+    support: 'Du behöver inte göra mer än det här just nu.',
     prompts: [
       'Hitta 3 saker med blicken',
       'Känn 2 ställen där kroppen har stöd',
@@ -186,8 +186,8 @@ const RETURN_LANDING_VARIANTS = [
   },
   {
     title: 'Landa lite mer',
-    body: 'Samla uppmärksamheten i det som finns runt dig.',
-    support: 'Det behöver inte kännas stort för att hjälpa.',
+    body: 'Samla uppmärksamheten i det som finns precis runt dig.',
+    support: 'Små skiften kan göra stor skillnad i stunden.',
     prompts: [
       'Lägg märke till 3 saker du ser',
       'Känn 2 saker i eller mot kroppen',
@@ -196,8 +196,8 @@ const RETURN_LANDING_VARIANTS = [
   },
   {
     title: 'En mjuk återgång',
-    body: 'Ta in rummet igen, utan att skynda.',
-    support: 'Du kan återvända steg för steg.',
+    body: 'Ta in rummet igen, utan att skynda på något.',
+    support: 'Du får återvända steg för steg.',
     prompts: [
       'Se 3 former eller färger nära dig',
       'Känn 2 ytor som håller upp kroppen',
@@ -206,8 +206,8 @@ const RETURN_LANDING_VARIANTS = [
   },
   {
     title: 'Ner i tempo',
-    body: 'Låt tempot sjunka lite, bara för en kort stund.',
-    support: 'Ibland räcker ett litet stopp för att hitta fotfästet igen.',
+    body: 'Låt tempot sjunka lite, bara i den här stunden.',
+    support: 'Ett kort stopp kan räcka för att hitta fotfästet igen.',
     prompts: [
       'Välj 3 saker som står stilla omkring dig',
       'Känn 2 punkter där kroppen möter underlaget',
@@ -216,8 +216,8 @@ const RETURN_LANDING_VARIANTS = [
   },
   {
     title: 'Kom tillbaka varsamt',
-    body: 'Flytta fokus från tankar till det som faktiskt känns i kroppen.',
-    support: 'Det får vara enkelt.',
+    body: 'Flytta fokus från tankar till det som faktiskt känns i kroppen just nu.',
+    support: 'Det får vara enkelt och mjukt.',
     prompts: [
       'Se 3 saker som är närmast dig',
       'Känn 2 områden med tyngd eller värme',
@@ -226,8 +226,8 @@ const RETURN_LANDING_VARIANTS = [
   },
   {
     title: 'Lite mer närvaro',
-    body: 'Vi tar en kort landning i det som bär dig just nu.',
-    support: 'Små signaler från kroppen kan räcka för att hitta tillbaka.',
+    body: 'Vi tar en kort landning i det som bär dig här och nu.',
+    support: 'Små signaler från kroppen kan hjälpa dig tillbaka.',
     prompts: [
       'Lägg märke till 3 detaljer i rummet',
       'Känn 2 punkter där du har stöd',
@@ -364,7 +364,7 @@ function renderReturnToNowTool() {
             </div>
           </div>
           <div class="thought-catcher-step return-to-now-step">
-            <p>Du kan återvända till övningen när tankarna drar iväg igen.</p>
+            <p>Du kan återvända hit när tankarna drar iväg igen.</p>
           </div>
           <div class="thought-catcher-actions">
             <button class="neo-btn neo-btn--filled neo-btn--cta" type="button" data-return-action="restart">Börja om</button>
@@ -384,9 +384,9 @@ function renderReturnToNowTool() {
   let stepContent = '';
 
   if (state.stepIndex === 0) {
-    title = 'Vad drar dig bort från nuet?';
-    body = 'Välj det som passar bäst just nu.';
-    support = 'Det räcker att bara lägga märke till vad som drar iväg dig.';
+    title = 'Vad drar dig bort från nuet just nu?';
+    body = 'Börja med att lägga märke till vad som tar dig bort från stunden.';
+    support = 'Det räcker att notera det som pågår i huvudet just nu.';
     cta = 'Det här stämmer';
     stepContent = `
       ${renderThoughtOptionChips(RETURN_PULL_OPTIONS, state.selectedPull, 'return-pull')}
@@ -396,8 +396,8 @@ function renderReturnToNowTool() {
 
   if (state.stepIndex === 1) {
     title = 'Går det att göra något åt det just nu?';
-    body = 'Du behöver inte lösa allt nu. Börja med att se om det här är något du faktiskt kan agera på i denna stund.';
-    support = 'Det här handlar inte om rätt svar, bara om vad som är sant just nu.';
+    body = 'Du behöver inte reda ut allt nu. Känn efter om det här går att påverka i den här stunden.';
+    support = 'Du behöver inte hitta rätt svar, bara det som känns sant just nu.';
     cta = 'Jag vill gå vidare';
     stepContent = renderThoughtOptionChips(RETURN_ACTION_OPTIONS, state.selectedActionability, 'return-actionability');
   }
@@ -405,12 +405,12 @@ function renderReturnToNowTool() {
   if (state.stepIndex === 2) {
     title = isActionable ? 'Ett litet nästa steg' : 'Tankeparkering';
     body = isActionable
-      ? 'Om det går att göra något åt det nu, välj ett litet steg — inte hela lösningen.'
-      : 'Du behöver inte bära den här tanken hela tiden. Låt den få vänta en stund.';
+      ? 'Om det går att göra något nu, välj ett litet steg. Du behöver inte hela lösningen.'
+      : 'Du behöver inte bära tanken hela tiden. Ibland räcker det att låta den vänta en stund.';
     support = isActionable
-      ? 'Det räcker med ett litet steg.'
-      : 'Att parkera en tanke är inte att ignorera den. Det är att välja när du vill möta den.';
-    cta = 'Tillbaka till nuet';
+      ? 'Ett litet steg är nog för att lätta trycket.'
+      : 'Att parkera en tanke är att ge dig själv en paus, inte att ge upp.';
+    cta = isActionable ? 'Ett steg är valt' : 'Tanken får vänta';
     stepContent = `
       ${renderThoughtOptionChips(isActionable ? RETURN_NEXT_STEP_OPTIONS : RETURN_PARK_OPTIONS, state.selectedStepChoice, 'return-step-choice')}
       ${state.selectedStepChoice === 'Egen tanke' ? `<input class="txt-in txt-in-sm" type="text" placeholder="Skriv din formulering" value="${state.customStepChoice || ''}" data-return-custom-input="step-choice">` : ''}
@@ -424,6 +424,7 @@ function renderReturnToNowTool() {
     support = landingVariant.support;
     cta = 'Jag är här nu';
     stepContent = `
+      <p class="return-now-prompt-intro">Nu hjälper vi kroppen och uppmärksamheten tillbaka hit:</p>
       <div class="return-now-checklist">
         ${landingVariant.prompts.map((prompt) => `<div class="return-now-item">${prompt}</div>`).join('')}
       </div>
@@ -437,7 +438,7 @@ function renderReturnToNowTool() {
           <div>
             <span class="ex-badge">🧭 tillbaka till nuet</span>
             <h4 class="ex-title">Tillbaka till nuet</h4>
-            <p class="ex-subtitle">Landa i det som finns här just nu när tankarna drar iväg.</p>
+            <p class="ex-subtitle">När tankarna drar iväg hjälper vi dig tillbaka, lugnt och steg för steg.</p>
           </div>
         </div>
         <div class="tool-progress" aria-live="polite">
