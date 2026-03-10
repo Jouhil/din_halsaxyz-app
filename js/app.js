@@ -243,10 +243,10 @@ function renderGratitude(){
 // ══════════════════════════════════════════
 let timerInt,breathInt;
 const breathPhases=[
-  {key:'inhale',label:'🌬️ Andas in',short:'In',anim:'bIn'},
-  {key:'hold1',label:'⏸️ Håll',short:'Håll',anim:'bHold'},
-  {key:'exhale',label:'💨 Andas ut',short:'Ut',anim:'bOut'},
-  {key:'hold2',label:'⏸️ Håll',short:'Håll',anim:'bHold'}
+  {key:'inhale',label:'Andas in',short:'In',anim:'bIn',hint:'Låt luften komma in'},
+  {key:'hold1',label:'Håll',short:'Håll',anim:'bHold',hint:'Stanna kvar en stund'},
+  {key:'exhale',label:'Andas ut',short:'Ut',anim:'bOut',hint:'Släpp ut långsamt'},
+  {key:'hold2',label:'Håll',short:'Håll',anim:'bHold',hint:'Vila i stillheten'}
 ];
 const breathState={active:false,left:0,phaseIndex:0,phaseRemaining:4};
 
@@ -267,10 +267,14 @@ function syncBreathPreset(){if(breathState.active)return;const mins=Math.max(1,p
 function setBreathReadyState(){
   const lbl=document.getElementById('breath-lbl');
   const phase=document.getElementById('breath-phase-sec');
+  const guidance=document.getElementById('breath-guidance');
   const txt=document.getElementById('btxt');
+  const startBtn=document.getElementById('breath-main-btn');
   if(lbl)lbl.innerText='Redo att starta';
+  if(guidance)guidance.innerText='Vi börjar med 4-4-4-4 i lugn takt.';
   if(phase)phase.innerText='Nästa: Andas in i 4 sek';
   if(txt)txt.innerText='';
+  if(startBtn)startBtn.innerText='Starta';
 }
 function startBreath(secs){
   stopBreath(false);
@@ -279,6 +283,8 @@ function startBreath(secs){
   breathState.phaseIndex=0;
   breathState.phaseRemaining=4;
   document.getElementById('bwrap').classList.add('show');
+  const startBtn=document.getElementById('breath-main-btn');
+  if(startBtn)startBtn.innerText='Starta om';
   updateTimerDisp(breathState.left);
   renderBreathPhase();
   timerInt=setInterval(tickBreathing,1000);
@@ -313,8 +319,10 @@ function updatePhaseText(){
   const phase=breathPhases[breathState.phaseIndex];
   const lbl=document.getElementById('breath-lbl');
   const phaseSec=document.getElementById('breath-phase-sec');
+  const guidance=document.getElementById('breath-guidance');
   const txt=document.getElementById('btxt');
   if(lbl)lbl.innerText=phase.label;
+  if(guidance)guidance.innerText=phase.hint;
   if(phaseSec)phaseSec.innerText=`${phase.short} · ${Math.max(1,breathState.phaseRemaining)}s`;
   if(txt)txt.innerText=`${phase.short}
 ${Math.max(1,breathState.phaseRemaining)}s`;
