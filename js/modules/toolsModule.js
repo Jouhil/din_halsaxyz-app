@@ -138,95 +138,6 @@ const SOFT_THOUGHT_OPTIONS = [
   'Egen tanke',
 ];
 
-const RETURN_ACUTE_SUPPORT_OPTIONS = [
-  'Jag ser 3 saker omkring mig',
-  'Jag känner fötterna mot underlaget',
-  'Jag tar en långsam utandning',
-  'Jag lägger handen på bröstet',
-  'Egen förankring',
-];
-
-const RETURN_PREVENTIVE_PRACTICE_OPTIONS = [
-  'Jag vill öva 1 minut',
-  'Jag vill öva 3 lugna andetag',
-  'Jag vill checka in med kroppen',
-  'Jag vill påminna mig om tempo',
-  'Egen intention',
-];
-
-const RETURN_LANDING_VARIANTS = [
-  {
-    title: 'Här och nu',
-    body: 'Vi börjar med det som finns nära dig.',
-    support: 'Kom tillbaka lite grann, inte allt på en gång.',
-    prompts: [
-      'Låt blicken vila på 3 saker',
-      'Känn 2 kontaktpunkter mot kroppen',
-      'Ta 1 långsam utandning',
-    ],
-  },
-  {
-    title: 'Tillbaka till nuet',
-    body: 'Låt kroppen hinna ikapp tankarna en liten stund.',
-    support: 'Du behöver inte göra mer än det här just nu.',
-    prompts: [
-      'Hitta 3 saker med blicken',
-      'Känn 2 ställen där kroppen har stöd',
-      'Andas ut lite långsammare 1 gång',
-    ],
-  },
-  {
-    title: 'Landa lite mer',
-    body: 'Samla uppmärksamheten i det som finns precis runt dig.',
-    support: 'Små skiften kan göra stor skillnad i stunden.',
-    prompts: [
-      'Lägg märke till 3 saker du ser',
-      'Känn 2 saker i eller mot kroppen',
-      'Lyssna till 1 ljud innan du andas ut',
-    ],
-  },
-  {
-    title: 'En mjuk återgång',
-    body: 'Ta in rummet igen, utan att skynda på något.',
-    support: 'Du får återvända steg för steg.',
-    prompts: [
-      'Se 3 former eller färger nära dig',
-      'Känn 2 ytor som håller upp kroppen',
-      'Släpp ut 1 lugn utandning',
-    ],
-  },
-  {
-    title: 'Ner i tempo',
-    body: 'Låt tempot sjunka lite, bara i den här stunden.',
-    support: 'Ett kort stopp kan räcka för att hitta fotfästet igen.',
-    prompts: [
-      'Välj 3 saker som står stilla omkring dig',
-      'Känn 2 punkter där kroppen möter underlaget',
-      'Ta 1 lång utandning i din egen takt',
-    ],
-  },
-  {
-    title: 'Kom tillbaka varsamt',
-    body: 'Flytta fokus från tankar till det som faktiskt känns i kroppen just nu.',
-    support: 'Det får vara enkelt och mjukt.',
-    prompts: [
-      'Se 3 saker som är närmast dig',
-      'Känn 2 områden med tyngd eller värme',
-      'Lyssna efter 1 ljud som pågår just nu',
-    ],
-  },
-  {
-    title: 'Lite mer närvaro',
-    body: 'Vi tar en kort landning i det som bär dig här och nu.',
-    support: 'Små signaler från kroppen kan hjälpa dig tillbaka.',
-    prompts: [
-      'Lägg märke till 3 detaljer i rummet',
-      'Känn 2 punkter där du har stöd',
-      'Ta 1 utandning och mjukna i axlarna',
-    ],
-  },
-];
-
 const toolsState = {
   activeView: 'home',
   stepIndex: 0,
@@ -244,11 +155,15 @@ const toolsState = {
     currentStep: 'track-choice',
     stepHistory: ['track-choice'],
     selectedTrack: '',
-    acuteSupportChoice: '',
-    customAcuteSupportChoice: '',
-    preventivePracticeChoice: '',
-    customPreventivePracticeChoice: '',
-    selectedLandingVariant: null,
+    worryMode: false,
+    selectedAcuteTime: '20:00',
+    acuteReminderOn: false,
+    acuteWorryText: '',
+    selectedPrevTime: '20:00',
+    prevReminderOn: false,
+    groundingCompleted: [false, false, false],
+    preventiveExercise: '',
+    preventiveBodySelections: [],
   },
 };
 
@@ -288,34 +203,15 @@ function resetReturnToNow() {
     currentStep: 'track-choice',
     stepHistory: ['track-choice'],
     selectedTrack: '',
-    acuteSupportChoice: '',
-    customAcuteSupportChoice: '',
-    preventivePracticeChoice: '',
-    customPreventivePracticeChoice: '',
-    selectedLandingVariant: null,
-  };
-}
-
-function getSelectedLandingVariant() {
-  const state = toolsState.returnToNow;
-  if (state.selectedLandingVariant) {
-    return state.selectedLandingVariant;
-  }
-
-  state.selectedLandingVariant = RETURN_LANDING_VARIANTS[
-    Math.floor(Math.random() * RETURN_LANDING_VARIANTS.length)
-  ];
-  return state.selectedLandingVariant;
-}
-
-function getReturnToNowProgress() {
-  const state = toolsState.returnToNow;
-  const totalSteps = 4;
-  const currentStep = Math.min(state.stepHistory.length, totalSteps);
-  const percentage = Math.round((currentStep / totalSteps) * 100);
-  return {
-    stepLabel: `Steg ${currentStep} av ${totalSteps}`,
-    percentage,
+    worryMode: false,
+    selectedAcuteTime: '20:00',
+    acuteReminderOn: false,
+    acuteWorryText: '',
+    selectedPrevTime: '20:00',
+    prevReminderOn: false,
+    groundingCompleted: [false, false, false],
+    preventiveExercise: '',
+    preventiveBodySelections: [],
   };
 }
 
@@ -359,147 +255,254 @@ function renderReturnToNowTool() {
   if (!container) return;
 
   const state = toolsState.returnToNow;
-  const isDone = state.currentStep === 'done';
 
-  if (isDone) {
-    const doneTitle = state.selectedTrack === 'acute' ? 'Du hanterade en akut stund' : 'Du har tränat närvaro';
-    const doneSubtitle = state.selectedTrack === 'acute'
-      ? 'Fint jobbat. Du tog tillbaka kontakt med nuet när tankarna drog iväg.'
-      : 'Fint jobbat. Du byggde närvaro i förväg med ett lugnt steg.';
-    const doneBody = state.selectedTrack === 'acute'
-      ? 'Kom gärna tillbaka hit direkt nästa gång det börjar snurra.'
-      : 'En kort övning då och då gör det lättare att landa i stunden.';
-    container.innerHTML = `
-      <article class="micro-card" data-dim="present">
-        <div class="micro-tool-card return-to-now-card">
-          <div class="micro-tool-head">
-            <div>
-              <span class="ex-badge">🧭 tillbaka till nuet</span>
-              <h4 class="ex-title">${doneTitle}</h4>
-              <p class="ex-subtitle">${doneSubtitle}</p>
+  const acuteHeaderMap = {
+    'acute-1': ['Det är okej', 'Vi tar det ett litet steg i taget.', 0],
+    'acute-2': ['Märk det', 'Du behöver inte lösa något just nu.', 20],
+    'acute-defusion': ['Skapa avstånd', 'Tanken kan finnas utan att styra dig.', 45],
+    'acute-worry': ['Parkera oron', 'Ge den en tid – och frigör resten av dagen.', 45],
+    'acute-3': ['Landa i nuet', 'Låt kroppen hjälpa tankarna.', 70],
+    'acute-4': ['Lite mer här och nu', '', 100],
+  };
+
+  const getModeCard = () => `
+    <article class="micro-card" data-dim="present">
+      <div class="micro-tool-card return-to-now-card return-ref-shell">
+        <div class="tool-header">
+          <div class="tool-badge">⏱ Tillbaka till nuet</div>
+          <h1>Var är du just nu?</h1>
+          <p class="subtitle">Välj det läge som passar bäst.</p>
+        </div>
+        <div class="mode-selector" style="padding-top:0">
+          <button class="mode-card acute ${state.selectedTrack === 'acute' ? 'is-selected' : ''}" type="button" data-return-track="acute">
+            <div class="mode-icon">🌊</div>
+            <h3>Tankarna drar iväg just nu</h3>
+            <p>Något tar plats. Jag behöver hjälp att landa i nuet.</p>
+          </button>
+          <button class="mode-card preventive ${state.selectedTrack === 'preventive' ? 'is-selected' : ''}" type="button" data-return-track="preventive">
+            <div class="mode-icon">🌱</div>
+            <h3>Jag vill öva mig på nuet</h3>
+            <p>Allt är okej just nu, men jag vill stärka min förmåga.</p>
+          </button>
+        </div>
+      </div>
+    </article>
+  `;
+
+  if (state.currentStep === 'track-choice') {
+    container.innerHTML = getModeCard();
+    return;
+  }
+
+  if (state.currentStep.startsWith('acute-')) {
+    const [title, subtitle, progress] = acuteHeaderMap[state.currentStep] || acuteHeaderMap['acute-1'];
+    let stepHtml = '';
+    let controls = '';
+
+    if (state.currentStep === 'acute-1') {
+      stepHtml = `
+        <div class="grounding-step active">
+          <div class="step-content return-center" style="padding: 28px 20px;">
+            <div class="breath-circle"></div>
+            <p class="emphasis" style="margin-bottom:8px">Andas ut.</p>
+            <p class="body-text">Bara en lång utandning.<br>Inget mer behöver hända just nu.</p>
+            <div class="auto-hint">Tryck när du är redo</div>
+          </div>
+        </div>
+      `;
+      controls = '<button class="neo-btn neo-btn--filled neo-btn--cta" type="button" data-return-action="next">Jag andades ut</button>';
+    }
+
+    if (state.currentStep === 'acute-2') {
+      stepHtml = `
+        <div class="grounding-step active">
+          <div class="step-content">
+            <h3>Det är okej att det tar plats</h3>
+            <p class="body-text">Tankar om det som hänt, oro för det som kan hända – eller båda på en gång. Det är vanligare än du tror.</p>
+            <p class="body-text">Du behöver inte förstå varför just nu. Det räcker att märka att något tar plats.</p>
+            <div class="insight-box" style="margin-top:4px">
+              <p>Det här verktyget hjälper dig inte att lösa det – det hjälper dig att lägga ner det en stund.</p>
+            </div>
+            <button class="worry-nudge" style="margin-top:14px" type="button" data-return-toggle-worry="true">
+              <span>⏰</span>
+              <div>
+                <strong>Handlar det mest om oro?</strong>
+                <p>Tryck här så anpassar vi stegen efter det.</p>
+              </div>
+              <span class="arrow">${state.worryMode ? '✓' : '›'}</span>
+            </button>
+          </div>
+        </div>
+      `;
+      controls = '<button class="neo-btn neo-btn--filled neo-btn--cta" type="button" data-return-action="next">Jag är redo att fortsätta</button><button class="neo-btn neo-btn--outline neo-btn--cta" type="button" data-return-action="back">Tillbaka</button><button class="neo-btn neo-btn--outline neo-btn--cta" type="button" data-return-action="restart">Börja om</button>';
+    }
+
+    if (state.currentStep === 'acute-defusion') {
+      stepHtml = `
+        <div class="grounding-step active">
+          <div class="step-content">
+            <h3>Skapa lite avstånd till tanken</h3>
+            <p class="body-text">När en tanke tar över känns det som att den <em>är</em> sann, som att den <em>är</em> du. Men tanken är inte verkligheten – det är en signal hjärnan skickar.</p>
+            <p class="body-text">Du behöver inte argumentera bort den. Det räcker att märka den.</p>
+            <div class="defusion-box">
+              <p class="defusion-label">Säg tyst för dig själv:</p>
+              <p class="defusion-phrase">"Jag märker att jag har tanken att&nbsp;…"</p>
+              <p class="defusion-hint">Fyll i det som tar plats. Sedan – låt den passera förbi.</p>
+            </div>
+            <div class="insight-box">
+              <p>Det är skillnad att <strong>ha</strong> en tanke och att <strong>tro på</strong> en tanke. Den kan finnas utan att den behöver styra.</p>
+            </div>
+            ${state.worryMode ? '<div style="margin-top:14px"><button class="worry-nudge" type="button" data-return-go-worry="true"><span>⏰</span><div><strong>Vill du ge oron en egen tid?</strong><p>Schemalägg den – och låt resten av dagen vara fri.</p></div><span class="arrow">›</span></button></div>' : ''}
+          </div>
+        </div>
+      `;
+      controls = '<button class="neo-btn neo-btn--filled neo-btn--cta" type="button" data-return-action="next">Jag märkte tanken</button><button class="neo-btn neo-btn--outline neo-btn--cta" type="button" data-return-action="back">Tillbaka</button><button class="neo-btn neo-btn--outline neo-btn--cta" type="button" data-return-action="restart">Börja om</button>';
+    }
+
+    if (state.currentStep === 'acute-worry') {
+      const times = ['18:00', '19:00', '20:00', '21:00'];
+      stepHtml = `
+        <div class="grounding-step active">
+          <div class="step-content">
+            <h3>Ge oron en egen tid</h3>
+            <p class="body-text">Hjärnan behöver veta att oron inte glöms bort – bara skjuts upp. Skriv ner vad du oroar dig för just nu, så slipper hjärnan hålla i det hela dagen.</p>
+            <textarea class="worry-textarea" placeholder="Vad oroar dig? Skriv det här…" data-return-worry-text="acute">${state.acuteWorryText || ''}</textarea>
+            <p class="emphasis" style="margin: 16px 0 10px">När ska oron få komma?</p>
+            <div class="time-picker-wrap">${times.map((time) => `<button class="time-slot ${state.selectedAcuteTime === time ? 'selected' : ''}" type="button" data-return-time="acute" data-return-time-value="${time}">${time}</button>`).join('')}</div>
+            <button class="reminder-toggle" type="button" data-return-reminder="acute">
+              <div>
+                <strong>Påminn mig kl <span>${state.selectedAcuteTime}</span></strong>
+                <p>En mild signal när orotiden är här.</p>
+              </div>
+              <div class="toggle-switch ${state.acuteReminderOn ? 'on' : ''}"><div class="toggle-knob"></div></div>
+            </button>
+            <div class="insight-box" style="margin-top:14px">
+              <p>När oron dyker upp innan dess – påminn dig: <em>"Klockan 20 får du all min uppmärksamhet."</em></p>
             </div>
           </div>
-          <div class="thought-catcher-step return-to-now-step">
-            <p>${doneBody}</p>
+        </div>
+      `;
+      controls = '<button class="neo-btn neo-btn--filled neo-btn--cta" type="button" data-return-action="next">Oron är parkerad – fortsätt</button><button class="neo-btn neo-btn--outline neo-btn--cta" type="button" data-return-action="back">Tillbaka</button><button class="neo-btn neo-btn--outline neo-btn--cta" type="button" data-return-action="restart">Börja om</button>';
+    }
+
+    if (state.currentStep === 'acute-3') {
+      const cfg = [
+        ['3', 'Hitta 3 saker du kan se', 'Titta runt dig. Nämn dem tyst.', 'Tryck när du hittat tre saker →'],
+        ['2', 'Känn 2 ställen där kroppen har stöd', 'Stolen, golvet, kudden. Stanna en stund.', 'Tryck när du känt →'],
+        ['1', 'Andas ut lite långsammare', 'Bara en gång. Lite längre än vanligt.', 'Tryck när du andades →'],
+      ];
+      const idx = state.groundingCompleted.findIndex((done) => !done);
+      const active = idx === -1 ? 2 : idx;
+      stepHtml = `
+        <div class="grounding-step active">
+          <div class="step-content">
+            <h3>Låt kroppen hjälpa tankarna</h3>
+            <p class="body-text">En sak i taget. Tryck när du gjort varje del.</p>
+            ${cfg.map((item, i) => `
+              <div style="margin-top:16px; ${i === active ? '' : 'display:none;'}">
+                <div class="big-instruction">
+                  <div class="big-number">${item[0]}</div>
+                  <p class="action">${item[1]}</p>
+                  <p class="hint">${item[2]}</p>
+                </div>
+                <button class="tap-area ${state.groundingCompleted[i] ? 'done' : ''}" type="button" data-return-ground-step="${i}">${state.groundingCompleted[i] ? '✓ Gjort' : item[3]}</button>
+              </div>
+            `).join('')}
+            <div class="mini-progress">
+              ${[0, 1, 2].map((i) => `<div class="mini-dot ${state.groundingCompleted[i] ? 'done' : i === active ? 'active' : ''}"></div>`).join('')}
+            </div>
           </div>
-          <div class="thought-catcher-actions">
-            <button class="neo-btn neo-btn--filled neo-btn--cta" type="button" data-return-action="restart">Börja om</button>
+        </div>
+      `;
+      controls = '<button class="neo-btn neo-btn--outline neo-btn--cta" type="button" data-return-action="back">Tillbaka</button><button class="neo-btn neo-btn--outline neo-btn--cta" type="button" data-return-action="restart">Börja om</button>';
+    }
+
+    if (state.currentStep === 'acute-4') {
+      stepHtml = `
+        <div class="completion">
+          <div class="check-icon">🌿</div>
+          <h2>Lite mer här och nu</h2>
+          <p>Bra gjort. Du tog ett steg tillbaka till det som finns just nu.</p>
+          <p style="font-size:13px; color: var(--text-muted)">Du kan komma tillbaka hit när tankarna drar iväg igen.</p>
+        </div>
+      `;
+      controls = '<button class="neo-btn neo-btn--filled neo-btn--cta" type="button" data-return-action="complete">Klar</button><button class="neo-btn neo-btn--outline neo-btn--cta" type="button" data-return-action="restart-acute-flow">Gör om</button>';
+    }
+
+    container.innerHTML = `
+      <article class="micro-card" data-dim="present">
+        <div class="mode-label"><span class="mode-dot acute"></span> Akut läge</div>
+        <div class="micro-tool-card return-to-now-card return-ref-shell" style="margin-top:8px;">
+          <div class="tool-header">
+            <div class="tool-badge">⏱ Tillbaka till nuet</div>
+            <h1>${title}</h1>
+            <p class="subtitle">${subtitle}</p>
           </div>
+          <div class="progress-wrap">
+            <div class="progress-track"><div class="progress-fill" style="width:${progress}%"></div></div>
+          </div>
+          ${stepHtml}
+          <div class="thought-catcher-actions">${controls}</div>
         </div>
       </article>
     `;
     return;
   }
 
-  const { stepLabel, percentage } = getReturnToNowProgress();
-  let title = '';
-  let body = '';
-  let support = '';
-  let cta = '';
-  let stepContent = '';
-
-
-
-  if (state.currentStep === 'track-choice') {
-    title = 'Tillbaka till nuet';
-    body = 'Välj det som passar dig bäst just nu.';
-    support = 'Du kan alltid börja om eller byta spår efteråt.';
-    cta = state.selectedTrack === 'acute'
-      ? 'Fortsätt med akut stöd'
-      : state.selectedTrack === 'preventive'
-        ? 'Fortsätt med övning'
-        : 'Välj ett spår';
-    stepContent = `
-      <div class="return-track-grid">
-        <button class="return-track-card ${state.selectedTrack === 'acute' ? 'is-selected' : ''}" type="button" data-return-track="acute">
-          <span class="return-track-card__eyebrow">Akut</span>
-          <span class="return-track-card__title">Tankarna drar iväg just nu</span>
-          <span class="return-track-card__body">För dig som behöver snabb hjälp att landa här och nu.</span>
-        </button>
-        <button class="return-track-card ${state.selectedTrack === 'preventive' ? 'is-selected' : ''}" type="button" data-return-track="preventive">
-          <span class="return-track-card__eyebrow">Förebyggande</span>
-          <span class="return-track-card__title">Jag vill öva mig på nuet</span>
-          <span class="return-track-card__body">För dig som vill träna upp närvaro i lugnare tempo.</span>
-        </button>
+  const preventiveMenu = `
+    <div class="grounding-step active" id="p-step-1">
+      <div class="reflection-prompt">
+        <h3>Vad vill du öva på?</h3>
+        <p>Du väljer själv hur djupt du vill gå idag.</p>
+        <ul class="pattern-list">
+          <li class="pattern-item" data-return-preventive="body"><span class="pi-icon">🧘</span><div><strong>Kroppsskanning</strong><br><span style="color:var(--text-muted); font-size:13px">Känn efter var du bär spänning just nu</span></div></li>
+          <li class="pattern-item" data-return-preventive="anchor"><span class="pi-icon">⚓</span><div><strong>Hitta ett ankare</strong><br><span style="color:var(--text-muted); font-size:13px">Välj en sak att komma tillbaka till när tankarna drar</span></div></li>
+          <li class="pattern-item" data-return-preventive="pattern"><span class="pi-icon">🔍</span><div><strong>Förstå dina tankemönster</strong><br><span style="color:var(--text-muted); font-size:13px">När tenderar tankarna att dra iväg för dig?</span></div></li>
+          <li class="pattern-item" data-return-preventive="defusion-learn"><span class="pi-icon">🌫</span><div><strong>Öva på att skapa avstånd</strong><br><span style="color:var(--text-muted); font-size:13px">Lär dig skilja på att ha en tanke och tro på den</span></div></li>
+          <li class="pattern-item" data-return-preventive="worry-plan"><span class="pi-icon">⏰</span><div><strong>Schemalägg din oro</strong><br><span style="color:var(--text-muted); font-size:13px">Ge oron en tid – och låt resten av dagen vara fri</span></div></li>
+        </ul>
       </div>
-    `;
+    </div>
+  `;
+
+  const prevSteps = {
+    body: `<div class="step-content"><h3>Kroppsskanning</h3><p class="body-text">Vi börjar uppifrån. Stanna vid varje del tills du märkt om det finns spänning där.</p><div class="chips" style="flex-direction:column; gap:10px; margin-top:12px">${['😮‍💨 Axlar och nacke', '🫁 Bröstet – andningen', '🫃 Magen – en knut?', '🦵 Ben och fötter – mark'].map((label) => `<button class="chip ${state.preventiveBodySelections.includes(label) ? 'selected' : ''}" style="text-align:left; border-radius:10px; padding:12px 16px" type="button" data-return-body-chip="${label}">${label}</button>`).join('')}</div><p class="body-text" style="margin-top:16px">Det räcker att märka det. Du behöver inte ändra något.</p></div>`,
+    anchor: '<div class="step-content"><h3>Hitta ditt ankare</h3><p class="body-text">Ett ankare är något konkret du kan komma tillbaka till när tankarna drar iväg. Det fungerar bäst om det är något fysiskt och nära – ett rum du trivs i, en person vars röst lugnar dig, känslan av att vara ute i naturen.</p><p class="body-text">Ankaret behöver inte vara storslaget. Det ska vara genuint ditt.</p><div class="defusion-box"><p class="defusion-label">Tänk efter:</p><p class="defusion-phrase" style="font-size:16px">Var befinner jag mig när jag känner mig mest lugn?</p></div><div class="insight-box"><p>Nästa gång tankarna drar – stanna en sekund och föreställ dig platsen, personen eller känslan. Det räcker.</p></div></div>',
+    pattern: '<div class="step-content"><h3>Lär känna dina mönster</h3><p class="body-text">Hjärnan drar iväg av en anledning – inte slumpmässigt. För många händer det när det är tyst, när de ska sova, eller efter en konflikt. För andra utan synlig anledning alls.</p><p class="body-text">Att förstå sitt mönster förändrar inte tanken – men det gör det lättare att märka: <em>"Ah, det är det här igen."</em> Den insikten skapar lite avstånd i sig.</p><div class="defusion-box"><p class="defusion-label">Tänk efter:</p><p class="defusion-phrase" style="font-size:16px">När brukar mina tankar vara svårast att lämna?</p></div><div class="insight-box"><p>Du behöver inte ha svaret nu. Bara hålla frågan öppen – svaret brukar komma av sig självt.</p></div></div>',
+    'defusion-learn': '<div class="step-content"><h3>Skapa avstånd till tanken</h3><p class="body-text">En negativ tanke behöver du varken argumentera bort eller lösa. Du kan bara notera att den finns.</p><div class="defusion-box"><p class="defusion-label">Tänk på en tanke som ofta stör dig. Säg sedan:</p><p class="defusion-phrase">"Jag märker att jag har tanken att&nbsp;…"</p></div><div class="insight-box"><p>Det är skillnad att <strong>ha</strong> en tanke och att <strong>tro på</strong> en tanke. Tanken kan finnas utan att den behöver styra.</p></div><p class="body-text" style="margin-top:14px">Öva det några gånger idag – varje gång en jobbig tanke dyker upp.</p></div>',
+    'worry-plan': `<div class="step-content"><h3>Schemalägg din oro</h3><p class="body-text">Oro som skjuts undan tenderar att komma tillbaka starkare. Men oro som får en dedikerad tid – den lär sig vänta.</p><p class="body-text">Tekniken är enkel: bestäm en tid varje dag då du aktivt tillåter dig att oroa dig. När oron dyker upp annars, notera den och påminn dig: <em>"Det får komma då."</em></p><div class="insight-box"><p><strong>På orotiden:</strong> Skriv ner oron. Granska den. Fråga dig om den är lösbar just nu. Sedan avslutar du – oavsett om den är löst eller inte. Det handlar inte om att lösa, utan om att ge den plats.</p></div><p class="emphasis" style="margin: 16px 0 10px">Välj din orotid:</p><div class="time-picker-wrap">${['17:00', '18:00', '19:00', '20:00', '21:00'].map((time) => `<button class="time-slot ${state.selectedPrevTime === time ? 'selected' : ''}" type="button" data-return-time="prev" data-return-time-value="${time}">${time}</button>`).join('')}</div><button class="reminder-toggle" type="button" data-return-reminder="prev" style="margin-top:14px"><div><strong>Påminn mig kl <span>${state.selectedPrevTime}</span></strong><p>En daglig signal när orotiden börjar.</p></div><div class="toggle-switch ${state.prevReminderOn ? 'on' : ''}"><div class="toggle-knob"></div></div></button></div>`,
+  };
+
+  let inner = preventiveMenu;
+  let controls = '';
+  if (state.currentStep === 'preventive-exercise' && state.preventiveExercise) {
+    inner = prevSteps[state.preventiveExercise] || preventiveMenu;
+    const labels = {
+      body: 'Jag har känt efter',
+      anchor: 'Jag vet mitt ankare',
+      pattern: 'Det känns igen',
+      'defusion-learn': 'Jag förstår – jag provar',
+      'worry-plan': 'Orotid satt',
+    };
+    controls = `<button class="neo-btn neo-btn--filled neo-btn--cta" type="button" data-return-action="next">${labels[state.preventiveExercise] || 'Klar'}</button><button class="neo-btn neo-btn--outline neo-btn--cta" type="button" data-return-action="back">Välj annan övning</button><button class="neo-btn neo-btn--outline neo-btn--cta" type="button" data-return-action="restart">Börja om</button>`;
   }
 
-  if (state.currentStep === 'acute-core') {
-    title = 'Bra att du stannade upp';
-    body = 'Välj en enkel förankring och gör den direkt. Målet är att få tillbaka lite kontakt med nuet.';
-    support = 'Du behöver inte känna dig klar först. Börja bara med en sak.';
-    cta = 'Det hjälper';
-    stepContent = `
-      ${renderThoughtOptionChips(RETURN_ACUTE_SUPPORT_OPTIONS, state.acuteSupportChoice, 'return-acute-support')}
-      ${state.acuteSupportChoice === 'Egen förankring' ? `<input class="txt-in txt-in-sm" type="text" placeholder="Skriv din egen förankring" value="${state.customAcuteSupportChoice || ''}" data-return-custom-input="acute-support">` : ''}
-    `;
-  }
-
-  if (state.currentStep === 'preventive-core') {
-    title = 'Stärk närvaro i förväg';
-    body = 'Välj hur du vill öva nu. En kort medveten stund kan göra det lättare att stanna kvar i nuet senare.';
-    support = 'Håll det enkelt och vänligt.';
-    cta = 'Starta övningen';
-    stepContent = `
-      ${renderThoughtOptionChips(RETURN_PREVENTIVE_PRACTICE_OPTIONS, state.preventivePracticeChoice, 'return-preventive-practice')}
-      ${state.preventivePracticeChoice === 'Egen intention' ? `<input class="txt-in txt-in-sm" type="text" placeholder="Skriv din intention" value="${state.customPreventivePracticeChoice || ''}" data-return-custom-input="preventive-practice">` : ''}
-    `;
-  }
-
-  if (state.currentStep === 'acute-landing') {
-    const landingVariant = getSelectedLandingVariant();
-    title = 'Akutstöd klart';
-    body = 'Bra jobbat. Du har redan brutit spiralen och skapat lite mer utrymme.';
-    support = landingVariant.support;
-    cta = 'Jag är mer här nu';
-    stepContent = `
-      <p class="return-now-prompt-intro">Fortsätt i samma lugna riktning med tre små steg:</p>
-      <div class="return-now-checklist">
-        ${landingVariant.prompts.map((prompt) => `<div class="return-now-item">${prompt}</div>`).join('')}
-      </div>
-    `;
-  }
-
-  if (state.currentStep === 'preventive-landing') {
-    title = 'Närvaroövning klar';
-    body = 'Fint. Du har tränat uppmärksamheten medan det var lugnare.';
-    support = 'Det här gör det lättare att hitta tillbaka snabbare när tankarna senare drar iväg.';
-    cta = 'Ta med detta vidare';
-    stepContent = `
-      <div class="return-now-checklist">
-        <div class="return-now-item">Notera en sak du ser just nu.</div>
-        <div class="return-now-item">Notera en kontaktpunkt i kroppen.</div>
-        <div class="return-now-item">Välj ett ord för tempot du vill bära med dig.</div>
-      </div>
-    `;
+  if (state.currentStep === 'preventive-done') {
+    inner = '<div class="completion"><div class="check-icon">🌱</div><h2>Bra jobbat</h2><p>Varje gång du övar blir det lite lättare att hitta tillbaka – även när det är svårt.</p></div>';
+    controls = '<button class="neo-btn neo-btn--filled neo-btn--cta" type="button" data-return-action="complete">Klar</button><button class="neo-btn neo-btn--outline neo-btn--cta" type="button" data-return-action="back">Gör en till övning</button>';
   }
 
   container.innerHTML = `
     <article class="micro-card" data-dim="present">
-      <div class="micro-tool-card return-to-now-card">
-        <div class="micro-tool-head">
-          <div>
-            <span class="ex-badge">🧭 tillbaka till nuet</span>
-            <h4 class="ex-title">Tillbaka till nuet</h4>
-            <p class="ex-subtitle">Två vägar tillbaka till nuet — välj det som passar stunden.</p>
-          </div>
+      <div class="mode-label"><span class="mode-dot preventive"></span> Förebyggande</div>
+      <div class="micro-tool-card return-to-now-card return-ref-shell" style="margin-top:8px;">
+        <div class="tool-header">
+          <div class="tool-badge">⏱ Tillbaka till nuet</div>
+          <h1>Öva på nuet</h1>
+          <p class="subtitle">Välj vad du vill utforska idag.</p>
         </div>
-        <div class="tool-progress" aria-live="polite">
-          <div class="tool-progress-bar"><span style="width:${percentage}%;"></span></div>
-          <div class="tool-time">${stepLabel}</div>
-        </div>
-        <div class="thought-catcher-step return-to-now-step" aria-live="polite">
-          <h5>${title}</h5>
-          <p>${body}</p>
-          ${support ? `<p class="thought-catcher-support">${support}</p>` : ''}
-          ${stepContent}
-        </div>
-        <div class="thought-catcher-actions">
-          <button class="neo-btn neo-btn--filled neo-btn--cta" type="button" data-return-action="next">${cta}</button>
-          ${(state.stepHistory.length > 1) ? '<button class="neo-btn neo-btn--outline neo-btn--cta" type="button" data-return-action="back">Tillbaka</button>' : ''}
-          ${(state.stepHistory.length > 1) ? '<button class="neo-btn neo-btn--outline neo-btn--cta" type="button" data-return-action="restart">Börja om</button>' : ''}
-        </div>
+        ${inner}
+        <div class="thought-catcher-actions">${controls}</div>
       </div>
     </article>
   `;
@@ -507,23 +510,12 @@ function renderReturnToNowTool() {
 
 function canAdvanceReturnToNowStep() {
   const state = toolsState.returnToNow;
-  if (state.currentStep === 'track-choice') {
-    return Boolean(state.selectedTrack);
-  }
-
-  if (state.currentStep === 'acute-core') {
-    if (!state.acuteSupportChoice) return false;
-    if (state.acuteSupportChoice === 'Egen förankring') return Boolean(state.customAcuteSupportChoice.trim());
-  }
-
-  if (state.currentStep === 'preventive-core') {
-    if (!state.preventivePracticeChoice) return false;
-    if (state.preventivePracticeChoice === 'Egen intention') return Boolean(state.customPreventivePracticeChoice.trim());
-  }
-
+  if (state.currentStep === 'track-choice') return Boolean(state.selectedTrack);
+  if (state.currentStep === 'acute-3') return state.groundingCompleted.every(Boolean);
+  if (state.currentStep === 'preventive-menu') return false;
+  if (state.currentStep === 'preventive-exercise') return Boolean(state.preventiveExercise);
   return true;
 }
-
 function openTool(toolId) {
   const tool = TOOL_DEFINITIONS.find((item) => item.id === toolId);
   if (!tool || tool.disabled) return;
@@ -759,7 +751,6 @@ function bindToolsEvents() {
     }
 
     if (target.closest('[data-tools-back]')) {
-      if (toolsState.activeView === 'return-to-now') toolsState.returnToNow.selectedLandingVariant = null;
       setToolsView('home');
       return;
     }
@@ -801,23 +792,79 @@ function bindToolsEvents() {
         renderThoughtCatcherTool();
         return;
       }
-      if (stepKey === 'return-acute-support') {
-        toolsState.returnToNow.acuteSupportChoice = value;
-        if (value !== 'Egen förankring') toolsState.returnToNow.customAcuteSupportChoice = '';
-        renderReturnToNowTool();
-        return;
-      }
-      if (stepKey === 'return-preventive-practice') {
-        toolsState.returnToNow.preventivePracticeChoice = value;
-        if (value !== 'Egen intention') toolsState.returnToNow.customPreventivePracticeChoice = '';
-        renderReturnToNowTool();
-        return;
-      }
     }
 
     const trackCard = target.closest('[data-return-track]');
     if (trackCard instanceof HTMLElement) {
       toolsState.returnToNow.selectedTrack = trackCard.dataset.returnTrack || '';
+      renderReturnToNowTool();
+      return;
+    }
+
+
+    const worryToggle = target.closest('[data-return-toggle-worry]');
+    if (worryToggle instanceof HTMLElement) {
+      toolsState.returnToNow.worryMode = !toolsState.returnToNow.worryMode;
+      renderReturnToNowTool();
+      return;
+    }
+
+    const goWorry = target.closest('[data-return-go-worry]');
+    if (goWorry instanceof HTMLElement) {
+      goToReturnToNowStep('acute-worry');
+      renderReturnToNowTool();
+      return;
+    }
+
+    const timeButton = target.closest('[data-return-time]');
+    if (timeButton instanceof HTMLElement) {
+      const context = timeButton.dataset.returnTime;
+      const value = timeButton.dataset.returnTimeValue || '20:00';
+      if (context === 'acute') toolsState.returnToNow.selectedAcuteTime = value;
+      if (context === 'prev') toolsState.returnToNow.selectedPrevTime = value;
+      renderReturnToNowTool();
+      return;
+    }
+
+    const reminderToggle = target.closest('[data-return-reminder]');
+    if (reminderToggle instanceof HTMLElement) {
+      const context = reminderToggle.dataset.returnReminder;
+      if (context === 'acute') toolsState.returnToNow.acuteReminderOn = !toolsState.returnToNow.acuteReminderOn;
+      if (context === 'prev') toolsState.returnToNow.prevReminderOn = !toolsState.returnToNow.prevReminderOn;
+      renderReturnToNowTool();
+      return;
+    }
+
+    const groundStepButton = target.closest('[data-return-ground-step]');
+    if (groundStepButton instanceof HTMLElement) {
+      const index = Number(groundStepButton.dataset.returnGroundStep);
+      if (!Number.isNaN(index)) {
+        toolsState.returnToNow.groundingCompleted[index] = true;
+        if (toolsState.returnToNow.groundingCompleted.every(Boolean)) {
+          goToReturnToNowStep('acute-4');
+        }
+      }
+      renderReturnToNowTool();
+      return;
+    }
+
+    const preventiveChoice = target.closest('[data-return-preventive]');
+    if (preventiveChoice instanceof HTMLElement) {
+      toolsState.returnToNow.preventiveExercise = preventiveChoice.dataset.returnPreventive || '';
+      goToReturnToNowStep('preventive-exercise');
+      renderReturnToNowTool();
+      return;
+    }
+
+    const bodyChip = target.closest('[data-return-body-chip]');
+    if (bodyChip instanceof HTMLElement) {
+      const value = bodyChip.dataset.returnBodyChip || '';
+      const list = toolsState.returnToNow.preventiveBodySelections;
+      if (list.includes(value)) {
+        toolsState.returnToNow.preventiveBodySelections = list.filter((item) => item !== value);
+      } else {
+        toolsState.returnToNow.preventiveBodySelections = [...list, value];
+      }
       renderReturnToNowTool();
       return;
     }
@@ -857,16 +904,43 @@ function bindToolsEvents() {
       return;
     }
 
-    if (!canAdvanceReturnToNowStep()) return;
     const state = toolsState.returnToNow;
+
+    if (returnAction === 'complete') {
+      resetReturnToNow();
+      setToolsView('home');
+      renderReturnToNowTool();
+      return;
+    }
+
+    if (returnAction === 'restart-acute-flow') {
+      state.currentStep = 'acute-1';
+      state.stepHistory = ['track-choice', 'acute-1'];
+      state.groundingCompleted = [false, false, false];
+      renderReturnToNowTool();
+      return;
+    }
+
+    if (!canAdvanceReturnToNowStep()) return;
+
     if (state.currentStep === 'track-choice') {
-      goToReturnToNowStep(state.selectedTrack === 'acute' ? 'acute-core' : 'preventive-core');
-    } else if (state.currentStep === 'acute-core') {
-      goToReturnToNowStep('acute-landing');
-    } else if (state.currentStep === 'preventive-core') {
-      goToReturnToNowStep('preventive-landing');
-    } else if (state.currentStep === 'acute-landing' || state.currentStep === 'preventive-landing') {
-      goToReturnToNowStep('done');
+      if (state.selectedTrack === 'acute') {
+        goToReturnToNowStep('acute-1');
+      } else {
+        goToReturnToNowStep('preventive-menu');
+      }
+    } else if (state.currentStep === 'acute-1') {
+      goToReturnToNowStep('acute-2');
+    } else if (state.currentStep === 'acute-2') {
+      goToReturnToNowStep('acute-defusion');
+    } else if (state.currentStep === 'acute-defusion') {
+      goToReturnToNowStep('acute-3');
+      state.groundingCompleted = [false, false, false];
+    } else if (state.currentStep === 'acute-worry') {
+      goToReturnToNowStep('acute-3');
+      state.groundingCompleted = [false, false, false];
+    } else if (state.currentStep === 'preventive-exercise') {
+      goToReturnToNowStep('preventive-done');
     }
     renderReturnToNowTool();
   });
@@ -895,13 +969,8 @@ function bindToolsEvents() {
       return;
     }
 
-    if (target.matches('[data-return-custom-input="acute-support"]')) {
-      toolsState.returnToNow.customAcuteSupportChoice = target.value;
-      return;
-    }
-
-    if (target.matches('[data-return-custom-input="preventive-practice"]')) {
-      toolsState.returnToNow.customPreventivePracticeChoice = target.value;
+    if (target.matches('[data-return-worry-text="acute"]')) {
+      toolsState.returnToNow.acuteWorryText = target.value;
       return;
     }
   });
