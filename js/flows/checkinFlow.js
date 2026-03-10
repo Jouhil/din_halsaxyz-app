@@ -524,15 +524,19 @@ function renderToolStep() {
   const progress = tool.durationSec > 0 ? Math.round(((tool.durationSec - flow.countdown) / tool.durationSec) * 100) : 0;
   const remaining = formatTime(flow.countdown || tool.durationSec);
   const isDone = flow.toolReady || flow.countdown === 0;
+  const primaryToolActionLabel = flow.timerRunning ? 'Pausa rekommenderat verktyg' : 'Starta rekommenderat verktyg';
 
   return `<div class="card">
-    <div class="flow-note">${focusSummary}</div>
-    <div class="flow-note">${recommendationReason}</div>
-    <div class="neo-card micro-tool-card micro-card" data-dim="${selectedDim}">
+    <div class="recommendation-context">Utifrån din check-in just nu</div>
+    <h4 class="recommendation-heading">Rekommenderat verktyg</h4>
+    <div class="neo-card micro-tool-card micro-card recommendation-primary" data-dim="${selectedDim}">
+      <div class="flow-note recommendation-focus">${focusSummary}</div>
+      <div class="recommendation-reason">${recommendationReason}</div>
       ${renderMicroTool(tool)}
+      <button class="neo-btn neo-btn--filled neo-btn--cta" data-action="start-tool">${flow.timerRunning ? '⏸ ' : '▶ '} ${primaryToolActionLabel}</button>
       <div class="tool-progress"><div class="tool-progress-bar"><span style="width:${Math.max(0, Math.min(progress, 100))}%"></span></div><div class="tool-time">Tid kvar: <span>${remaining}</span></div></div>
     </div>
-    ${recommendationAlternatives.length ? `<div class="flow-note">Andra verktyg som också kan passa</div><div class="chip-wrap">${recommendationAlternatives.map((alt) => `<button class="chip" data-action="pick-tool" data-tool-id="${alt.id}">${alt.title}</button>`).join('')}</div>` : ''}
+    ${recommendationAlternatives.length ? `<div class="recommendation-alt-wrap"><div class="flow-note recommendation-alt-heading">Andra verktyg som också kan passa</div><div class="chip-wrap recommendation-alt-chips">${recommendationAlternatives.map((alt) => `<button class="chip recommendation-alt-chip" data-action="pick-tool" data-tool-id="${alt.id}">${alt.title}</button>`).join('')}</div></div>` : ''}
     <div class="flow-actions">
       <button class="neo-btn neo-btn--outline neo-btn--cta neo-btn--dim" data-dim="${selectedDim}" data-action="swap-tool">🔁 Byt verktyg</button>
       <button class="neo-link" data-action="guide-focus">❓ Lär mer</button>
@@ -546,7 +550,7 @@ function renderMicroTool(tool) {
     ? `<li class="ex-step"><span class="ex-step-num">${i + 1}</span><span class="ex-step-txt">${step}</span></li>`
     : '')).join('');
   return `<div class="ex-badge">MIKRO-VERKTYG</div>
-      <div class="micro-tool-head"><div><div class="ex-title micro-title">${tool.title}</div><div class="flow-note micro-meta">~${tool.durationSec}s rekommenderat</div></div><button class="neo-btn neo-btn--soft neo-btn--sm" data-action="start-tool">${flow.timerRunning ? '⏸ Pausa' : '▶ Fortsätt'}</button></div>
+      <div class="micro-tool-head"><div><div class="ex-title micro-title">${tool.title}</div><div class="flow-note micro-meta">~${tool.durationSec}s rekommenderat</div></div></div>
       ${flow.plan?.selectedPrompt ? `<div class="flow-note">${flow.plan.selectedPrompt}</div>` : ''}
       <ul class="ex-steps micro-steps">${normalizedSteps}</ul>`;
 }

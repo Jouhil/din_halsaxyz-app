@@ -1,4 +1,4 @@
-const DEFAULT_REASON = 'Det här verktyget kan passa bra just nu.';
+const DEFAULT_REASON = 'Vi börjar här för att ge dig en lugn och tydlig start just nu.';
 
 function toNumber(value, fallback = 5) {
   const parsed = Number(value);
@@ -46,10 +46,10 @@ function toolKind(tool = {}) {
 
 function buildReason({ kind, primaryNeed, thoughtLoad, stressLoad, overwhelmLoad, bodyLoad }) {
   if (kind === 'breathing' && (stressLoad >= 7 || bodyLoad >= 6)) return 'Det här verktyget passar när stressen är hög och kroppen behöver varva ned.';
-  if (kind === 'return-to-now' && thoughtLoad >= 7) return 'Det här verktyget kan hjälpa när tankarna drar iväg och det är svårt att landa i nuet.';
+  if (kind === 'return-to-now' && thoughtLoad >= 7) return 'Det här verktyget hjälper när tankarna drar iväg och du vill landa mjukt i nuet igen.';
   if (kind === 'grounding' && overwhelmLoad >= 7) return 'Det här verktyget passar när du behöver komma tillbaka till kroppen och omgivningen.';
-  if (kind === 'thought-catcher') return 'Det här verktyget passar när tankemönster fastnar och du vill hitta ett mjukare perspektiv.';
-  if (primaryNeed === 'energi') return 'Vi börjar med ett verktyg som hjälper dig att samla fokus i ett lugnt tempo.';
+  if (kind === 'thought-catcher') return 'Det här verktyget passar när tankemönster fastnar och du vill få lite mer luft i perspektivet.';
+  if (primaryNeed === 'energi') return 'Det här verktyget hjälper dig att samla energi utan att pressa upp tempot.';
   return DEFAULT_REASON;
 }
 
