@@ -165,48 +165,73 @@ const RETURN_NEXT_STEP_OPTIONS = [
 
 const RETURN_LANDING_VARIANTS = [
   {
-    title: 'Landning i nuet',
-    body: 'Nu hjälper vi kroppen och uppmärksamheten tillbaka till det som finns här.',
-    prompts: [
-      'Se 3 saker omkring dig',
-      'Känn 2 saker i eller mot kroppen',
-      'Ta 1 lugn utandning',
-    ],
-  },
-  {
-    title: 'Tillbaka till nuet',
-    body: 'Vi landar i det som finns omkring dig just nu.',
-    prompts: [
-      'Lägg märke till 3 saker du ser',
-      'Känn efter på 2 ställen i kroppen',
-      'Låt 1 utandning bli lite längre',
-    ],
-  },
-  {
     title: 'Här och nu',
-    body: 'Bara lite grann tillbaka till det som är här.',
+    body: 'Börja med det som finns nära dig.',
+    support: 'Det räcker att komma tillbaka lite grann.',
     prompts: [
-      'Hitta 3 saker med blicken',
-      'Känn 2 kontaktpunkter mot stolen eller golvet',
-      'Ta 1 mjuk utandning',
-    ],
-  },
-  {
-    title: 'Landa lite mer',
-    body: 'Nu får kroppen och uppmärksamheten komma tillbaka hit.',
-    prompts: [
-      'Se 3 detaljer i rummet',
-      'Känn 2 områden där kroppen har stöd',
+      'Låt blicken vila på 3 saker',
+      'Känn 2 kontaktpunkter mot kroppen',
       'Ta 1 långsam utandning',
     ],
   },
   {
-    title: 'Ett steg tillbaka till nuet',
-    body: 'Vi hjälper uppmärksamheten tillbaka till det som finns här, i din takt.',
+    title: 'Tillbaka till nuet',
+    body: 'Låt kroppen hinna ikapp tankarna en stund.',
+    support: 'Du behöver inte göra något mer än detta just nu.',
     prompts: [
-      'Låt blicken vila på 3 saker nära dig',
+      'Hitta 3 saker med blicken',
+      'Känn 2 ställen där kroppen har stöd',
+      'Andas ut lite långsammare 1 gång',
+    ],
+  },
+  {
+    title: 'Landa lite mer',
+    body: 'Samla uppmärksamheten i det som finns runt dig.',
+    support: 'Det behöver inte kännas stort för att hjälpa.',
+    prompts: [
+      'Lägg märke till 3 saker du ser',
+      'Känn 2 saker i eller mot kroppen',
+      'Lyssna till 1 ljud innan du andas ut',
+    ],
+  },
+  {
+    title: 'En mjuk återgång',
+    body: 'Ta in rummet igen, utan att skynda.',
+    support: 'Du kan återvända steg för steg.',
+    prompts: [
+      'Se 3 former eller färger nära dig',
+      'Känn 2 ytor som håller upp kroppen',
+      'Släpp ut 1 lugn utandning',
+    ],
+  },
+  {
+    title: 'Ner i tempo',
+    body: 'Låt tempot sjunka lite, bara för en kort stund.',
+    support: 'Ibland räcker ett litet stopp för att hitta fotfästet igen.',
+    prompts: [
+      'Välj 3 saker som står stilla omkring dig',
       'Känn 2 punkter där kroppen möter underlaget',
-      'Ta 1 mjuk och lugn utandning',
+      'Ta 1 lång utandning i din egen takt',
+    ],
+  },
+  {
+    title: 'Kom tillbaka varsamt',
+    body: 'Flytta fokus från tankar till det som faktiskt känns i kroppen.',
+    support: 'Det får vara enkelt.',
+    prompts: [
+      'Se 3 saker som är närmast dig',
+      'Känn 2 områden med tyngd eller värme',
+      'Lyssna efter 1 ljud som pågår just nu',
+    ],
+  },
+  {
+    title: 'Lite mer närvaro',
+    body: 'Vi tar en kort landning i det som bär dig just nu.',
+    support: 'Små signaler från kroppen kan räcka för att hitta tillbaka.',
+    prompts: [
+      'Lägg märke till 3 detaljer i rummet',
+      'Känn 2 punkter där du har stöd',
+      'Ta 1 utandning och mjukna i axlarna',
     ],
   },
 ];
@@ -396,7 +421,7 @@ function renderReturnToNowTool() {
     const landingVariant = getSelectedLandingVariant();
     title = landingVariant.title;
     body = landingVariant.body;
-    support = 'Du behöver inte göra det perfekt. Bara kom tillbaka lite grann.';
+    support = landingVariant.support;
     cta = 'Jag är här nu';
     stepContent = `
       <div class="return-now-checklist">
