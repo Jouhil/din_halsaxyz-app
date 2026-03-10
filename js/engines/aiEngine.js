@@ -2,6 +2,7 @@ import { getPrimaryNeed } from './matchingEngine.js';
 import { pickRotated } from './rotationEngine.js';
 import { getHabitMemory } from './habitMemoryEngine.js';
 import { inferNeedPriorityFromAnswers } from './questionEngine.js';
+import { getRecommendedTool } from './toolRecommendationEngine.js';
 
 const DEFAULT_NEED = 'stress';
 const DEFAULT_CLOSING = { lines: ['Du tog hand om dig i dag.', 'Små steg gör skillnad.'] };
@@ -126,6 +127,7 @@ function inferUiHints(primaryNeed, intensity) {
 function selectTool({
   primaryNeed,
   checkinValues,
+  adaptiveAnswers = {},
   userPrefs = {},
   tools = [],
   memory = null,
@@ -150,7 +152,30 @@ function selectTool({
   const avoidSet = new Set(Array.isArray(avoidToolIds) ? avoidToolIds : []);
   const withoutAvoid = rankedSource.filter((tool) => !avoidSet.has(tool.id));
   const eligible = withoutAvoid.length ? withoutAvoid : rankedSource;
-  return pickWithRotation(eligible, { recent: rotationHistory[`tool:${primaryNeed}`], keyFn: (tool) => tool.id }) || matchingNeed[0] || tools[0] || null;
+  const recommendation = getRecommendedTool({
+    primaryNeed,
+    checkinValues,
+    adaptiveAnswers,
+    memory,
+    recentToolIds: rotationHistory[`tool:${primaryNeed}`] || memory?.preferences?.avoidTools || [],
+    availableTools: eligible,
+  });
+  const pickedByRecommendation = recommendation?.toolId
+    ? eligible.find((tool) => tool.id === recommendation.toolId) || null
+    : null;
+  const selectedTool = pickedByRecommendation
+    || pickWithRotation(eligible, { recent: rotationHistory[`tool:${primaryNeed}`], keyFn: (tool) => tool.id })
+    || matchingNeed[0]
+    || tools[0]
+    || null;
+
+  return {
+    selectedTool,
+    recommendation: {
+      ...(recommendation || {}),
+      toolId: selectedTool?.id || recommendation?.toolId || null,
+    },
+  };
 }
 
 function selectPrompt({ primaryNeed, selectedTool, library = {}, rotationHistory = {} }) {
@@ -174,6 +199,7 @@ export function buildSessionPlan(input = {}) {
     rotationHistory = {},
     userPrefs = {},
     selectedNeed,
+    adaptiveAnswers = {},
     tools = [],
     flowMinutes = 3,
     now = new Date().toISOString(),
@@ -187,9 +213,10 @@ export function buildSessionPlan(input = {}) {
   const memoryNeed = memory.dominantNeed || memory.preferences.favoredNeed;
   const primaryNeed = selectedNeed || (hasCheckinValues && !isWeakNeed ? inferredNeed : null) || memoryNeed || inferredNeed || DEFAULT_NEED;
   const intensity = normalizeIntensity(checkinValues, primaryNeed);
-  const selectedTool = selectTool({
+  const { selectedTool, recommendation } = selectTool({
     primaryNeed,
     checkinValues,
+    adaptiveAnswers,
     userPrefs,
     tools,
     rotationHistory,
@@ -204,6 +231,7 @@ export function buildSessionPlan(input = {}) {
   return {
     primaryNeed,
     selectedTool,
+    toolRecommendation: recommendation,
     focusSummary,
     selectedPrompt,
     closingMessage,

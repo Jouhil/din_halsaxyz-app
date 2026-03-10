@@ -392,6 +392,7 @@ function refreshPlan({ persist = false } = {}) {
   if (!state.dailyLib || !state.dailyClosing || !flow.currentFlow) return;
   flow.plan = buildSessionPlan({
     checkinValues: flow.preValues,
+    adaptiveAnswers: flow.questionAnswers,
     selectedNeed: flow.selectedNeed,
     libraries: { library: state.dailyLib, closing: state.dailyClosing },
     rotationHistory: loadRotationHistory(),
@@ -512,6 +513,12 @@ function renderToolStep() {
   const selectedDim = FOCUS_META[selectedNeed]?.dim || 'stress';
   const focusSummary = flow.plan?.focusSummary
     || buildFocusSummary({ primaryNeed: selectedNeed, checkinValues: flow.preValues });
+  const recommendation = flow.plan?.toolRecommendation || null;
+  const recommendationReason = recommendation?.reasonShort || 'Det här verktyget kan passa bra just nu.';
+  const recommendationAlternatives = (recommendation?.alternatives || [])
+    .map((alt) => tools.find((item) => item.id === alt.toolId) || null)
+    .filter((alt) => alt && alt.id !== tool.id)
+    .slice(0, 2);
   flow.selectedTool = tool;
 
   const progress = tool.durationSec > 0 ? Math.round(((tool.durationSec - flow.countdown) / tool.durationSec) * 100) : 0;
@@ -520,10 +527,12 @@ function renderToolStep() {
 
   return `<div class="card">
     <div class="flow-note">${focusSummary}</div>
+    <div class="flow-note">${recommendationReason}</div>
     <div class="neo-card micro-tool-card micro-card" data-dim="${selectedDim}">
       ${renderMicroTool(tool)}
       <div class="tool-progress"><div class="tool-progress-bar"><span style="width:${Math.max(0, Math.min(progress, 100))}%"></span></div><div class="tool-time">Tid kvar: <span>${remaining}</span></div></div>
     </div>
+    ${recommendationAlternatives.length ? `<div class="flow-note">Andra verktyg som också kan passa</div><div class="chip-wrap">${recommendationAlternatives.map((alt) => `<button class="chip" data-action="pick-tool" data-tool-id="${alt.id}">${alt.title}</button>`).join('')}</div>` : ''}
     <div class="flow-actions">
       <button class="neo-btn neo-btn--outline neo-btn--cta neo-btn--dim" data-dim="${selectedDim}" data-action="swap-tool">🔁 Byt verktyg</button>
       <button class="neo-link" data-action="guide-focus">❓ Lär mer</button>
@@ -792,6 +801,20 @@ function bind(root) {
     if (didSwap) startToolTimer(true);
     render();
   });
+
+  root.querySelectorAll('[data-action="pick-tool"]').forEach((el) => el.addEventListener('click', () => {
+    const toolId = el.dataset.toolId;
+    const nextTool = tools.find((item) => item.id === toolId);
+    if (!nextTool) return;
+    stopTimer();
+    flow.selectedTool = nextTool;
+    flow.plan = {
+      ...(flow.plan || {}),
+      selectedTool: nextTool,
+    };
+    startToolTimer(true);
+    render();
+  }));
 
   root.querySelectorAll('[data-action="set-star"]').forEach((el) => el.addEventListener('click', () => {
     flow.after.stars = Number(el.dataset.star);
