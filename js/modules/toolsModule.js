@@ -22,7 +22,7 @@ const TOOL_DEFINITIONS = [
     id: 'thought-catcher',
     view: 'thought-catcher',
     title: 'Tankefångare',
-    description: 'Fånga en tanke, mjuka upp den och prova ett mer hjälpsamt perspektiv.',
+    description: 'Fånga en tanke, mjuka upp den och ge dig själv lite mer inre utrymme.',
     icon: '📝',
     tone: 'thought',
   },
@@ -92,30 +92,30 @@ const THOUGHT_CATCHER_STEPS = [
   {
     key: 'notice',
     title: 'Vilken tanke tar mest plats just nu?',
-    body: 'Välj den tanke som känns tydligast, eller skriv en egen.',
-    support: 'Börja med att lägga märke till tanken – du behöver inte lösa den direkt.',
+    body: 'Börja med att lägga märke till den tanke som känns starkast just nu.',
+    support: 'Det räcker att välja det som känns närmast just nu.',
     cta: 'Det här stämmer',
   },
   {
     key: 'impact',
-    title: 'Hur tung känns den tanken?',
-    body: 'Känn efter hur mycket tanken påverkar dig just nu.',
-    support: 'Du behöver inte ändra tanken direkt.',
+    title: 'Hur påverkar tanken dig just nu?',
+    body: 'Känn efter hur tungt eller spänt det känns i dig när tanken är där.',
+    support: 'Du behöver inte lösa tanken här.',
     cta: 'Jag vill gå vidare',
   },
   {
     key: 'soften',
-    title: 'Finns en mjukare tanke att prova?',
-    body: 'Välj en tanke som känns lite vänligare eller mer hjälpsam att bära.',
-    support: 'Prova om det finns en tanke som känns lite mjukare att bära.',
+    title: 'Finns det en mjukare tanke du kan prova?',
+    body: 'Se om du hittar en formulering som känns lite vänligare och lättare att bära.',
+    support: 'Se om något känns lite snällare, inte perfekt.',
     cta: 'Prova en mjukare tanke',
   },
   {
     key: 'result',
-    title: 'Hur känns den nya tanken i kroppen?',
-    body: 'Känn efter om den ger lite mer utrymme just nu.',
-    support: 'Små skiften räknas.',
-    cta: 'Känn efter',
+    title: 'Vad händer i dig med den nya tanken?',
+    body: 'Känn efter om kroppen får lite mer lugn eller utrymme nu.',
+    support: 'Det räcker om det känns bara lite lättare.',
+    cta: 'Klar',
   },
 ];
 
@@ -551,7 +551,8 @@ function getThoughtCatcherProgress() {
   const capped = Math.min(step + 1, THOUGHT_CATCHER_STEPS.length);
   const percentage = Math.round((capped / THOUGHT_CATCHER_STEPS.length) * 100);
   return {
-    stepLabel: `Steg ${capped} av ${THOUGHT_CATCHER_STEPS.length}`,
+    stepLabel: `Del ${capped} av ${THOUGHT_CATCHER_STEPS.length} · steg för steg`,
+    stepKicker: `Steg ${capped}: ${capped === 1 ? 'Lägg märke till tanken' : capped === 2 ? 'Se påverkan' : capped === 3 ? 'Prova en mjukare tanke' : 'Känn skillnaden'}`,
     percentage,
   };
 }
@@ -586,11 +587,12 @@ function renderThoughtCatcherTool() {
             <div>
               <span class="ex-badge">📝 tankefångare</span>
               <h4 class="ex-title">Lite mer utrymme</h4>
-              <p class="ex-subtitle">Bra gjort. Du har tagit ett steg från automatisk tanke till något mer medvetet.</p>
+              <p class="ex-subtitle">Bra gjort. Du har tagit ett steg från en automatisk tanke till något mer medvetet.</p>
             </div>
           </div>
           <div class="thought-catcher-step">
-            <p>Du kan återvända till övningen när samma tanke dyker upp igen.</p>
+            <p>Stanna gärna en kort stund och märk vad som känns annorlunda nu.</p>
+            <p class="thought-catcher-support">Du kan återvända till övningen när samma tanke dyker upp igen.</p>
           </div>
           <div class="thought-catcher-actions">
             <button class="neo-btn neo-btn--filled neo-btn--cta" type="button" data-thought-catcher-action="restart">Börja om</button>
@@ -602,7 +604,7 @@ function renderThoughtCatcherTool() {
   }
 
   const step = THOUGHT_CATCHER_STEPS[state.stepIndex];
-  const { stepLabel, percentage } = getThoughtCatcherProgress();
+  const { stepLabel, stepKicker, percentage } = getThoughtCatcherProgress();
 
   let stepContent = '';
   if (step.key === 'notice') {
@@ -644,7 +646,7 @@ function renderThoughtCatcherTool() {
           <div>
             <span class="ex-badge">📝 tankefångare</span>
             <h4 class="ex-title">Tankefångare</h4>
-            <p class="ex-subtitle">Fånga en tanke, mjuka upp den och prova ett mer hjälpsamt perspektiv.</p>
+            <p class="ex-subtitle">Ett lugnt steg i taget: lägg märke till tanken, mjuka upp den och känn efter.</p>
           </div>
         </div>
         <div class="tool-progress" aria-live="polite">
@@ -652,13 +654,14 @@ function renderThoughtCatcherTool() {
           <div class="tool-time">${stepLabel}</div>
         </div>
         <div class="thought-catcher-step" aria-live="polite">
+          <p class="thought-catcher-kicker">${stepKicker}</p>
           <h5>${step.title}</h5>
           <p>${step.body}</p>
           ${step.support ? `<p class="thought-catcher-support">${step.support}</p>` : ''}
           ${stepContent}
         </div>
         <div class="thought-catcher-actions">
-          <button class="neo-btn neo-btn--filled neo-btn--cta" type="button" data-thought-catcher-action="next">${state.stepIndex === THOUGHT_CATCHER_STEPS.length - 1 ? 'Klar' : step.cta || 'Nästa'}</button>
+          <button class="neo-btn neo-btn--filled neo-btn--cta" type="button" data-thought-catcher-action="next">${step.cta || 'Nästa'}</button>
           ${(state.stepIndex > 0) ? '<button class="neo-btn neo-btn--outline neo-btn--cta" type="button" data-thought-catcher-action="back">Tillbaka</button>' : ''}
           ${(state.stepIndex > 0) ? '<button class="neo-btn neo-btn--outline neo-btn--cta" type="button" data-thought-catcher-action="restart">Börja om</button>' : ''}
         </div>
