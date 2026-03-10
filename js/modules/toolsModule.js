@@ -163,6 +163,54 @@ const RETURN_NEXT_STEP_OPTIONS = [
   'Egen tanke',
 ];
 
+const RETURN_LANDING_VARIANTS = [
+  {
+    title: 'Landning i nuet',
+    body: 'Nu hjälper vi kroppen och uppmärksamheten tillbaka till det som finns här.',
+    prompts: [
+      'Se 3 saker omkring dig',
+      'Känn 2 saker i eller mot kroppen',
+      'Ta 1 lugn utandning',
+    ],
+  },
+  {
+    title: 'Tillbaka till nuet',
+    body: 'Vi landar i det som finns omkring dig just nu.',
+    prompts: [
+      'Lägg märke till 3 saker du ser',
+      'Känn efter på 2 ställen i kroppen',
+      'Låt 1 utandning bli lite längre',
+    ],
+  },
+  {
+    title: 'Här och nu',
+    body: 'Bara lite grann tillbaka till det som är här.',
+    prompts: [
+      'Hitta 3 saker med blicken',
+      'Känn 2 kontaktpunkter mot stolen eller golvet',
+      'Ta 1 mjuk utandning',
+    ],
+  },
+  {
+    title: 'Landa lite mer',
+    body: 'Nu får kroppen och uppmärksamheten komma tillbaka hit.',
+    prompts: [
+      'Se 3 detaljer i rummet',
+      'Känn 2 områden där kroppen har stöd',
+      'Ta 1 långsam utandning',
+    ],
+  },
+  {
+    title: 'Ett steg tillbaka till nuet',
+    body: 'Vi hjälper uppmärksamheten tillbaka till det som finns här, i din takt.',
+    prompts: [
+      'Låt blicken vila på 3 saker nära dig',
+      'Känn 2 punkter där kroppen möter underlaget',
+      'Ta 1 mjuk och lugn utandning',
+    ],
+  },
+];
+
 const toolsState = {
   activeView: 'home',
   stepIndex: 0,
@@ -183,6 +231,7 @@ const toolsState = {
     selectedActionability: '',
     selectedStepChoice: '',
     customStepChoice: '',
+    selectedLandingVariant: null,
   },
 };
 
@@ -225,7 +274,20 @@ function resetReturnToNow() {
     selectedActionability: '',
     selectedStepChoice: '',
     customStepChoice: '',
+    selectedLandingVariant: null,
   };
+}
+
+function getSelectedLandingVariant() {
+  const state = toolsState.returnToNow;
+  if (state.selectedLandingVariant) {
+    return state.selectedLandingVariant;
+  }
+
+  state.selectedLandingVariant = RETURN_LANDING_VARIANTS[
+    Math.floor(Math.random() * RETURN_LANDING_VARIANTS.length)
+  ];
+  return state.selectedLandingVariant;
 }
 
 function getReturnToNowProgress() {
@@ -331,15 +393,14 @@ function renderReturnToNowTool() {
   }
 
   if (state.stepIndex === 3) {
-    title = 'Landning i nuet';
-    body = 'Nu hjälper vi kroppen och uppmärksamheten tillbaka till det som finns här.';
+    const landingVariant = getSelectedLandingVariant();
+    title = landingVariant.title;
+    body = landingVariant.body;
     support = 'Du behöver inte göra det perfekt. Bara kom tillbaka lite grann.';
     cta = 'Jag är här nu';
     stepContent = `
       <div class="return-now-checklist">
-        <div class="return-now-item">Se 3 saker omkring dig</div>
-        <div class="return-now-item">Känn 2 saker i eller mot kroppen</div>
-        <div class="return-now-item">Ta 1 lugn utandning</div>
+        ${landingVariant.prompts.map((prompt) => `<div class="return-now-item">${prompt}</div>`).join('')}
       </div>
     `;
   }
@@ -623,6 +684,9 @@ function bindToolsEvents() {
     }
 
     if (target.closest('[data-tools-back]')) {
+      if (toolsState.activeView === 'return-to-now') {
+        toolsState.returnToNow.selectedLandingVariant = null;
+      }
       setToolsView('home');
       return;
     }
