@@ -95,20 +95,24 @@ body.dark .grat-line{color:#e8f0e8!important;}
 .quick-tool-btn:hover{border-color:var(--accent);color:var(--accent);}
 .breath-card{background:linear-gradient(155deg,rgba(45,106,79,.12),rgba(45,106,79,.04));border:1px solid var(--border);border-radius:22px;padding:clamp(16px,3vw,24px);}
 .calm-title{font-size:clamp(1.25rem,3vw,1.6rem);font-weight:700;text-align:center;margin-bottom:6px;}
-.breath-sub{color:var(--text2);text-align:center;font-size:.9rem;margin-bottom:10px;}
-#timer-disp{font-size:clamp(2.1rem,8vw,3.3rem);font-weight:700;color:var(--accent);text-align:center;letter-spacing:1px;margin:2px 0;}
-#breath-lbl{font-size:clamp(1rem,2.6vw,1.18rem);font-weight:700;text-align:center;min-height:28px;margin-top:6px;}
-#breath-phase-sec{color:var(--text2);font-size:.85rem;font-weight:600;text-align:center;min-height:20px;}
-.breath-wrap{position:relative;margin:12px auto;width:clamp(140px,30vw,210px);height:clamp(140px,30vw,210px);display:none;align-items:center;justify-content:center;}
-.breath-wrap.show{display:flex;}
-.b-ring{position:absolute;border-radius:50%;width:100%;height:100%;background:radial-gradient(circle at 33% 33%,#d5f3c1,#4f8a6e 55%,#2D6A4F);box-shadow:0 0 40px rgba(45,106,79,.25),inset 0 -10px 25px rgba(0,0,0,.2),inset 0 10px 25px rgba(255,255,255,.12);}
+.breath-sub{color:var(--text2);text-align:center;font-size:.9rem;margin-bottom:14px;}
+.breath-focus{background:linear-gradient(180deg,rgba(255,255,255,.35),rgba(255,255,255,.08));border:1px solid rgba(255,255,255,.45);border-radius:20px;padding:18px 16px;margin-bottom:14px;backdrop-filter:blur(2px);}
+body.dark .breath-focus,body.surface--dark .breath-focus{background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.02));border-color:rgba(255,255,255,.12);}
+#breath-lbl{font-size:clamp(1.35rem,4vw,2rem);font-weight:700;text-align:center;min-height:44px;letter-spacing:-.3px;}
+#breath-guidance{color:var(--text2);font-size:.92rem;font-weight:500;text-align:center;min-height:20px;margin-top:2px;}
+.breath-wrap{position:relative;margin:16px auto 12px;width:clamp(160px,32vw,230px);height:clamp(160px,32vw,230px);display:flex;align-items:center;justify-content:center;}
+.b-ring{position:absolute;border-radius:50%;width:100%;height:100%;background:radial-gradient(circle at 33% 33%,#dbf4cb,#5a9776 58%,#2D6A4F);box-shadow:0 0 45px rgba(45,106,79,.26),inset 0 -10px 25px rgba(0,0,0,.2),inset 0 10px 25px rgba(255,255,255,.14);will-change:transform;}
+.breath-wrap::before{content:"";position:absolute;inset:-12px;border-radius:50%;border:1px solid rgba(45,106,79,.16);}
+.breath-wrap.show .b-ring{box-shadow:0 0 55px rgba(45,106,79,.35),inset 0 -10px 25px rgba(0,0,0,.2),inset 0 10px 25px rgba(255,255,255,.14);}
 .b-shine{position:absolute;border-radius:50%;width:58%;height:58%;background:radial-gradient(circle at 33% 33%,rgba(255,255,255,.28),transparent 65%);}
 .b-txt{position:relative;z-index:2;color:#fff;font-weight:700;font-size:clamp(.82rem,2.2vw,1rem);text-align:center;text-shadow:0 2px 6px rgba(0,0,0,.5);white-space:pre-line;font-family:inherit;}
-@keyframes bIn{from{transform:scale(.58);}to{transform:scale(1);}}
+@keyframes bIn{from{transform:scale(.62);}to{transform:scale(1);}}
 @keyframes bHold{0%,100%{transform:scale(1);}}
-@keyframes bOut{from{transform:scale(1);}to{transform:scale(.58);}}
-.time-ctrl-panel{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px 16px;margin-top:14px;}
-.time-ctrl-label{font-size:.83rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;text-align:center;color:var(--text2);}
+@keyframes bOut{from{transform:scale(1);}to{transform:scale(.62);}}
+#timer-disp{font-size:clamp(2.2rem,8vw,3.5rem);font-weight:700;color:var(--accent);text-align:center;letter-spacing:1.5px;margin:2px 0 10px;}
+#breath-phase-sec{color:var(--text2);font-size:.86rem;font-weight:600;text-align:center;min-height:20px;}
+.time-ctrl-panel{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px 16px;margin-top:8px;}
+.time-ctrl-label{font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;text-align:center;color:var(--text2);}
 .time-ctrl-row{display:flex;align-items:center;gap:10px;justify-content:center;flex-wrap:wrap;}
 .time-presets{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
 .time-preset-btn{border:1px solid var(--border);background:var(--input-bg);color:var(--text);border-radius:999px;padding:6px 12px;font-weight:700;font-family:inherit;cursor:pointer;transition:.2s;}
@@ -116,11 +120,12 @@ body.dark .grat-line{color:#e8f0e8!important;}
 .time-preset-btn.is-active{background:rgba(45,106,79,.14);border-color:var(--accent);color:var(--accent);}
 .time-input{width:86px;padding:10px 12px;border-radius:12px;border:1.5px solid var(--border);background:var(--input-bg);color:var(--text);font-size:1.1rem;font-family:inherit;font-weight:700;text-align:center;transition:.2s;}
 .time-input:focus{outline:none;border-color:var(--accent);}
-.time-start-btn,.time-stop-btn{white-space:nowrap;}
-.sound-panel{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px;margin-top:12px;}
-.sound-row{display:grid;grid-template-columns:minmax(90px,1fr) auto 1fr;align-items:center;gap:10px;padding:8px 0;}
+.time-start-btn,.time-stop-btn{white-space:nowrap;min-width:110px;}
+.sound-panel{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:12px 14px;margin-top:12px;}
+.sound-title{font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--text2);margin-bottom:6px;text-align:center;}
+.sound-row{display:grid;grid-template-columns:minmax(92px,1fr) auto 1fr;align-items:center;gap:10px;padding:10px 0;}
 .sound-row:not(:last-child){border-bottom:1px solid var(--border);}
-.snd-label{font-size:.9rem;font-weight:600;color:var(--text);}
+.snd-label{font-size:.88rem;font-weight:600;color:var(--text);}
 .snd-toggle.on{background:rgba(45,106,79,.12)!important;border-color:var(--accent)!important;color:var(--accent)!important;}
 .sound-row input[type=range]{width:100%;accent-color:#2D6A4F;height:6px;}
 
@@ -612,16 +617,24 @@ body.guide-open #content{overflow:hidden;}
           <section class="breath-card">
             <div class="calm-title">🌊 Box breathing 4-4-4-4</div>
             <div class="breath-sub">Andas in 4 sek · håll 4 sek · andas ut 4 sek · håll 4 sek</div>
-            <div id="timer-disp">05:00</div>
-            <div id="breath-lbl">Redo att starta</div>
-            <div id="breath-phase-sec">Nästa: Andas in i 4 sek</div>
-            <div class="breath-wrap" id="bwrap">
-              <div class="b-ring" id="bring"></div>
-              <div class="b-shine"></div>
-              <div class="b-txt" id="btxt"></div>
+            <div class="breath-focus">
+              <div id="breath-lbl">Redo att starta</div>
+              <div id="breath-guidance">Vi börjar med 4-4-4-4 i lugn takt.</div>
+              <div class="breath-wrap" id="bwrap">
+                <div class="b-ring" id="bring"></div>
+                <div class="b-shine"></div>
+                <div class="b-txt" id="btxt"></div>
+              </div>
+              <div id="timer-disp">05:00</div>
+              <div id="breath-phase-sec">Nästa: Andas in i 4 sek</div>
             </div>
             <div class="time-ctrl-panel">
-              <div class="time-ctrl-label">⏱ Sessionstid i minuter</div>
+              <div class="time-ctrl-label">Starta din session</div>
+              <div class="time-ctrl-row" style="margin-bottom:10px;">
+                <button class="time-start-btn btn btn--filled" id="breath-main-btn" onclick="startCustom()">Starta</button>
+                <button class="time-stop-btn btn btn--outline" onclick="stopBreath()">Avsluta</button>
+              </div>
+              <div class="time-ctrl-label">Sessionstid i minuter</div>
               <div class="time-presets" role="group" aria-label="Snabbval för andningssession">
                 <button type="button" class="time-preset-btn" data-mins="1" onclick="setBreathMinutesPreset(1)">1 min</button>
                 <button type="button" class="time-preset-btn" data-mins="3" onclick="setBreathMinutesPreset(3)">3 min</button>
@@ -630,11 +643,10 @@ body.guide-open #content{overflow:hidden;}
               </div>
               <div class="time-ctrl-row">
                 <input type="number" class="time-input" id="custom-min" value="5" min="1" max="60" oninput="syncBreathPreset()">
-                <button class="time-start-btn btn btn--filled" onclick="startCustom()">Starta box breathing</button>
-                <button class="time-stop-btn btn btn--outline" onclick="stopBreath()">Avsluta</button>
               </div>
             </div>
             <div class="sound-panel">
+              <div class="sound-title">Valfria bakgrundsljud</div>
               <div class="sound-row"><span class="snd-label">🌧️ Regn</span><button class="snd-toggle btn btn--outline btn--sm" id="rain-btn" onclick="toggleSound('rain')">AV</button><input type="range" id="rain-vol" min="0" max="1" step="0.05" value="0.35" oninput="setVol('rain',this.value)"></div>
               <div class="sound-row"><span class="snd-label">🌊 Hav</span><button class="snd-toggle btn btn--outline btn--sm" id="ocean-btn" onclick="toggleSound('ocean')">AV</button><input type="range" id="ocean-vol" min="0" max="1" step="0.05" value="0.35" oninput="setVol('ocean',this.value)"></div>
               <div class="sound-row"><span class="snd-label">🌲 Skog</span><button class="snd-toggle btn btn--outline btn--sm" id="forest-btn" onclick="toggleSound('forest')">AV</button><input type="range" id="forest-vol" min="0" max="1" step="0.05" value="0.35" oninput="setVol('forest',this.value)"></div>
