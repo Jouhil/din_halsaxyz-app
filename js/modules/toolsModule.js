@@ -138,13 +138,6 @@ const SOFT_THOUGHT_OPTIONS = [
   'Egen tanke',
 ];
 
-const RETURN_PULL_OPTIONS = [
-  'Det som varit',
-  'Det som kan hända',
-  'Både och',
-  'Egen tanke',
-];
-
 const RETURN_ACUTE_SUPPORT_OPTIONS = [
   'Jag ser 3 saker omkring mig',
   'Jag känner fötterna mot underlaget',
@@ -248,10 +241,8 @@ const toolsState = {
     reliefValue: 50,
   },
   returnToNow: {
-    currentStep: 'concern',
-    stepHistory: ['concern'],
-    selectedConcernType: '',
-    customConcern: '',
+    currentStep: 'track-choice',
+    stepHistory: ['track-choice'],
     selectedTrack: '',
     acuteSupportChoice: '',
     customAcuteSupportChoice: '',
@@ -294,10 +285,8 @@ function getProgress() {
 
 function resetReturnToNow() {
   toolsState.returnToNow = {
-    currentStep: 'concern',
-    stepHistory: ['concern'],
-    selectedConcernType: '',
-    customConcern: '',
+    currentStep: 'track-choice',
+    stepHistory: ['track-choice'],
     selectedTrack: '',
     acuteSupportChoice: '',
     customAcuteSupportChoice: '',
@@ -342,7 +331,7 @@ function goBackReturnToNowStep() {
   const state = toolsState.returnToNow;
   if (state.stepHistory.length <= 1) return;
   state.stepHistory.pop();
-  state.currentStep = state.stepHistory[state.stepHistory.length - 1] || 'concern';
+  state.currentStep = state.stepHistory[state.stepHistory.length - 1] || 'track-choice';
 }
 
 function setToolsView(view) {
@@ -382,7 +371,7 @@ function renderReturnToNowTool() {
       : 'En kort övning då och då gör det lättare att landa i stunden.';
     container.innerHTML = `
       <article class="micro-card" data-dim="present">
-        <div class="micro-tool-card">
+        <div class="micro-tool-card return-to-now-card">
           <div class="micro-tool-head">
             <div>
               <span class="ex-badge">🧭 tillbaka till nuet</span>
@@ -409,21 +398,12 @@ function renderReturnToNowTool() {
   let cta = '';
   let stepContent = '';
 
-  if (state.currentStep === 'concern') {
-    title = 'Vad drar dig bort från nuet?';
-    body = 'Välj det som passar bäst just nu.';
-    support = 'Det räcker att bara lägga märke till vad som drar iväg dig.';
-    cta = 'Fortsätt';
-    stepContent = `
-      ${renderThoughtOptionChips(RETURN_PULL_OPTIONS, state.selectedConcernType, 'return-concern')}
-      ${state.selectedConcernType === 'Egen tanke' ? `<input class="txt-in txt-in-sm" type="text" placeholder="Skriv din tanke" value="${state.customConcern || ''}" data-return-custom-input="concern">` : ''}
-    `;
-  }
+
 
   if (state.currentStep === 'track-choice') {
-    title = 'Var är du just nu?';
-    body = 'Välj spåret som passar din stund bäst. Vi anpassar hjälpen direkt efter ditt val.';
-    support = '';
+    title = 'Tillbaka till nuet';
+    body = 'Välj det som passar dig bäst just nu.';
+    support = 'Du kan alltid börja om eller byta spår efteråt.';
     cta = state.selectedTrack === 'acute'
       ? 'Fortsätt med akut stöd'
       : state.selectedTrack === 'preventive'
@@ -497,12 +477,12 @@ function renderReturnToNowTool() {
 
   container.innerHTML = `
     <article class="micro-card" data-dim="present">
-      <div class="micro-tool-card">
+      <div class="micro-tool-card return-to-now-card">
         <div class="micro-tool-head">
           <div>
             <span class="ex-badge">🧭 tillbaka till nuet</span>
             <h4 class="ex-title">Tillbaka till nuet</h4>
-            <p class="ex-subtitle">När tankarna drar iväg hjälper vi dig tillbaka, lugnt och steg för steg.</p>
+            <p class="ex-subtitle">Två vägar tillbaka till nuet — välj det som passar stunden.</p>
           </div>
         </div>
         <div class="tool-progress" aria-live="polite">
@@ -527,11 +507,6 @@ function renderReturnToNowTool() {
 
 function canAdvanceReturnToNowStep() {
   const state = toolsState.returnToNow;
-  if (state.currentStep === 'concern') {
-    if (!state.selectedConcernType) return false;
-    if (state.selectedConcernType === 'Egen tanke') return Boolean(state.customConcern.trim());
-  }
-
   if (state.currentStep === 'track-choice') {
     return Boolean(state.selectedTrack);
   }
@@ -826,12 +801,6 @@ function bindToolsEvents() {
         renderThoughtCatcherTool();
         return;
       }
-      if (stepKey === 'return-concern') {
-        toolsState.returnToNow.selectedConcernType = value;
-        if (value !== 'Egen tanke') toolsState.returnToNow.customConcern = '';
-        renderReturnToNowTool();
-        return;
-      }
       if (stepKey === 'return-acute-support') {
         toolsState.returnToNow.acuteSupportChoice = value;
         if (value !== 'Egen förankring') toolsState.returnToNow.customAcuteSupportChoice = '';
@@ -890,9 +859,7 @@ function bindToolsEvents() {
 
     if (!canAdvanceReturnToNowStep()) return;
     const state = toolsState.returnToNow;
-    if (state.currentStep === 'concern') {
-      goToReturnToNowStep('track-choice');
-    } else if (state.currentStep === 'track-choice') {
+    if (state.currentStep === 'track-choice') {
       goToReturnToNowStep(state.selectedTrack === 'acute' ? 'acute-core' : 'preventive-core');
     } else if (state.currentStep === 'acute-core') {
       goToReturnToNowStep('acute-landing');
@@ -925,11 +892,6 @@ function bindToolsEvents() {
 
     if (target.matches('[data-thought-slider="result"]')) {
       toolsState.thoughtCatcher.reliefValue = Number(target.value);
-      return;
-    }
-
-    if (target.matches('[data-return-custom-input="concern"]')) {
-      toolsState.returnToNow.customConcern = target.value;
       return;
     }
 
