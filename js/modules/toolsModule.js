@@ -145,20 +145,48 @@ const RETURN_PULL_OPTIONS = [
   'Egen tanke',
 ];
 
-const RETURN_ACTION_OPTIONS = ['Ja', 'Nej', 'Vet inte'];
+const RETURN_DIRECTION_OPTIONS = ['Det som varit', 'Det som kan hända'];
 
-const RETURN_PARK_OPTIONS = [
-  'Den får vänta en stund',
-  'Jag återkommer senare',
-  'En tanke, inte en akut uppgift',
-  'Jag behöver inte lösa det just nu',
+const RETURN_PAST_MODE_OPTIONS = [
+  'Det här kan jag inte ändra nu',
+  'Det finns något jag vill ta med mig',
+  'Jag vet inte',
+];
+
+const RETURN_FUTURE_MODE_OPTIONS = [
+  'Det finns inget jag kan göra just nu',
+  'Det finns ett litet steg jag kan ta',
+  'Jag vet inte',
+];
+
+const RETURN_PAST_PARK_OPTIONS = [
+  'Inte nu',
+  'Jag låter det vila en stund',
+  'Jag behöver inte gå igenom allt igen',
+  'Tanke, inte uppgift',
   'Egen tanke',
 ];
 
-const RETURN_NEXT_STEP_OPTIONS = [
-  'Skriv en kort notis',
-  'Välj en tid senare idag',
-  'Skicka ett kort meddelande',
+const RETURN_PAST_LEARN_OPTIONS = [
+  'Jag gjorde så gott jag kunde',
+  'Jag lär mig något av det här',
+  'Jag kan släppa resten',
+  'Jag behöver inte bära allt',
+  'Egen tanke',
+];
+
+const RETURN_FUTURE_WAIT_OPTIONS = [
+  'Inte nu',
+  'Jag tar det senare',
+  'Oro är inte en uppgift',
+  'Jag behöver inte lösa det nu',
+  'Egen tanke',
+];
+
+const RETURN_FUTURE_STEP_OPTIONS = [
+  'Skriv ner det',
+  'Ta det senare idag',
+  'Fråga någon',
   'Gör en liten sak nu',
   'Egen tanke',
 ];
@@ -250,12 +278,15 @@ const toolsState = {
     reliefValue: 50,
   },
   returnToNow: {
-    stepIndex: 0,
-    selectedPull: '',
-    customPull: '',
-    selectedActionability: '',
-    selectedStepChoice: '',
-    customStepChoice: '',
+    currentStep: 'concern',
+    stepHistory: ['concern'],
+    selectedConcernType: '',
+    customConcern: '',
+    activeBranch: '',
+    pastMode: '',
+    futureMode: '',
+    selectedSupportChoice: '',
+    customSupportChoice: '',
     selectedLandingVariant: null,
   },
 };
@@ -293,12 +324,15 @@ function getProgress() {
 
 function resetReturnToNow() {
   toolsState.returnToNow = {
-    stepIndex: 0,
-    selectedPull: '',
-    customPull: '',
-    selectedActionability: '',
-    selectedStepChoice: '',
-    customStepChoice: '',
+    currentStep: 'concern',
+    stepHistory: ['concern'],
+    selectedConcernType: '',
+    customConcern: '',
+    activeBranch: '',
+    pastMode: '',
+    futureMode: '',
+    selectedSupportChoice: '',
+    customSupportChoice: '',
     selectedLandingVariant: null,
   };
 }
@@ -317,12 +351,29 @@ function getSelectedLandingVariant() {
 
 function getReturnToNowProgress() {
   const state = toolsState.returnToNow;
-  const capped = Math.min(state.stepIndex + 1, 4);
-  const percentage = Math.round((capped / 4) * 100);
+  const needsDirectionStep = state.selectedConcernType === 'Både och' || state.selectedConcernType === 'Egen tanke';
+  const totalSteps = needsDirectionStep ? 5 : 4;
+  const currentStep = Math.min(state.stepHistory.length, totalSteps);
+  const percentage = Math.round((currentStep / totalSteps) * 100);
   return {
-    stepLabel: `Steg ${capped} av 4`,
+    stepLabel: `Steg ${currentStep} av ${totalSteps}`,
     percentage,
   };
+}
+
+function goToReturnToNowStep(nextStep) {
+  const state = toolsState.returnToNow;
+  state.currentStep = nextStep;
+  if (state.stepHistory[state.stepHistory.length - 1] !== nextStep) {
+    state.stepHistory.push(nextStep);
+  }
+}
+
+function goBackReturnToNowStep() {
+  const state = toolsState.returnToNow;
+  if (state.stepHistory.length <= 1) return;
+  state.stepHistory.pop();
+  state.currentStep = state.stepHistory[state.stepHistory.length - 1] || 'concern';
 }
 
 function setToolsView(view) {
@@ -350,7 +401,7 @@ function renderReturnToNowTool() {
   if (!container) return;
 
   const state = toolsState.returnToNow;
-  const isDone = state.stepIndex >= 4;
+  const isDone = state.currentStep === 'done';
 
   if (isDone) {
     container.innerHTML = `
@@ -376,48 +427,81 @@ function renderReturnToNowTool() {
   }
 
   const { stepLabel, percentage } = getReturnToNowProgress();
-  const isActionable = state.selectedActionability === 'Ja';
+  const isPastBranch = state.activeBranch === 'past';
+  const pastTakesLearning = state.pastMode === 'Det finns något jag vill ta med mig';
+  const futureSmallStep = state.futureMode === 'Det finns ett litet steg jag kan ta';
   let title = '';
   let body = '';
   let support = '';
   let cta = '';
   let stepContent = '';
 
-  if (state.stepIndex === 0) {
-    title = 'Vad drar dig bort från nuet just nu?';
-    body = 'Börja med att lägga märke till vad som tar dig bort från stunden.';
-    support = 'Det räcker att notera det som pågår i huvudet just nu.';
+  if (state.currentStep === 'concern') {
+    title = 'Vad drar dig bort från nuet?';
+    body = 'Välj det som passar bäst just nu.';
+    support = 'Det räcker att bara lägga märke till vad som drar iväg dig.';
     cta = 'Det här stämmer';
     stepContent = `
-      ${renderThoughtOptionChips(RETURN_PULL_OPTIONS, state.selectedPull, 'return-pull')}
-      ${state.selectedPull === 'Egen tanke' ? `<input class="txt-in txt-in-sm" type="text" placeholder="Skriv din tanke" value="${state.customPull || ''}" data-return-custom-input="pull">` : ''}
+      ${renderThoughtOptionChips(RETURN_PULL_OPTIONS, state.selectedConcernType, 'return-concern')}
+      ${state.selectedConcernType === 'Egen tanke' ? `<input class="txt-in txt-in-sm" type="text" placeholder="Skriv din tanke" value="${state.customConcern || ''}" data-return-custom-input="concern">` : ''}
     `;
   }
 
-  if (state.stepIndex === 1) {
-    title = 'Går det att göra något åt det just nu?';
-    body = 'Du behöver inte reda ut allt nu. Känn efter om det här går att påverka i den här stunden.';
-    support = 'Du behöver inte hitta rätt svar, bara det som känns sant just nu.';
+  if (state.currentStep === 'direction') {
+    title = 'Vad tar mest plats just nu?';
+    body = 'Vi börjar med det som känns starkast i denna stund.';
+    support = 'Du behöver inte ta allt på en gång.';
+    cta = 'Vi börjar här';
+    stepContent = renderThoughtOptionChips(RETURN_DIRECTION_OPTIONS, state.activeBranch === 'past' ? 'Det som varit' : state.activeBranch === 'future' ? 'Det som kan hända' : '', 'return-direction');
+  }
+
+  if (state.currentStep === 'branch-core') {
+    title = isPastBranch ? 'Det som varit drar kvar' : 'Det som kan hända drar iväg';
+    body = isPastBranch
+      ? 'Ältande försöker ofta lösa något i efterhand. Vi ska inte lösa det nu — vi ska hjälpa dig lossna lite från det.'
+      : 'Framtidsoro vill ofta få dig att tänka klart allt i förväg. Vi ska göra det mindre stort just nu.';
+    support = isPastBranch
+      ? 'Det handlar inte om att förneka det som hänt, bara om vad du behöver just nu.'
+      : 'Du behöver inte lösa hela framtiden i denna stund.';
     cta = 'Jag vill gå vidare';
-    stepContent = renderThoughtOptionChips(RETURN_ACTION_OPTIONS, state.selectedActionability, 'return-actionability');
+    stepContent = renderThoughtOptionChips(
+      isPastBranch ? RETURN_PAST_MODE_OPTIONS : RETURN_FUTURE_MODE_OPTIONS,
+      isPastBranch ? state.pastMode : state.futureMode,
+      isPastBranch ? 'return-past-mode' : 'return-future-mode',
+    );
   }
 
-  if (state.stepIndex === 2) {
-    title = isActionable ? 'Ett litet nästa steg' : 'Tankeparkering';
-    body = isActionable
-      ? 'Om det går att göra något nu, välj ett litet steg. Du behöver inte hela lösningen.'
-      : 'Du behöver inte bära tanken hela tiden. Ibland räcker det att låta den vänta en stund.';
-    support = isActionable
-      ? 'Ett litet steg är nog för att lätta trycket.'
-      : 'Att parkera en tanke är att ge dig själv en paus, inte att ge upp.';
-    cta = isActionable ? 'Ett steg är valt' : 'Tanken får vänta';
+  if (state.currentStep === 'branch-support') {
+    title = isPastBranch
+      ? (pastTakesLearning ? 'Det du vill ta med dig' : 'Tankeparkering')
+      : (futureSmallStep ? 'Ett litet nästa steg' : 'Oro får vänta');
+    body = isPastBranch
+      ? (pastTakesLearning
+        ? 'Finns det något du vill bära med dig, utan att fastna i resten?'
+        : 'Det har redan hänt. Du behöver inte gå igenom det igen just nu.')
+      : (futureSmallStep
+        ? 'Om det går att göra något åt det nu, välj ett litet steg — inte hela lösningen.'
+        : 'Det här behöver inte lösas nu. Du får lägga det åt sidan en stund.');
+    support = isPastBranch
+      ? (pastTakesLearning
+        ? 'Det räcker att ta med sig en liten del, inte hela händelsen.'
+        : 'Att lägga det åt sidan en stund är inte att blunda. Det är att ge dig själv lite mer luft.')
+      : (futureSmallStep
+        ? 'Det räcker med ett litet steg.'
+        : 'Att pausa oron en stund kan vara ett sätt att få tillbaka lite utrymme.');
+    cta = isPastBranch
+      ? (pastTakesLearning ? 'Jag tar med mig detta' : 'Tillbaka till nuet')
+      : (futureSmallStep ? 'Det här räcker just nu' : 'Jag släpper det för nu');
+    const supportOptions = isPastBranch
+      ? (pastTakesLearning ? RETURN_PAST_LEARN_OPTIONS : RETURN_PAST_PARK_OPTIONS)
+      : (futureSmallStep ? RETURN_FUTURE_STEP_OPTIONS : RETURN_FUTURE_WAIT_OPTIONS);
     stepContent = `
-      ${renderThoughtOptionChips(isActionable ? RETURN_NEXT_STEP_OPTIONS : RETURN_PARK_OPTIONS, state.selectedStepChoice, 'return-step-choice')}
-      ${state.selectedStepChoice === 'Egen tanke' ? `<input class="txt-in txt-in-sm" type="text" placeholder="Skriv din formulering" value="${state.customStepChoice || ''}" data-return-custom-input="step-choice">` : ''}
+      ${renderThoughtOptionChips(supportOptions, state.selectedSupportChoice, 'return-support-choice')}
+      ${state.selectedSupportChoice === 'Egen tanke' ? `<input class="txt-in txt-in-sm" type="text" placeholder="Skriv din formulering" value="${state.customSupportChoice || ''}" data-return-custom-input="support-choice">` : ''}
     `;
   }
 
-  if (state.stepIndex === 3) {
+  if (state.currentStep === 'landing') {
     const landingVariant = getSelectedLandingVariant();
     title = landingVariant.title;
     body = landingVariant.body;
@@ -453,8 +537,8 @@ function renderReturnToNowTool() {
         </div>
         <div class="thought-catcher-actions">
           <button class="neo-btn neo-btn--filled neo-btn--cta" type="button" data-return-action="next">${cta}</button>
-          ${(state.stepIndex > 0) ? '<button class="neo-btn neo-btn--outline neo-btn--cta" type="button" data-return-action="back">Tillbaka</button>' : ''}
-          ${(state.stepIndex > 0) ? '<button class="neo-btn neo-btn--outline neo-btn--cta" type="button" data-return-action="restart">Börja om</button>' : ''}
+          ${(state.stepHistory.length > 1) ? '<button class="neo-btn neo-btn--outline neo-btn--cta" type="button" data-return-action="back">Tillbaka</button>' : ''}
+          ${(state.stepHistory.length > 1) ? '<button class="neo-btn neo-btn--outline neo-btn--cta" type="button" data-return-action="restart">Börja om</button>' : ''}
         </div>
       </div>
     </article>
@@ -463,18 +547,24 @@ function renderReturnToNowTool() {
 
 function canAdvanceReturnToNowStep() {
   const state = toolsState.returnToNow;
-  if (state.stepIndex === 0) {
-    if (!state.selectedPull) return false;
-    if (state.selectedPull === 'Egen tanke') return Boolean(state.customPull.trim());
+  if (state.currentStep === 'concern') {
+    if (!state.selectedConcernType) return false;
+    if (state.selectedConcernType === 'Egen tanke') return Boolean(state.customConcern.trim());
   }
 
-  if (state.stepIndex === 1) {
-    return Boolean(state.selectedActionability);
+  if (state.currentStep === 'direction') {
+    return Boolean(state.activeBranch);
   }
 
-  if (state.stepIndex === 2) {
-    if (!state.selectedStepChoice) return false;
-    if (state.selectedStepChoice === 'Egen tanke') return Boolean(state.customStepChoice.trim());
+  if (state.currentStep === 'branch-core') {
+    if (state.activeBranch === 'past') return Boolean(state.pastMode);
+    if (state.activeBranch === 'future') return Boolean(state.futureMode);
+    return false;
+  }
+
+  if (state.currentStep === 'branch-support') {
+    if (!state.selectedSupportChoice) return false;
+    if (state.selectedSupportChoice === 'Egen tanke') return Boolean(state.customSupportChoice.trim());
   }
 
   return true;
@@ -715,9 +805,7 @@ function bindToolsEvents() {
     }
 
     if (target.closest('[data-tools-back]')) {
-      if (toolsState.activeView === 'return-to-now') {
-        toolsState.returnToNow.selectedLandingVariant = null;
-      }
+      if (toolsState.activeView === 'return-to-now') toolsState.returnToNow.selectedLandingVariant = null;
       setToolsView('home');
       return;
     }
@@ -759,18 +847,32 @@ function bindToolsEvents() {
         renderThoughtCatcherTool();
         return;
       }
-      if (stepKey === 'return-pull') {
-        toolsState.returnToNow.selectedPull = value;
+      if (stepKey === 'return-concern') {
+        toolsState.returnToNow.selectedConcernType = value;
+        if (value !== 'Egen tanke') toolsState.returnToNow.customConcern = '';
+        if (value === 'Det som varit') toolsState.returnToNow.activeBranch = 'past';
+        if (value === 'Det som kan hända') toolsState.returnToNow.activeBranch = 'future';
+        if (value === 'Både och' || value === 'Egen tanke') toolsState.returnToNow.activeBranch = '';
         renderReturnToNowTool();
         return;
       }
-      if (stepKey === 'return-actionability') {
-        toolsState.returnToNow.selectedActionability = value;
+      if (stepKey === 'return-direction') {
+        toolsState.returnToNow.activeBranch = value === 'Det som varit' ? 'past' : 'future';
         renderReturnToNowTool();
         return;
       }
-      if (stepKey === 'return-step-choice') {
-        toolsState.returnToNow.selectedStepChoice = value;
+      if (stepKey === 'return-past-mode') {
+        toolsState.returnToNow.pastMode = value;
+        renderReturnToNowTool();
+        return;
+      }
+      if (stepKey === 'return-future-mode') {
+        toolsState.returnToNow.futureMode = value;
+        renderReturnToNowTool();
+        return;
+      }
+      if (stepKey === 'return-support-choice') {
+        toolsState.returnToNow.selectedSupportChoice = value;
         renderReturnToNowTool();
         return;
       }
@@ -806,13 +908,27 @@ function bindToolsEvents() {
     }
 
     if (returnAction === 'back') {
-      toolsState.returnToNow.stepIndex = Math.max(0, toolsState.returnToNow.stepIndex - 1);
+      goBackReturnToNowStep();
       renderReturnToNowTool();
       return;
     }
 
     if (!canAdvanceReturnToNowStep()) return;
-    toolsState.returnToNow.stepIndex += 1;
+    const state = toolsState.returnToNow;
+    if (state.currentStep === 'concern') {
+      const needsDirectionStep = state.selectedConcernType === 'Både och' || state.selectedConcernType === 'Egen tanke';
+      goToReturnToNowStep(needsDirectionStep ? 'direction' : 'branch-core');
+    } else if (state.currentStep === 'direction') {
+      goToReturnToNowStep('branch-core');
+    } else if (state.currentStep === 'branch-core') {
+      state.selectedSupportChoice = '';
+      state.customSupportChoice = '';
+      goToReturnToNowStep('branch-support');
+    } else if (state.currentStep === 'branch-support') {
+      goToReturnToNowStep('landing');
+    } else if (state.currentStep === 'landing') {
+      goToReturnToNowStep('done');
+    }
     renderReturnToNowTool();
   });
 
@@ -840,13 +956,13 @@ function bindToolsEvents() {
       return;
     }
 
-    if (target.matches('[data-return-custom-input="pull"]')) {
-      toolsState.returnToNow.customPull = target.value;
+    if (target.matches('[data-return-custom-input="concern"]')) {
+      toolsState.returnToNow.customConcern = target.value;
       return;
     }
 
-    if (target.matches('[data-return-custom-input="step-choice"]')) {
-      toolsState.returnToNow.customStepChoice = target.value;
+    if (target.matches('[data-return-custom-input="support-choice"]')) {
+      toolsState.returnToNow.customSupportChoice = target.value;
     }
   });
 }
