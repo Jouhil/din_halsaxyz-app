@@ -269,13 +269,13 @@ function renderReturnToNowTool() {
     <article class="micro-card" data-dim="present">
       <div class="micro-tool-card return-to-now-card return-ref-shell">
         <div class="tool-header">
-          <div class="tool-badge">⏱ Tillbaka till nuet</div>
+          <div class="tool-badge">⏱ Vara här och nu!</div>
           <h1>Var är du just nu?</h1>
           <p class="subtitle">Välj det läge som passar bäst.</p>
         </div>
         <div class="mode-selector" style="padding-top:0">
           <button class="mode-card acute ${state.selectedTrack === 'acute' ? 'is-selected' : ''}" type="button" data-return-track="acute">
-            <div class="mode-icon">🌊</div>
+            <div class="mode-icon">🤯</div>
             <h3>Tankarna drar iväg just nu</h3>
             <p>Något tar plats. Jag behöver hjälp att landa i nuet.</p>
           </button>
@@ -303,9 +303,13 @@ function renderReturnToNowTool() {
       stepHtml = `
         <div class="grounding-step active">
           <div class="step-content return-center" style="padding: 28px 20px;">
-            <div class="breath-circle"></div>
-            <p class="emphasis" style="margin-bottom:8px">Andas ut.</p>
-            <p class="body-text">Bara en lång utandning.<br>Inget mer behöver hända just nu.</p>
+            <div class="breath-guide" aria-hidden="true">
+              <div class="breath-ring breath-ring--outer"></div>
+              <div class="breath-ring breath-ring--inner"></div>
+              <div class="breath-circle">↘</div>
+            </div>
+            <p class="emphasis breath-copy" style="margin-bottom:8px">Andas ut långsamt nu.</p>
+            <p class="body-text">Följ cirkeln när den mjuknar utåt.<br>Låt axlarna sjunka lite.</p>
             <div class="auto-hint">Tryck när du är redo</div>
           </div>
         </div>
@@ -344,7 +348,8 @@ function renderReturnToNowTool() {
             <h3>Skapa lite avstånd till tanken</h3>
             <p class="body-text">När en tanke tar över känns det som att den <em>är</em> sann, som att den <em>är</em> du. Men tanken är inte verkligheten – det är en signal hjärnan skickar.</p>
             <p class="body-text">Du behöver inte argumentera bort den. Det räcker att märka den.</p>
-            <div class="defusion-box">
+            <div class="defusion-box defusion-box--highlight">
+              <div class="defusion-icon" aria-hidden="true">💭</div>
               <p class="defusion-label">Säg tyst för dig själv:</p>
               <p class="defusion-phrase">"Jag märker att jag har tanken att&nbsp;…"</p>
               <p class="defusion-hint">Fyll i det som tar plats. Sedan – låt den passera förbi.</p>
@@ -387,9 +392,9 @@ function renderReturnToNowTool() {
 
     if (state.currentStep === 'acute-3') {
       const cfg = [
-        ['3', 'Hitta 3 saker du kan se', 'Titta runt dig. Nämn dem tyst.', 'Tryck när du hittat tre saker →'],
-        ['2', 'Känn 2 ställen där kroppen har stöd', 'Stolen, golvet, kudden. Stanna en stund.', 'Tryck när du känt →'],
-        ['1', 'Andas ut lite långsammare', 'Bara en gång. Lite längre än vanligt.', 'Tryck när du andades →'],
+        ['3', '👀', 'Hitta 3 saker du kan se', 'Titta runt dig. Nämn dem tyst.', 'Tryck när du hittat tre saker →'],
+        ['2', '🖐️', 'Känn 2 ställen där kroppen har stöd', 'Stolen, golvet, kudden. Stanna en stund.', 'Tryck när du känt →'],
+        ['1', '👂', 'Lyssna efter 1 ljud nära dig', 'Låt ljudet hjälpa dig tillbaka hit.', 'Tryck när du hört →'],
       ];
       const idx = state.groundingCompleted.findIndex((done) => !done);
       const active = idx === -1 ? 2 : idx;
@@ -400,12 +405,13 @@ function renderReturnToNowTool() {
             <p class="body-text">En sak i taget. Tryck när du gjort varje del.</p>
             ${cfg.map((item, i) => `
               <div style="margin-top:16px; ${i === active ? '' : 'display:none;'}">
-                <div class="big-instruction">
+                <div class="big-instruction ${i === active ? 'is-active' : ''}">
                   <div class="big-number">${item[0]}</div>
-                  <p class="action">${item[1]}</p>
-                  <p class="hint">${item[2]}</p>
+                  <p class="sense-icon" aria-hidden="true">${item[1]}</p>
+                  <p class="action">${item[2]}</p>
+                  <p class="hint">${item[3]}</p>
                 </div>
-                <button class="tap-area ${state.groundingCompleted[i] ? 'done' : ''}" type="button" data-return-ground-step="${i}">${state.groundingCompleted[i] ? '✓ Gjort' : item[3]}</button>
+                <button class="tap-area ${state.groundingCompleted[i] ? 'done' : ''}" type="button" data-return-ground-step="${i}">${state.groundingCompleted[i] ? '✓ Gjort' : item[4]}</button>
               </div>
             `).join('')}
             <div class="mini-progress">
@@ -419,11 +425,11 @@ function renderReturnToNowTool() {
 
     if (state.currentStep === 'acute-4') {
       stepHtml = `
-        <div class="completion">
-          <div class="check-icon">🌿</div>
+        <div class="completion completion--warm">
+          <div class="check-icon check-icon--pulse">✅</div>
           <h2>Lite mer här och nu</h2>
-          <p>Bra gjort. Du tog ett steg tillbaka till det som finns just nu.</p>
-          <p style="font-size:13px; color: var(--text-muted)">Du kan komma tillbaka hit när tankarna drar iväg igen.</p>
+          <p>Bra gjort. Du tog dig lugnt tillbaka till det som faktiskt händer just nu.</p>
+          <p class="completion-note">Du pausade bruset, gav kroppen stöd och hittade fotfästet igen.</p>
         </div>
       `;
       controls = '<button class="neo-btn neo-btn--filled neo-btn--cta" type="button" data-return-action="complete">Klar</button><button class="neo-btn neo-btn--outline neo-btn--cta" type="button" data-return-action="restart-acute-flow">Gör om</button>';
@@ -434,7 +440,7 @@ function renderReturnToNowTool() {
         <div class="mode-label"><span class="mode-dot acute"></span> Akut läge</div>
         <div class="micro-tool-card return-to-now-card return-ref-shell" style="margin-top:8px;">
           <div class="tool-header">
-            <div class="tool-badge">⏱ Tillbaka till nuet</div>
+            <div class="tool-badge">⏱ Vara här och nu!</div>
             <h1>${title}</h1>
             <p class="subtitle">${subtitle}</p>
           </div>
@@ -442,7 +448,7 @@ function renderReturnToNowTool() {
             <div class="progress-track"><div class="progress-fill" style="width:${progress}%"></div></div>
           </div>
           ${stepHtml}
-          <div class="thought-catcher-actions">${controls}</div>
+          <div class="thought-catcher-actions tool-actions-row">${controls}</div>
         </div>
       </article>
     `;
@@ -497,12 +503,12 @@ function renderReturnToNowTool() {
       <div class="mode-label"><span class="mode-dot preventive"></span> Förebyggande</div>
       <div class="micro-tool-card return-to-now-card return-ref-shell" style="margin-top:8px;">
         <div class="tool-header">
-          <div class="tool-badge">⏱ Tillbaka till nuet</div>
+          <div class="tool-badge">⏱ Vara här och nu!</div>
           <h1>Öva på nuet</h1>
           <p class="subtitle">Välj vad du vill utforska idag.</p>
         </div>
         ${inner}
-        <div class="thought-catcher-actions">${controls}</div>
+        <div class="thought-catcher-actions tool-actions-row">${controls}</div>
       </div>
     </article>
   `;
